@@ -2,5 +2,6 @@ fastapi
 uvicorn[standard]
 httpx
 readability-lxml
+lxml_html_clean
 beautifulsoup4
 python-dotenv

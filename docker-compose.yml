@@ -1,9 +1,11 @@
 # Merge this service block into your existing homelab docker-compose.yml
 services:
   extractor:
-    build: .
+    build:
+      context: .
+      network: host
     ports:
-      - "8080:8080"
+      - "8090:8080"
     restart: always
     env_file:
       - .env

@@ -8,7 +8,7 @@ class GeminiProvider:
     name = "gemini"
 
     def __init__(self, api_key: str, model: str | None = None):
-        self.model = model or "gemini-2.0-flash"
+        self.model = model or "gemini-3.1-flash-lite-preview"
         self._client = genai.Client(api_key=api_key)
 
     async def summarize(self, system: str, user: str) -> dict:

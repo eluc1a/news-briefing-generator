@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Example</title>
+  <entry>
+    <title>First Post</title>
+    <link href="https://example.com/posts/1"/>
+    <id>tag:example.com,2026:1</id>
+    <published>2026-04-18T10:00:00Z</published>
+  </entry>
+  <entry>
+    <title>Second Post</title>
+    <link href="https://example.com/posts/2"/>
+    <id>tag:example.com,2026:2</id>
+    <published>2026-04-17T09:00:00Z</published>
+  </entry>
+</feed>

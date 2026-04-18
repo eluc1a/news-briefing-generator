@@ -27,7 +27,7 @@ async def run_fetch(
 ) -> dict[str, dict[str, int]]:
     stats: dict[str, dict[str, int]] = {}
     for source in sources:
-        s = {"new": 0, "errors": 0, "skipped": 0}
+        s = {"new": 0, "errors": 0, "skipped": 0, "failed": 0}
         stats[source.name] = s
         try:
             if source.type == "rss":
@@ -38,6 +38,7 @@ async def run_fetch(
                 )
         except Exception as exc:
             log.warning("discovery failed for %s: %s", source.name, exc)
+            s["failed"] = 1
             continue
 
         log.info("discovered %d items from %s", len(items), source.name)
@@ -63,6 +64,6 @@ async def run_fetch(
                 content=result.text,
                 published=item.published,
             )
-            if delay_seconds:
+            if delay_seconds > 0:
                 await asyncio.sleep(delay_seconds)
     return stats

@@ -16,7 +16,7 @@ async def db_pool():
     await pool.close()
 
 
-@pytest_asyncio.fixture(loop_scope="session")
+@pytest_asyncio.fixture(scope="function", loop_scope="session")
 async def db(db_pool):
     async with db_pool.acquire() as conn:
         await conn.execute(

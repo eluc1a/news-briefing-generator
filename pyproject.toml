@@ -12,6 +12,11 @@ include = ["jina_clone*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+# Both settings are required: asyncio_default_fixture_loop_scope keeps the
+# session-scoped db_pool on the same event loop as the fixtures that use it;
+# asyncio_default_test_loop_scope ensures each test function also runs on that
+# same session loop — without it asyncpg raises "Future attached to a different
+# loop" because the test coroutine gets its own function-scoped loop.
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]

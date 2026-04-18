@@ -1,11 +1,17 @@
 # Merge this service block into your existing homelab docker-compose.yml
+#
+# network_mode: host is required because the batch jobs connect to
+# fox's Postgres (mcp_news) at 192.168.0.89, and pg_hba.conf on fox
+# only allows LAN source IPs — not the Docker bridge subnet. With
+# host networking the container binds ports directly on fox and
+# connects to Postgres as if it were local. Set PORT=8090 in .env to
+# match the external port previously exposed via ports mapping.
 services:
   extractor:
     build:
       context: .
       network: host
-    ports:
-      - "8090:8080"
+    network_mode: host
     restart: always
     env_file:
       - .env

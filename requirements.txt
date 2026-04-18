@@ -5,3 +5,11 @@ readability-lxml
 lxml_html_clean
 beautifulsoup4
 python-dotenv
+feedparser
+asyncpg
+pyyaml
+anthropic
+openai
+google-genai
+pytest
+pytest-asyncio

@@ -29,13 +29,12 @@ def build_user_prompt(
 ) -> tuple[str, list[dict]]:
     """Returns (prompt_text, included_articles).
 
-    Articles are assumed oldest-first; if over the total cap, drop the
-    oldest until it fits. `included_articles` is what was actually fed
-    to the LLM — the summarize job uses this to know which links to
-    mark summarized.
+    Articles are assumed oldest-first. Select greedily from newest to
+    oldest, stopping once total_cap would be exceeded. The returned
+    prompt and included_articles are in newest-first order, so
+    included[0] is always the newest kept article. Caller uses
+    included_articles to know which links to mark summarized.
     """
-    # Work newest-first: reverse, greedily include until total_cap reached,
-    # return in newest-first order (included[0] is always the newest article).
     reversed_articles = list(reversed(articles))
     selected: list[dict] = []
     total = 0

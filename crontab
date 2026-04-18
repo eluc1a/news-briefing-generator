@@ -1,0 +1,5 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+0 * * * * cd /app && /usr/local/bin/python -m jina_clone fetch >> /var/log/jina-clone/fetch.log 2>&1
+10 8 * * * cd /app && /usr/local/bin/python -m jina_clone summarize >> /var/log/jina-clone/summarize.log 2>&1

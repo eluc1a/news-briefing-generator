@@ -9,3 +9,7 @@ services:
     restart: always
     env_file:
       - .env
+    volumes:
+      - ./sources.yaml:/app/sources.yaml:ro
+      - ./summaries:/app/summaries
+      - ./logs:/var/log/jina-clone

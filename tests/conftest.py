@@ -1,7 +1,7 @@
 import os
 
 import asyncpg
-import pytest
+import pytest_asyncio
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
@@ -9,10 +9,17 @@ TEST_DATABASE_URL = os.getenv(
 )
 
 
-@pytest.fixture
-async def db():
+@pytest_asyncio.fixture(scope="session", loop_scope="session")
+async def db_pool():
     pool = await asyncpg.create_pool(TEST_DATABASE_URL, min_size=1, max_size=2)
-    async with pool.acquire() as conn:
-        await conn.execute("TRUNCATE entries, news_summaries RESTART IDENTITY;")
     yield pool
     await pool.close()
+
+
+@pytest_asyncio.fixture(loop_scope="session")
+async def db(db_pool):
+    async with db_pool.acquire() as conn:
+        await conn.execute(
+            "TRUNCATE entries, news_summaries RESTART IDENTITY CASCADE;"
+        )
+    return db_pool

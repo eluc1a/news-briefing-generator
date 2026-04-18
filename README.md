@@ -1,156 +1,302 @@
-# Article Extractor Service
+# Jina Clone — Article Pipeline
 
-A lightweight HTTP microservice that accepts a URL, fetches its HTML, extracts the main article content using Readability, and returns clean plain text. Runs as a Docker container on the `fox` homelab server and is called from n8n workflows.
+A native Python pipeline that discovers articles from RSS feeds and scraped
+index pages, extracts their content, stores them in the existing `mcp_news`
+Postgres database, and generates daily LLM summaries. Runs as a single
+Docker container on `fox` (192.168.0.89) with in-container cron.
 
-## Current deployment
+Originally just an HTTP extractor service (still present, still serves
+`/extract` for n8n and other callers), now extended with a batch pipeline.
 
-- **Host:** `fox` (LAN IP `192.168.0.89`)
-- **Host port:** `8090` (container port `8080`)
-- **Base URL:** `http://192.168.0.89:8090`
-- **Container:** `jina-clone-extractor-1` (managed via `docker compose` in this directory)
+## What it does
 
-`fox` already runs nginx on host port 8080, so the container is mapped to host port 8090.
+```
+sources.yaml ──► fetch  ──► extract ──► Postgres (entries)
+                   ▲                        │
+                   │ hourly                 │ daily 08:10 ET
+                   │                        ▼
+                 cron ────────────────► summarize ──► LLM ──► summaries/*.md
+                                                          └─► Postgres (news_summaries)
+```
 
-## Deploying
+- **Fetch job** (hourly): walks every source in `sources.yaml`, discovers article
+  URLs (RSS feed parsing or CSS-selector index scraping), dedups against
+  `entries.link`, extracts each new article via Readability, and inserts rows
+  into `entries`. Extraction failures are stored with `content=null` so the
+  URL is "seen" and never retried.
+- **Summarize job** (daily 08:10 America/New_York): selects unsummarized
+  articles for our sources, builds a single prompt (newest-first, capped at
+  200k chars), sends it to the configured LLM provider, writes the result to
+  `summaries/YYYY-MM-DD-HHMM.md`, inserts a `news_summaries` row, and marks
+  the included articles `summarized_at`. On LLM failure nothing is written —
+  the next run retries.
+- **Extractor HTTP service** (always-on): `GET /extract?url=...` returns
+  clean plain text, same as before. Used by n8n and other external callers.
+  Port 8090 on `fox`.
 
-From this directory on `fox`:
+## LLM providers
+
+Swappable via `LLM_PROVIDER` env var:
+
+| Provider | Default model                    | API key env var      |
+|----------|----------------------------------|----------------------|
+| `claude` | `claude-sonnet-4-6`              | `ANTHROPIC_API_KEY`  |
+| `openai` | `gpt-4o`                         | `OPENAI_API_KEY`     |
+| `gemini` | `gemini-3.1-flash-lite-preview`  | `GEMINI_API_KEY`     |
+
+Override any default with `LLM_MODEL=...`. Only the selected provider's key
+is required at startup.
+
+Currently running with `LLM_PROVIDER=gemini`.
+
+## Deployment
+
+Deployed on `fox` in this directory. The container uses **host networking**
+(not bridge) because fox's `pg_hba.conf` only allows LAN source IPs, not
+the Docker bridge subnet.
 
 ```bash
+# On fox, from this directory:
 docker compose up -d --build
 ```
 
-- `-d` detaches so it keeps running after you close the shell.
-- `--build` rebuilds the image if any source file changed. Safe to run repeatedly.
-- `restart: always` is set in `docker-compose.yml`, so the container comes back up after reboots or crashes.
+`restart: always` is set so the container comes back up after reboots or
+crashes. Cron runs inside the container with `TZ=America/New_York`.
 
-### First-time build note
-
-If `pip install` fails with DNS errors during build (seen in environments where Docker's default bridge can't resolve DNS), the compose file already pins the build network to `host` via:
-
-```yaml
-build:
-  context: .
-  network: host
-```
-
-No action needed — this is already configured.
-
-Verify it's up:
+### Verify it's up
 
 ```bash
 curl http://192.168.0.89:8090/health
 # → {"status":"ok"}
 ```
 
-## Maintaining the deployment
+### Run jobs manually
 
-### Check status
 ```bash
-docker compose ps
+docker compose exec extractor python -m jina_clone fetch
+docker compose exec extractor python -m jina_clone summarize
 ```
 
-### Tail logs
+### Tail cron logs
+
 ```bash
-docker compose logs -f extractor
+tail -f logs/fetch.log logs/summarize.log
 ```
 
-### Restart (e.g. after editing `.env`)
+(Host directory `logs/` is mounted to `/var/log/jina-clone` inside the
+container.)
+
+### Find generated summaries
+
+```bash
+ls summaries/
+cat summaries/$(ls -t summaries/ | head -1)
+```
+
+## Adding new sources
+
+Every source is an entry in `sources.yaml` at the repo root. The file is
+mounted read-only into the container, so edits take effect on the next job
+run — **no rebuild, no restart**.
+
+### RSS feeds
+
+```yaml
+- name: Simon Willison
+  type: rss
+  url: https://simonwillison.net/atom/everything/
+  category: ai
+```
+
+Fields:
+- `name` — human-readable, written to `entries.source`. Must be unique.
+- `type: rss` — the feed is parsed with `feedparser`.
+- `url` — the feed URL (Atom or RSS).
+- `category` — written to `entries.category` (and used for the daily
+  summary's `news_summaries.category`). Default `"ai"`.
+
+### Index pages scraped via CSS selector
+
+```yaml
+- name: Hacker News
+  type: scrape
+  url: https://news.ycombinator.com/
+  link_selector: ".titleline > a"
+  category: ai
+```
+
+Fields:
+- `name`, `url`, `category` — as above.
+- `type: scrape` — the URL is fetched, parsed with BeautifulSoup, and
+  `link_selector` is applied with `soup.select(selector)`.
+- `link_selector` — a CSS selector that resolves to `<a>` elements whose
+  `href` is an article URL. Relative hrefs are resolved against `url`.
+
+### Finding the right selector for a scrape source
+
+1. Open the index page in your browser.
+2. Right-click an article link → Inspect.
+3. Look at the `<a>` tag's classes and parents. Pick a selector that matches
+   **article links only**, not nav or sidebar links. Good patterns:
+   - `article h2 > a` (post listings on many blogs)
+   - `.post-title > a`
+   - `.entry-title a`
+4. Test locally against a saved copy of the page:
+
+   ```bash
+   docker compose exec extractor python -c "
+   from bs4 import BeautifulSoup
+   import httpx
+   html = httpx.get('https://example.com/blog', follow_redirects=True).text
+   print([a.get('href') for a in BeautifulSoup(html, 'html.parser').select('YOUR_SELECTOR')])
+   "
+   ```
+
+### Adding the source
+
+1. Edit `sources.yaml`, append the new entry.
+2. (Optional, for immediate pickup) Run the fetch job manually:
+
+   ```bash
+   docker compose exec extractor python -m jina_clone fetch
+   ```
+
+   Otherwise, the next hourly cron tick picks it up.
+3. Verify rows landed:
+
+   ```bash
+   PGPASSWORD='REDACTED' psql -h 192.168.0.89 -U postgres -d mcp_news \
+     -c "SELECT source, COUNT(*) FROM entries WHERE source='YOUR NAME' GROUP BY source;"
+   ```
+
+### Caveats for new sources
+
+- **Unique names**: `name` is used to scope our queries against `entries`
+  (which is shared with another pipeline). Don't reuse a name that the other
+  pipeline already writes.
+- **JS-rendered pages**: Readability works on static HTML only. Sites that
+  hydrate content client-side will produce empty `content`. The URL is still
+  stored (with `content=null`), but won't appear in summaries.
+- **Paywalls / login walls / Cloudflare challenges**: the extractor sees the
+  challenge page, not the article. Same failure mode as above.
+- **Feed-with-summaries sources**: some RSS feeds include only titles and
+  excerpts. The extractor follows the `link` and fetches the full article
+  anyway, so this usually Just Works.
+- **Rate limits**: `FETCH_DELAY_SECONDS=1` means ~1s between article fetches
+  per source. Bump it in `.env` for polite scraping of smaller sites.
+
+## Configuration (`.env`)
+
+`.env` is **not committed** (contains secrets). Copy `.env.example` to `.env`
+and fill in your values.
+
+| Variable             | Default                                    | Description                                                    |
+|----------------------|--------------------------------------------|----------------------------------------------------------------|
+| `PORT`               | `8090`                                     | Port the HTTP extractor binds on fox                           |
+| `MAX_TEXT_LENGTH`    | `4000`                                     | Max characters returned in `text` / stored in `entries.content` |
+| `REQUEST_TIMEOUT`    | `15`                                       | Seconds before HTTP fetch times out                            |
+| `DATABASE_URL`       | _(required)_                               | `postgresql://postgres:…@192.168.0.89:5432/mcp_news`           |
+| `SOURCES_FILE`       | `sources.yaml`                             | Path to YAML inside the container                              |
+| `SUMMARIES_DIR`      | `summaries`                                | Where markdown summaries are written                           |
+| `FETCH_CONCURRENCY`  | `4`                                        | Reserved for future concurrency work (currently sequential)    |
+| `FETCH_DELAY_SECONDS`| `1`                                        | Delay between article fetches within a source                  |
+| `LLM_PROVIDER`       | `gemini`                                   | One of `claude`, `openai`, `gemini`                            |
+| `LLM_MODEL`          | _(provider default)_                       | Optional model ID override                                     |
+| `ANTHROPIC_API_KEY`  | —                                          | Required if `LLM_PROVIDER=claude`                              |
+| `OPENAI_API_KEY`     | —                                          | Required if `LLM_PROVIDER=openai`                              |
+| `GEMINI_API_KEY`     | —                                          | Required if `LLM_PROVIDER=gemini`                              |
+| `LOG_LEVEL`          | `INFO`                                     | Python logging level                                           |
+
+Restart the container after editing `.env` (cron inside re-reads it on each
+job invocation, but the long-running HTTP service reads it on boot):
+
 ```bash
 docker compose restart extractor
 ```
 
-### Rebuild after code change
+## Database schema
+
+Existing tables (not managed by this repo; shared with another pipeline):
+
+- `entries`: one row per article. `id` = article URL, `source` = from
+  `sources.yaml`, `category` = from `sources.yaml`, `content` = extracted
+  plain text (null on failure), `summarized_at` = null until included in a
+  daily summary.
+- `news_summaries`: one row per run of the summarize job. `headline` and
+  `facts` contain the LLM output.
+
+All queries are scoped to our sources by `source IN (<names from
+sources.yaml>)`. The other pipeline's rows are untouched.
+
+## Extractor HTTP API (unchanged)
+
+`GET /extract?url=<url>` — fetch and extract a single article.
+
 ```bash
-docker compose up -d --build
+curl "http://192.168.0.89:8090/extract?url=https://example.com/article"
 ```
 
-### Stop / start
-```bash
-docker compose stop extractor
-docker compose start extractor
-```
+Response:
 
-### Full teardown (removes container, keeps image)
-```bash
-docker compose down
-```
-
-### Update dependencies
-Edit `requirements.txt`, then rebuild:
-```bash
-docker compose up -d --build
-```
-
-### Change host port
-Edit the `ports:` line in `docker-compose.yml` (left side is host, right side is container — leave the right side as `8080`), then:
-```bash
-docker compose up -d
-```
-
-## API
-
-### `GET /extract?url=<url>`
-
-Fetches and extracts article content from the given URL.
-
-**Response:**
 ```json
 {
   "url": "https://example.com/article",
   "title": "Article Title",
-  "text": "Plain text body of the article...",
+  "text": "Plain text body...",
   "error": null
 }
 ```
 
-On failure (unreachable URL, timeout, unsupported content type), the service still returns HTTP 200 with `error` populated and `text`/`title` as `null`. This prevents n8n from treating transient fetch failures as workflow errors.
+On failure (unreachable URL, timeout, unsupported content type), returns
+HTTP 200 with `error` populated and `text`/`title` as `null`. Keeps n8n
+happy.
 
-**Example:**
+`GET /health` — returns `{"status":"ok"}`.
+
+## Running the test suite
+
+Unit + integration tests (real Postgres against a `jina_clone_test`
+database on fox):
+
 ```bash
-curl "http://192.168.0.89:8090/extract?url=https://example.com/some-article"
+./.venv/bin/pytest -v
 ```
 
-### `GET /health`
-
-Returns `{"status": "ok"}`. Use this for Docker health checks or to verify the service is reachable before a workflow runs.
-
-## Configuration (`.env`)
-
-| Variable          | Default | Description                              |
-|-------------------|---------|------------------------------------------|
-| `PORT`            | `8080`  | Port the service listens on **inside the container** |
-| `MAX_TEXT_LENGTH` | `4000`  | Max characters returned in `text` field  |
-| `REQUEST_TIMEOUT` | `15`    | Seconds before a fetch times out         |
-
-To change `MAX_TEXT_LENGTH` or `REQUEST_TIMEOUT`, edit `.env` and run `docker compose restart extractor`. Do not change `PORT` here unless you also update the container side of the `ports:` mapping in `docker-compose.yml`.
-
-## Wiring into n8n
-
-1. Use an **HTTP Request** node with method `GET` and URL:
-   ```
-   http://192.168.0.89:8090/extract?url={{$json.link}}
-   ```
-   Use the LAN IP rather than `fox` — n8n runs inside Docker and may not resolve hostnames on the host network.
-
-2. The `text` field from the response is what you pass into your Claude API prompt.
-
-3. Add a **Wait** node (2–3 seconds) between items when processing a list of URLs to avoid hammering target sites.
-
-4. Optionally, add an **IF** node to check `error != null` and route failures to a separate branch.
+27 tests cover: extraction from saved HTML, RSS parsing, scrape selector,
+storage CRUD, fetch orchestration, summarize orchestration, LLM response
+parser.
 
 ## Troubleshooting
 
-**`curl` to `/health` hangs or refuses connection**
-- Check the container is running: `docker compose ps`
-- Check logs for a crash loop: `docker compose logs extractor`
+**`/health` refuses connection**
+- `docker compose ps` — is the container running?
+- `docker compose logs extractor` — crash loop?
 
-**Every request returns `{"error": "..."}`**
-- DNS or network: verify the container can reach the internet: `docker compose exec extractor python -c "import httpx; print(httpx.get('https://example.com').status_code)"`
-- If that fails, check Docker daemon DNS config on `fox`.
+**Fetch logs show `InvalidAuthorizationSpecificationError`**
+- pg_hba.conf on fox isn't allowing the container's source IP. Confirm
+  `docker-compose.yml` has `network_mode: host`.
 
-**A specific site always returns empty text**
-- Some sites require JS to render content (Readability works on static HTML only). Check the raw response: `docker compose exec extractor python -c "import httpx; print(httpx.get('<URL>', follow_redirects=True, headers={'User-Agent':'Mozilla/5.0'}).text[:2000])"`
-- If the HTML has no article body (just a Cloudflare challenge, JS loader, etc.), this service can't help — would need a headless browser.
+**A source produces zero results**
+- Check the discovered items in isolation. For RSS:
+  `docker compose exec extractor python -c "import feedparser; print([e.link for e in feedparser.parse('URL').entries[:5]])"`
+- For scrape: see "Finding the right selector" above.
 
-**Port 8090 conflicts with something else**
-- Pick a different host port in `docker-compose.yml` and update the n8n node URL accordingly.
+**A specific site always extracts empty text**
+- JS-rendered or gated content. Readability can't help; would need a
+  headless browser. No fix planned here.
+
+**Summarize job crashes**
+- Check `logs/summarize.log`. Most common: expired or misconfigured API
+  key — errors include `401` or `PERMISSION_DENIED`. Update `.env` and
+  `docker compose restart extractor`.
+
+## Implementation docs
+
+- Design spec: `docs/superpowers/specs/2026-04-18-native-python-news-pipeline-design.md`
+- Implementation plan: `docs/superpowers/plans/2026-04-18-native-python-news-pipeline.md`
+
+## Wiring into n8n (unchanged)
+
+n8n can still call `GET /extract?url=...` on the extractor service as
+before. Use the LAN IP (`192.168.0.89`) rather than the hostname since n8n
+runs inside Docker and may not resolve `fox`.

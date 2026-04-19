@@ -1,0 +1,33 @@
+panels:
+  - key: ai
+    title: "AI & Technology"
+    categories:
+      - ai
+      - llm_tools
+      - data_science
+      - research
+  - key: national
+    title: "National"
+    categories:
+      - us_national_news
+      - us_local_news
+      - policy
+  - key: international
+    title: "International"
+    categories:
+      - international_news
+      - regional_international_news
+
+briefs:
+  categories:
+    - business
+    - business_finance_news
+    - business_tech
+    - cybersecurity
+    - linux
+    - science
+    - startups
+    - tech
+    - investigative_journalism
+
+min_articles_total: 8

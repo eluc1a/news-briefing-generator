@@ -18,6 +18,10 @@ def _settings(provider: str, api_keys: dict) -> Settings:
         llm_model=None,
         summary_token_cap=850000,
         summary_window_hours=24,
+        briefing_categories_file=None,
+        briefings_dir=None,
+        print_queue="brother",
+        ntfy_topic=None,
         api_keys=api_keys,
     )
 

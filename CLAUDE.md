@@ -14,6 +14,7 @@ Before touching code, read these:
 
 ## Environment
 
+- Always verify which code tree or branch you are in before starting your work 
 - This repo is developed and deployed on the same box — `fox`, LAN IP
   `192.168.0.89`. Shell commands that reference Postgres at that host are
   hitting the real production `mcp_news` database.

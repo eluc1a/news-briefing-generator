@@ -14,3 +14,5 @@ google-genai
 tiktoken
 pytest
 pytest-asyncio
+weasyprint
+jinja2

@@ -18,7 +18,16 @@ def test_sample_fixture_validates():
     assert {p.section for p in briefing.panels} == {
         "AI & Technology", "National", "Economy & Markets", "International",
     }
-    assert 6 <= len(briefing.briefs) <= 9
+    # Each panel now has a lede_headline, lede_body, and 3-4 `also` items.
+    for panel in briefing.panels:
+        assert panel.lede_headline
+        assert panel.lede_body
+        assert 3 <= len(panel.also) <= 4
+        for item in panel.also:
+            assert item.headline
+            assert item.body
+    # Briefs range tightened from 6-9 to 5-7.
+    assert 5 <= len(briefing.briefs) <= 7
 
 
 def test_three_panels_rejected():
@@ -32,7 +41,16 @@ def test_three_panels_rejected():
 def test_briefs_too_few_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    data["briefs"] = data["briefs"][:5]
+    data["briefs"] = data["briefs"][:4]  # below new floor of 5
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data)
+
+
+def test_briefs_too_many_rejected():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    # Double the briefs to push above the new ceiling of 7.
+    data["briefs"] = (data["briefs"] * 2)[:8]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 
@@ -41,5 +59,21 @@ def test_invalid_section_label_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
     data["panels"][0]["section"] = "Markets"
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data)
+
+
+def test_panel_missing_also_rejected():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    del data["panels"][0]["also"]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data)
+
+
+def test_panel_also_too_few_rejected():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    data["panels"][0]["also"] = data["panels"][0]["also"][:2]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)

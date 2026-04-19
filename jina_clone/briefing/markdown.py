@@ -15,8 +15,11 @@ def briefing_to_markdown(b: Briefing) -> str:
     out.write("\n")
     for panel in b.panels:
         out.write(f"## {panel.section}\n")
-        out.write(f"**{panel.lede}**\n\n")
-        out.write(f"{panel.body}\n\n")
+        out.write(f"**{panel.lede_headline}**\n\n")
+        out.write(f"{panel.lede_body}\n\n")
+        for item in panel.also:
+            out.write(f"- **{item.headline}** — {item.body}\n")
+        out.write("\n")
     out.write("## Briefs\n")
     for brief in b.briefs:
         out.write(f"- **{brief.topic}** — {brief.body}\n")

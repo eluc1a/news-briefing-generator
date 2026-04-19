@@ -24,40 +24,60 @@
   "panels": [
     {
       "section": "AI & Technology",
-      "lede": "Open-weights coalition tops 200 signatories, including two Turing laureates",
-      "body": "A petition urging governments to preserve open-weights releases of frontier models reached 214 signatories by Friday morning, organisers told Reuters. Signers include former US Chief Technology Officer Megan Smith, Turing laureates Yoshua Bengio and Geoffrey Hinton, and researchers from 37 universities across 14 countries. The text asks regulators to exempt OSI-licensed model weights from the EU AI Act's 10^25 FLOPs registration threshold. OpenAI, Anthropic, and Google DeepMind declined to sign, each citing ongoing legal review; Meta signed at 9:40 AM CET. The Mozilla Foundation and Allen Institute coordinated the effort with $1.2 million from the Ford Foundation. Signatures close April 30."
+      "lede_headline": "Open-weights coalition tops 200 signatories, two Turing laureates sign",
+      "lede_body": "A petition urging governments to preserve open-weights releases of frontier models reached 214 signatories by Friday morning. Signers include former US CTO Megan Smith, Turing laureates Yoshua Bengio and Geoffrey Hinton, and researchers from 37 universities across 14 countries. The text asks regulators to exempt OSI-licensed model weights from the EU AI Act's 10^25 FLOPs registration threshold. Meta signed at 9:40 AM CET; OpenAI, Anthropic, and Google DeepMind declined pending legal review.",
+      "also": [
+        {"headline": "Mistral ships Codestral 2", "body": "Mistral released Codestral 2 on Friday with 22B active parameters and a context window of 256k tokens. Available under the Mistral Research License for non-commercial use."},
+        {"headline": "Anthropic adds prompt caching beta", "body": "Claude API prompt caching entered public beta Friday, cutting per-token input cost by 90 percent for cached content. Minimum cached block size is 1024 tokens."},
+        {"headline": "UK AI Safety Institute staffs up", "body": "The UK AISI announced 41 new hires Friday, bringing headcount to 127. The institute's 2026 budget rose to £50 million, a 38 percent increase from 2025."}
+      ]
     },
     {
       "section": "National",
-      "lede": "Senate clears 68-31 short-term spending extension through June 30",
-      "body": "The Senate voted 68-31 Thursday night to extend federal funding through June 30, averting a shutdown that would have begun at midnight Friday. The continuing resolution preserves fiscal-year 2026 spending levels for most agencies but cuts $340 million from the State and Local Cybersecurity Grant Program, a 19 percent reduction from its 2025 appropriation. Twelve Republicans joined 56 Democrats in favor; 28 Republicans and three Democrats opposed. The House takes up the measure Saturday at 2:00 PM ET. The White House indicated the President will sign without public remarks on the cyber grant reduction. The National Association of State CIOs called the cut a blow to 52 state-level cyber offices."
+      "lede_headline": "Senate clears 68-31 short-term spending extension through June 30",
+      "lede_body": "The Senate voted 68-31 Thursday night to extend federal funding through June 30, averting a shutdown that would have begun at midnight Friday. The continuing resolution preserves fiscal-year 2026 spending levels for most agencies but cuts $340 million from the State and Local Cybersecurity Grant Program, a 19 percent reduction. Twelve Republicans joined 56 Democrats in favor. The House takes up the measure Saturday at 2:00 PM ET.",
+      "also": [
+        {"headline": "Texas flooding displaces 3,200", "body": "Harris County issued mandatory evacuations for 3,200 residents Friday after the San Jacinto River crested at 87.4 feet, its highest mark since 2017. FEMA opened three shelters."},
+        {"headline": "DOJ indicts 14 in Medicare fraud case", "body": "A federal grand jury in the Southern District of Florida unsealed indictments Friday against 14 defendants accused of submitting $412 million in false Medicare claims across 2022-2025."},
+        {"headline": "Supreme Court declines ATF rule challenge", "body": "The Supreme Court denied cert Friday in Vanderstok v. Garland, leaving in place the ATF's 2022 rule regulating 80 percent lower receivers as firearms under the GCA."}
+      ]
     },
     {
       "section": "Economy & Markets",
-      "lede": "Treasury 10-year yield closes at 4.31%, down 4 bp after retail-sales miss",
-      "body": "US 10-year Treasury yields closed Friday at 4.31 percent, down 4 basis points on the day and 11 on the week, after March retail sales rose 0.2 percent versus a 0.5 percent consensus. The S&P 500 closed at 5,421.18, down 0.4 percent; the Nasdaq Composite fell 0.8 percent to 17,204.33. The dollar index dropped to 102.11. Federal funds futures now imply a 64 percent probability of a 25-basis-point cut at the June 17 FOMC meeting, up from 51 percent Thursday. Morgan Stanley reported first-quarter net revenue of $15.1 billion and earnings per share of $2.08, beating consensus of $1.94; its wealth-management division added $94 billion in net new assets."
+      "lede_headline": "Treasury 10-year yield closes at 4.31%, down 4 bp after retail-sales miss",
+      "lede_body": "US 10-year Treasury yields closed Friday at 4.31 percent, down 4 basis points on the day and 11 on the week, after March retail sales rose 0.2 percent versus a 0.5 percent consensus. The S&P 500 closed at 5,421.18, down 0.4 percent; the Nasdaq Composite fell 0.8 percent to 17,204.33. Federal funds futures now imply a 64 percent probability of a 25-basis-point cut at the June 17 FOMC meeting, up from 51 percent Thursday.",
+      "also": [
+        {"headline": "Morgan Stanley Q1 beats consensus", "body": "Morgan Stanley reported Q1 net revenue of $15.1 billion and EPS of $2.08, beating the $1.94 consensus. Wealth-management added $94 billion in net new assets during the quarter."},
+        {"headline": "Dollar index falls to 102.11", "body": "The DXY dropped 0.3 percent to 102.11 Friday, its lowest close since January. Euro strength and a weaker-than-expected retail-sales print drove the move."},
+        {"headline": "Oil settles at $79.40 on OPEC+ signal", "body": "WTI crude rose $1.20 to $79.40 Friday after OPEC+ delegates told Reuters the June ministerial would extend voluntary production cuts through Q3."}
+      ]
     },
     {
       "section": "International",
-      "lede": "Tokyo summit ends without joint statement on rare-earth supply",
-      "body": "Trade ministers from seven Indo-Pacific economies — Japan, South Korea, Australia, India, Vietnam, the Philippines, and Indonesia — wrapped a two-day Tokyo summit Friday without the expected joint declaration on rare-earth diversification. Japan's METI cited disagreement over export-control language from Seoul and Canberra that would license outbound shipments above 500 metric tons. Minister Yasutoshi Nishimura said working-level talks continue through May 23 in Manila. The seven economies imported 73 percent of their rare-earth magnets from a single supplier in 2025. The $4.2 billion procurement framework was pushed to September's Quad meeting."
+      "lede_headline": "Tokyo summit ends without joint statement on rare-earth supply",
+      "lede_body": "Trade ministers from seven Indo-Pacific economies — Japan, South Korea, Australia, India, Vietnam, the Philippines, and Indonesia — wrapped a two-day Tokyo summit Friday without the expected joint declaration on rare-earth diversification. METI cited disagreement over export-control language from Seoul and Canberra that would license outbound shipments above 500 metric tons. Working-level talks continue through May 23 in Manila.",
+      "also": [
+        {"headline": "Germany raises 2026 growth forecast", "body": "The German Economic Ministry raised its 2026 GDP growth forecast Friday to 1.1 percent from 0.8 percent, citing stronger export orders from southern Europe and a mild winter."},
+        {"headline": "Brazil inflation hits 4.8%", "body": "Brazil's IBGE reported April annualised CPI at 4.8 percent, above the 4.6 percent consensus and the central bank's 4.5 percent target ceiling for the third straight month."},
+        {"headline": "Kenya-Ethiopia rail line opens", "body": "Presidents Ruto and Abiy jointly opened the 1,080-km Mombasa-Addis Ababa standard-gauge freight line Friday. Construction took seven years and cost $4.1 billion."}
+      ]
     }
   ],
   "pull_quote": "The registry is a starting line, not a finishing tape — models will change faster than filings can be updated. — Margrethe Vestager, quoted by Reuters",
   "briefs": [
-    {"topic": "Cybersecurity", "body": "The OpenSSL project shipped version 3.3.1 Friday addressing CVE-2026-4082, a session-resumption flaw in TLS 1.3 that allowed reuse of expired tickets. Patch within seven days."},
-    {"topic": "Linux", "body": "Kernel 6.14 reached release candidate 3 on Friday. The networking subsystem sees the largest delta at 412 commits, including a rewrite of the nftables expression engine by Pablo Neira Ayuso."},
-    {"topic": "Science", "body": "The European Space Agency confirmed Friday that the Comet Interceptor launch window has slipped from 2028 to early 2029 following delays to the Ariane 6 manifest. Mission cost rises to €178 million."},
-    {"topic": "Startups", "body": "Perplexity AI and Groq jointly disclosed $340 million in Series B funding Friday. Both cited H100 cluster availability as the primary bottleneck on inference capacity expansion through Q3."},
-    {"topic": "Investigations", "body": "A consortium of the Raleigh News & Observer, Charlotte Observer, and Kentucky Lantern published a six-month investigation Friday into private-equity ownership of 47 rural hospitals across four states."},
-    {"topic": "Tech", "body": "GitHub announced Friday that copilot-agent enterprise tenants will receive SOC 2 Type II attestation by June 30. Audit scope covers code-suggestion logging and customer data isolation."}
+    {"topic": "Cybersecurity", "body": "OpenSSL 3.3.1 shipped Friday addressing CVE-2026-4082, a TLS 1.3 session-resumption flaw allowing reuse of expired tickets. Patch within seven days."},
+    {"topic": "Linux", "body": "Kernel 6.14 reached release candidate 3 Friday. The networking subsystem sees the largest delta at 412 commits, including a nftables expression-engine rewrite."},
+    {"topic": "Science", "body": "ESA confirmed Friday that the Comet Interceptor launch window slipped from 2028 to early 2029 after Ariane 6 manifest delays. Mission cost rises to €178 million."},
+    {"topic": "Startups", "body": "Perplexity AI and Groq jointly disclosed $340 million in Series B funding Friday. Both cited H100 cluster availability as the primary inference bottleneck."},
+    {"topic": "Investigations", "body": "Raleigh News & Observer, Charlotte Observer, and Kentucky Lantern published a six-month investigation into private-equity ownership of 47 rural hospitals across four states."},
+    {"topic": "Tech", "body": "GitHub announced Friday that copilot-agent enterprise tenants will receive SOC 2 Type II attestation by June 30. Audit covers code-suggestion logging."}
   ],
   "data_point": {
     "value": "10^25 FLOPs",
-    "context": "Training-compute threshold above which an AI model qualifies as 'general-purpose' under the EU AI Act, triggering registration with the AI Office in Brussels. Roughly the scale of GPT-4 at its 2023 release and Claude 3 Opus in 2024."
+    "context": "Training-compute threshold above which an AI model qualifies as 'general-purpose' under the EU AI Act, triggering registration with the AI Office. Roughly GPT-4 at 2023 release."
   },
   "on_this_day": {
     "year_and_title": "1906 — the San Francisco earthquake",
-    "body": "At 5:12 AM local time on April 18, 1906, a magnitude 7.9 earthquake struck along 296 miles of the San Andreas Fault. The quake and the three-day fire that followed destroyed 28,188 buildings across 490 city blocks. Estimates place the death toll at roughly 3,000 and displaced residents at 225,000, more than half the city's population at the time."
+    "body": "At 5:12 AM local time on April 18, 1906, a magnitude 7.9 earthquake struck along 296 miles of the San Andreas Fault. The quake and three-day fire that followed destroyed 28,188 buildings across 490 city blocks. Estimates place the death toll at roughly 3,000 and displaced residents at 225,000."
   }
 }

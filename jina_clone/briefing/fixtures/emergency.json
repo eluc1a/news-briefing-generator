@@ -22,10 +22,46 @@
     ]
   },
   "panels": [
-    {"section": "AI & Technology",   "lede": "(no panel today)", "body": "Generator failure — see lead."},
-    {"section": "National",          "lede": "(no panel today)", "body": "Generator failure — see lead."},
-    {"section": "Economy & Markets", "lede": "(no panel today)", "body": "Generator failure — see lead."},
-    {"section": "International",     "lede": "(no panel today)", "body": "Generator failure — see lead."}
+    {
+      "section": "AI & Technology",
+      "lede_headline": "(no panel today)",
+      "lede_body": "Generator failure — see lead.",
+      "also": [
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."}
+      ]
+    },
+    {
+      "section": "National",
+      "lede_headline": "(no panel today)",
+      "lede_body": "Generator failure — see lead.",
+      "also": [
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."}
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "(no panel today)",
+      "lede_body": "Generator failure — see lead.",
+      "also": [
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."}
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "(no panel today)",
+      "lede_body": "Generator failure — see lead.",
+      "also": [
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."}
+      ]
+    }
   ],
   "pull_quote": "Even a paper that can't be written must still come out — this is that paper.",
   "briefs": [
@@ -33,8 +69,7 @@
     {"topic": "Articles", "body": "Today's articles are still in the database; nothing was lost."},
     {"topic": "Logs", "body": "Run: docker compose logs extractor | tail -200"},
     {"topic": "ntfy", "body": "A high-priority notification was sent to the configured topic."},
-    {"topic": "Recovery", "body": "Tomorrow's 08:10 run retries from scratch — no manual intervention needed."},
-    {"topic": "Manual rerun", "body": "docker compose exec extractor python -m jina_clone briefing run"}
+    {"topic": "Recovery", "body": "Tomorrow's 08:10 run retries from scratch — no manual intervention needed."}
   ],
   "data_point": {
     "value": "2",

@@ -98,6 +98,49 @@ async def insert_summary(
         )
 
 
+async def fetch_section_articles(
+    pool: asyncpg.Pool,
+    *,
+    categories: Sequence[str],
+    per_source_cap: int = 5,
+    limit: int = 40,
+    since_hours: float = 24,
+) -> list[asyncpg.Record]:
+    """Articles for a single briefing section, capped per source.
+
+    `per_source_cap` keeps one high-volume outlet from dominating the
+    pool (e.g., stops The Hindu from owning the International panel).
+    """
+    if not categories:
+        return []
+    async with pool.acquire() as conn:
+        return await conn.fetch(
+            """
+            WITH ranked AS (
+              SELECT
+                id, title, link, published, source, category, content, uploaded_at,
+                ROW_NUMBER() OVER (
+                  PARTITION BY source
+                  ORDER BY published DESC NULLS LAST, uploaded_at DESC
+                ) AS src_rank
+              FROM entries
+              WHERE category = ANY($1::text[])
+                AND content IS NOT NULL
+                AND uploaded_at >= now() - ($2 || ' hours')::interval
+            )
+            SELECT id, title, link, published, source, category, content, uploaded_at
+            FROM ranked
+            WHERE src_rank <= $3
+            ORDER BY published DESC NULLS LAST, uploaded_at DESC
+            LIMIT $4
+            """,
+            list(categories),
+            str(since_hours),
+            per_source_cap,
+            limit,
+        )
+
+
 async def fetch_recent_articles_by_category(
     pool: asyncpg.Pool,
     *,

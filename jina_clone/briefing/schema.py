@@ -62,3 +62,16 @@ class Briefing(BaseModel):
     briefs: list[Brief] = Field(min_length=5, max_length=7)
     data_point: DataPoint
     on_this_day: OnThisDay
+
+
+class FrontMatter(BaseModel):
+    """Internal: output of the front-matter Gemini call.
+
+    `lead_source_url` is the `link` field of the input article the
+    model chose as the lead. Used to dedupe panel/briefs calls.
+    """
+    lead: LeadStory
+    lead_source_url: str
+    pull_quote: str
+    data_point: DataPoint
+    on_this_day: OnThisDay

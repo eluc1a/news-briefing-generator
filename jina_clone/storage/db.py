@@ -96,3 +96,34 @@ async def insert_summary(
             facts,
             article_count,
         )
+
+
+async def fetch_recent_articles_by_category(
+    pool: asyncpg.Pool,
+    *,
+    categories: Sequence[str],
+    since_hours: float = 24,
+    limit: int = 80,
+) -> list[asyncpg.Record]:
+    """Articles uploaded in the last N hours, filtered to the given categories.
+
+    Used by the briefing job. Read-only — does not touch summarized_at.
+    Returns empty list if categories is empty (no SQL issued).
+    """
+    if not categories:
+        return []
+    async with pool.acquire() as conn:
+        return await conn.fetch(
+            """
+            SELECT id, title, link, published, source, category, content, uploaded_at
+            FROM entries
+            WHERE category = ANY($1::text[])
+              AND content IS NOT NULL
+              AND uploaded_at >= now() - ($2 || ' hours')::interval
+            ORDER BY published DESC NULLS LAST, uploaded_at DESC
+            LIMIT $3
+            """,
+            list(categories),
+            str(since_hours),
+            limit,
+        )

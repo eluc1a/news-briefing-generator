@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, TypeVar
 
 from google import genai
 from google.genai import types
@@ -21,6 +21,8 @@ class GeneratorFailure(RuntimeError):
 
 
 CallLLM = Callable[[object, str], Awaitable[str]]
+
+T = TypeVar("T")
 
 
 # ==================================================================
@@ -280,9 +282,8 @@ async def _call_with_retry(
     call_llm: CallLLM,
     client: object,
     user_msg: str,
-    system_prompt: str,
-    parse: Callable[[str], object],
-) -> object:
+    parse: Callable[[str], T],
+) -> T:
     # Wrap call_llm to carry system_prompt if the caller wants it.
     # Fakes used in tests accept (client, prompt) and ignore system.
     raw = await call_llm(client, user_msg)
@@ -339,9 +340,9 @@ async def generate_front_matter(
 
     return await _call_with_retry(
         call_llm=call_llm, client=client,
-        user_msg=user_msg, system_prompt=FRONT_MATTER_SYSTEM_PROMPT,
+        user_msg=user_msg,
         parse=parse,
-    )  # type: ignore[return-value]
+    )
 
 
 async def generate_panel(
@@ -363,9 +364,9 @@ async def generate_panel(
     user_msg = _build_panel_user_msg(section=section, articles=filtered)
     return await _call_with_retry(
         call_llm=call_llm, client=client,
-        user_msg=user_msg, system_prompt=system_prompt,
+        user_msg=user_msg,
         parse=Panel.model_validate_json,
-    )  # type: ignore[return-value]
+    )
 
 
 async def generate_briefs(
@@ -391,6 +392,6 @@ async def generate_briefs(
 
     return await _call_with_retry(
         call_llm=call_llm, client=client,
-        user_msg=user_msg, system_prompt=BRIEFS_SYSTEM_PROMPT,
+        user_msg=user_msg,
         parse=parse,
-    )  # type: ignore[return-value]
+    )

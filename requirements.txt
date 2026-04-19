@@ -16,3 +16,4 @@ pytest
 pytest-asyncio
 weasyprint
 jinja2
+pypdf

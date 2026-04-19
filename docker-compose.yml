@@ -19,4 +19,6 @@ services:
       - ./.env:/app/.env:ro
       - ./config:/app/config:ro
       - ./summaries:/app/summaries
+      - ./briefings:/app/briefings
       - ./logs:/var/log/jina-clone
+      - /var/run/cups/cups.sock:/var/run/cups/cups.sock

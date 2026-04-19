@@ -9,7 +9,7 @@ class PrintError(RuntimeError):
 def print_pdf(pdf_path: Path, *, queue: str = "brother") -> str:
     try:
         result = subprocess.run(
-            ["lp", "-d", queue, str(pdf_path)],
+            ["lp", "-d", queue, "-o", "sides=two-sided-long-edge", str(pdf_path)],
             capture_output=True,
             text=True,
             check=True,

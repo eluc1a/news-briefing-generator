@@ -12,7 +12,7 @@ def test_print_pdf_invokes_lp():
         run.return_value = MagicMock(stdout="request id is brother-42 (1 file(s))\n", returncode=0)
         result = print_pdf(Path("/tmp/x.pdf"), queue="brother")
         run.assert_called_once_with(
-            ["lp", "-d", "brother", "/tmp/x.pdf"],
+            ["lp", "-d", "brother", "-o", "sides=two-sided-long-edge", "/tmp/x.pdf"],
             capture_output=True,
             text=True,
             check=True,

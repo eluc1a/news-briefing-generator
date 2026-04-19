@@ -5,57 +5,78 @@ import yaml
 
 
 @dataclass(frozen=True)
-class PanelDef:
-    key: str
-    title: str
+class SectionDef:
+    key: str                      # "national", "economy", "ai", "international"
+    title: str                    # human-readable section title
     categories: tuple[str, ...]
+    limit: int                    # max articles fetched for this section
 
 
 @dataclass(frozen=True)
-class BriefingCategories:
-    panels: tuple[PanelDef, ...]
-    briefs_categories: tuple[str, ...]
+class BriefsDef:
+    categories: tuple[str, ...]
+    limit: int
+
+
+@dataclass(frozen=True)
+class BriefingConfig:
+    sections: tuple[SectionDef, ...]
+    briefs: BriefsDef
+    per_source_cap: int
+    front_matter_top_per_section: int
     min_articles_total: int
 
-    def panel_for_category(self, category: str) -> str | None:
-        for p in self.panels:
-            if category in p.categories:
-                return p.key
+    def section_for_category(self, category: str) -> str | None:
+        for s in self.sections:
+            if category in s.categories:
+                return s.key
         return None
 
-    def all_categories(self) -> list[str]:
-        out: list[str] = []
-        for p in self.panels:
-            out.extend(p.categories)
-        out.extend(self.briefs_categories)
-        return out
+
+def _require(data: dict, key: str, path: Path):
+    if key not in data:
+        raise KeyError(f"{path}: missing required key {key!r}")
+    return data[key]
 
 
-def load_briefing_categories(path: Path) -> BriefingCategories:
+def load_briefing_config(path: Path) -> BriefingConfig:
     data = yaml.safe_load(Path(path).read_text())
     if not isinstance(data, dict):
         raise ValueError(f"{path}: top-level must be a mapping")
-    raw_panels = data.get("panels")
-    if not isinstance(raw_panels, list) or not raw_panels:
-        raise ValueError(f"{path}: 'panels' must be a non-empty list")
-    panels: list[PanelDef] = []
-    for i, item in enumerate(raw_panels):
+
+    raw_sections = _require(data, "sections", path)
+    if not isinstance(raw_sections, list) or not raw_sections:
+        raise ValueError(f"{path}: 'sections' must be a non-empty list")
+
+    sections: list[SectionDef] = []
+    for i, item in enumerate(raw_sections):
         try:
-            panels.append(
-                PanelDef(
+            sections.append(
+                SectionDef(
                     key=item["key"],
                     title=item["title"],
                     categories=tuple(item["categories"]),
+                    limit=int(item["limit"]),
                 )
             )
         except KeyError as e:
-            raise ValueError(f"{path}: panel {i} missing required key {e}")
-    briefs_raw = data.get("briefs", {})
-    briefs_categories = tuple(briefs_raw.get("categories", ()))
-    if "min_articles_total" not in data:
-        raise KeyError("min_articles_total")
-    return BriefingCategories(
-        panels=tuple(panels),
-        briefs_categories=briefs_categories,
-        min_articles_total=int(data["min_articles_total"]),
+            raise ValueError(f"{path}: section {i} missing required key {e}")
+
+    raw_briefs = _require(data, "briefs", path)
+    try:
+        briefs = BriefsDef(
+            categories=tuple(raw_briefs["categories"]),
+            limit=int(raw_briefs["limit"]),
+        )
+    except KeyError as e:
+        raise ValueError(f"{path}: briefs missing required key {e}")
+
+    return BriefingConfig(
+        sections=tuple(sections),
+        briefs=briefs,
+        per_source_cap=int(_require(data, "per_source_cap", path)),
+        front_matter_top_per_section=int(
+            _require(data, "front_matter_top_per_section", path)
+        ),
+        min_articles_total=int(_require(data, "min_articles_total", path)),
     )

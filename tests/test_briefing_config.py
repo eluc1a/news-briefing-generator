@@ -3,67 +3,76 @@ from pathlib import Path
 import pytest
 
 from jina_clone.briefing.config import (
-    BriefingCategories,
-    PanelDef,
-    load_briefing_categories,
+    BriefingConfig,
+    BriefsDef,
+    SectionDef,
+    load_briefing_config,
 )
 
 
 CONFIG = Path("config/briefing_categories.yaml")
 
 
-def test_load_returns_four_panels():
-    cats = load_briefing_categories(CONFIG)
-    assert isinstance(cats, BriefingCategories)
-    assert len(cats.panels) == 4
-    assert [p.key for p in cats.panels] == ["ai", "national", "economy", "international"]
+def test_load_returns_four_sections():
+    cfg = load_briefing_config(CONFIG)
+    assert isinstance(cfg, BriefingConfig)
+    assert len(cfg.sections) == 4
+    assert [s.key for s in cfg.sections] == [
+        "national", "economy", "ai", "international",
+    ]
 
 
-def test_all_referenced_categories_are_unique():
-    cats = load_briefing_categories(CONFIG)
+def test_ai_section_is_narrowed_to_ai_category_only():
+    cfg = load_briefing_config(CONFIG)
+    ai = next(s for s in cfg.sections if s.key == "ai")
+    assert ai.categories == ("ai",)
+
+
+def test_each_section_has_a_limit():
+    cfg = load_briefing_config(CONFIG)
+    for s in cfg.sections:
+        assert s.limit > 0
+
+
+def test_briefs_loaded():
+    cfg = load_briefing_config(CONFIG)
+    assert isinstance(cfg.briefs, BriefsDef)
+    assert "cybersecurity" in cfg.briefs.categories
+    assert cfg.briefs.limit > 0
+
+
+def test_top_level_knobs():
+    cfg = load_briefing_config(CONFIG)
+    assert cfg.per_source_cap == 5
+    assert cfg.front_matter_top_per_section == 5
+    assert cfg.min_articles_total == 8
+
+
+def test_categories_are_unique_across_sections_and_briefs():
+    cfg = load_briefing_config(CONFIG)
     seen: set[str] = set()
-    for panel in cats.panels:
-        for c in panel.categories:
-            assert c not in seen, f"category {c!r} appears in multiple panels"
+    for s in cfg.sections:
+        for c in s.categories:
+            assert c not in seen, f"category {c!r} appears in multiple sections"
             seen.add(c)
-    for c in cats.briefs_categories:
-        assert c not in seen, f"brief category {c!r} also assigned to a panel"
+    for c in cfg.briefs.categories:
+        assert c not in seen, f"brief category {c!r} also assigned to a section"
         seen.add(c)
 
 
-def test_min_articles_total_loaded():
-    cats = load_briefing_categories(CONFIG)
-    assert cats.min_articles_total == 8
-
-
-def test_panel_for_category_lookup():
-    cats = load_briefing_categories(CONFIG)
-    assert cats.panel_for_category("ai") == "ai"
-    assert cats.panel_for_category("us_local_news") == "national"
-    assert cats.panel_for_category("business") == "economy"
-    assert cats.panel_for_category("regional_international_news") == "international"
-    assert cats.panel_for_category("cybersecurity") is None  # in briefs pool, no panel
-
-
-def test_all_categories_returns_union():
-    cats = load_briefing_categories(CONFIG)
-    all_cats = cats.all_categories()
-    assert "ai" in all_cats
-    assert "cybersecurity" in all_cats
-    # Should include both panel and briefs categories
-    assert len(all_cats) >= 12
-
-
-def test_unknown_panel_key_in_yaml_rejected(tmp_path):
+def test_missing_min_articles_total_rejected(tmp_path):
     bad = tmp_path / "bad.yaml"
     bad.write_text(
-        "panels:\n"
+        "sections:\n"
         "  - key: ai\n"
         "    title: AI\n"
         "    categories: [ai]\n"
+        "    limit: 40\n"
         "briefs:\n"
         "  categories: [tech]\n"
+        "  limit: 50\n"
+        "per_source_cap: 5\n"
+        "front_matter_top_per_section: 5\n"
     )
-    # Missing min_articles_total — should raise
     with pytest.raises((KeyError, ValueError)):
-        load_briefing_categories(bad)
+        load_briefing_config(bad)

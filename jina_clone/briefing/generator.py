@@ -1,7 +1,9 @@
 import json
+import os
 from typing import Awaitable, Callable
 
-import anthropic
+from google import genai
+from google.genai import types
 from pydantic import ValidationError
 
 from jina_clone.briefing.schema import Briefing
@@ -69,16 +71,15 @@ The output is printed on exactly 2 letter pages. Prefer fewer, stronger
 Output: valid JSON matching the schema. No preamble. No markdown fence.
 """
 
-MODEL = "claude-opus-4-7"
-MAX_TOKENS = 8000
+MODEL = "gemini-3.1-flash-lite-preview"
 PER_ARTICLE_BODY_CAP = 3000
 
 
 class GeneratorFailure(RuntimeError):
-    """Raised when Claude returns invalid JSON twice in a row."""
+    """Raised when the LLM returns invalid JSON twice in a row."""
 
 
-CallClaude = Callable[[object, str], Awaitable[str]]
+CallLLM = Callable[[object, str], Awaitable[str]]
 
 
 def build_user_message(
@@ -117,23 +118,16 @@ def build_user_message(
     return "\n".join(sections)
 
 
-async def _real_call_claude(client: anthropic.AsyncAnthropic, prompt: str) -> str:
-    msg = await client.messages.create(
+async def _real_call_llm(client: genai.Client, prompt: str) -> str:
+    response = await client.aio.models.generate_content(
         model=MODEL,
-        max_tokens=MAX_TOKENS,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": prompt}],
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            response_mime_type="application/json",
+        ),
     )
-    raw = msg.content[0].text.strip()
-    # Strip accidental markdown fences
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.lstrip().lower().startswith("json"):
-            raw = raw.lstrip()[4:]
-        raw = raw.strip()
-        if raw.endswith("```"):
-            raw = raw[:-3].strip()
-    return raw
+    return (response.text or "").strip()
 
 
 async def generate(
@@ -143,18 +137,18 @@ async def generate(
     weather: dict,
     today: str,
     volume: str,
-    call_claude: CallClaude | None = None,
-    client: anthropic.AsyncAnthropic | None = None,
+    call_llm: CallLLM | None = None,
+    client: genai.Client | None = None,
 ) -> Briefing:
     """Produce a validated Briefing.
 
-    `call_claude` is injectable for testing. When None, uses _real_call_claude
-    against an AsyncAnthropic client (created if `client` is None).
+    `call_llm` is injectable for testing. When None, uses _real_call_llm
+    against a genai.Client (created if `client` is None).
     """
-    if call_claude is None:
-        call_claude = _real_call_claude
+    if call_llm is None:
+        call_llm = _real_call_llm
         if client is None:
-            client = anthropic.AsyncAnthropic()
+            client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     user_msg = build_user_message(
         articles_by_panel=articles_by_panel,
@@ -164,7 +158,7 @@ async def generate(
         volume=volume,
     )
 
-    raw = await call_claude(client, user_msg)
+    raw = await call_llm(client, user_msg)
     try:
         return Briefing.model_validate_json(raw)
     except ValidationError as first_err:
@@ -173,10 +167,10 @@ async def generate(
             + f"\n\nPrevious attempt failed validation:\n{first_err}\n"
             + "Fix and re-emit valid JSON only."
         )
-        raw2 = await call_claude(client, retry_msg)
+        raw2 = await call_llm(client, retry_msg)
         try:
             return Briefing.model_validate_json(raw2)
         except ValidationError as second_err:
             raise GeneratorFailure(
-                f"Claude returned invalid JSON twice. First: {first_err}; second: {second_err}"
+                f"LLM returned invalid JSON twice. First: {first_err}; second: {second_err}"
             ) from second_err

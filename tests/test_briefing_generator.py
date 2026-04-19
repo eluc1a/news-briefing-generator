@@ -42,7 +42,7 @@ async def test_generate_happy_path_returns_briefing():
         weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
         today="Saturday, April 18, 2026",
         volume="Vol. I · No. 108",
-        call_claude=fake_call,
+        call_llm=fake_call,
         client=None,
     )
     assert isinstance(briefing, Briefing)
@@ -64,7 +64,7 @@ async def test_generate_retries_once_on_validation_failure():
         weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
         today="Saturday, April 18, 2026",
         volume="Vol. I · No. 108",
-        call_claude=fake_call,
+        call_llm=fake_call,
         client=None,
     )
     assert isinstance(briefing, Briefing)
@@ -86,7 +86,7 @@ async def test_generate_raises_on_double_failure():
             weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
             today="Saturday, April 18, 2026",
             volume="Vol. I · No. 108",
-            call_claude=fake_call,
+            call_llm=fake_call,
             client=None,
         )
 

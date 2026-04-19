@@ -2,106 +2,181 @@ import json
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
 
+from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.generator import (
     GeneratorFailure,
-    build_user_message,
-    generate,
+    generate_briefs,
+    generate_front_matter,
+    generate_panel,
 )
-from jina_clone.briefing.schema import Briefing
+from jina_clone.briefing.schema import (
+    Brief, DataPoint, FrontMatter, LeadStory, OnThisDay, Panel,
+)
 
 
 FIXTURE = Path("jina_clone/briefing/fixtures/sample_briefing.json")
-GOOD_JSON = FIXTURE.read_text()
+GOOD_BRIEFING = json.loads(FIXTURE.read_text())
+
+
+WEATHER = {
+    "temp_high": 70, "temp_low": 50, "conditions": "x",
+    "sunrise": "6:00", "sunset": "8:00", "pollen": "low",
+}
+
+
+def _front_matter_payload(lead_source_url: str = "https://a") -> str:
+    return json.dumps({
+        "lead": GOOD_BRIEFING["lead"],
+        "lead_source_url": lead_source_url,
+        "pull_quote": GOOD_BRIEFING["pull_quote"],
+        "data_point": GOOD_BRIEFING["data_point"],
+        "on_this_day": GOOD_BRIEFING["on_this_day"],
+    })
+
+
+def _panel_payload(section: str = "National") -> str:
+    panel = next(p for p in GOOD_BRIEFING["panels"] if p["section"] == section)
+    return json.dumps(panel)
+
+
+def _briefs_payload() -> str:
+    return json.dumps({"briefs": GOOD_BRIEFING["briefs"]})
 
 
 def _articles():
-    # Minimal article shape used by build_user_message
-    return {
-        "ai": [{"title": "x", "link": "https://a", "source": "s", "content": "ai body"}],
-        "national": [{"title": "y", "link": "https://b", "source": "s", "content": "nat body"}],
-        "international": [{"title": "z", "link": "https://c", "source": "s", "content": "intl body"}],
-    }
+    return [
+        {"title": "t1", "link": "https://a", "source": "S1",
+         "content": "body1", "category": "us_national_news"},
+        {"title": "t2", "link": "https://b", "source": "S2",
+         "content": "body2", "category": "us_local_news"},
+    ]
 
 
-def _briefs_pool():
-    return [{"title": "q", "link": "https://d", "source": "s", "content": "tech body", "category": "tech"}]
+# ------------- front matter -------------
 
+async def test_front_matter_happy_path():
+    async def fake(client, prompt: str) -> str:
+        return _front_matter_payload("https://a")
 
-async def test_generate_happy_path_returns_briefing():
-    calls = []
-
-    async def fake_call(client, prompt: str) -> str:
-        calls.append(prompt)
-        return GOOD_JSON
-
-    briefing = await generate(
-        articles_by_panel=_articles(),
-        briefs_pool=_briefs_pool(),
-        weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
-        today="Saturday, April 18, 2026",
-        volume="Vol. I · No. 108",
-        call_llm=fake_call,
-        client=None,
+    fm = await generate_front_matter(
+        articles=_articles(), weather=WEATHER,
+        today="Sat", volume="Vol",
+        call_llm=fake, client=None,
     )
-    assert isinstance(briefing, Briefing)
-    assert len(calls) == 1
+    assert isinstance(fm, FrontMatter)
+    assert fm.lead_source_url == "https://a"
 
 
-async def test_generate_retries_once_on_validation_failure():
-    bad = json.dumps({"date": "x"})  # missing required fields
-    attempts = [bad, GOOD_JSON]
-    seen_prompts: list[str] = []
-
-    async def fake_call(client, prompt: str) -> str:
-        seen_prompts.append(prompt)
+async def test_front_matter_retries_once_on_bad_json():
+    attempts = [json.dumps({"lead": "x"}), _front_matter_payload("https://a")]
+    async def fake(client, prompt: str) -> str:
         return attempts.pop(0)
 
-    briefing = await generate(
-        articles_by_panel=_articles(),
-        briefs_pool=_briefs_pool(),
-        weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
-        today="Saturday, April 18, 2026",
-        volume="Vol. I · No. 108",
-        call_llm=fake_call,
-        client=None,
+    fm = await generate_front_matter(
+        articles=_articles(), weather=WEATHER,
+        today="Sat", volume="Vol",
+        call_llm=fake, client=None,
     )
-    assert isinstance(briefing, Briefing)
-    assert len(seen_prompts) == 2
-    # Second prompt must mention the previous failure
-    assert "Previous attempt failed validation" in seen_prompts[1]
+    assert isinstance(fm, FrontMatter)
 
 
-async def test_generate_raises_on_double_failure():
-    bad = json.dumps({"date": "x"})
-
-    async def fake_call(client, prompt: str) -> str:
-        return bad
+async def test_front_matter_rejects_unknown_lead_url():
+    # lead_source_url must match one of the input article links
+    async def fake(client, prompt: str) -> str:
+        return _front_matter_payload("https://not-in-input")
 
     with pytest.raises(GeneratorFailure):
-        await generate(
-            articles_by_panel=_articles(),
-            briefs_pool=_briefs_pool(),
-            weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
-            today="Saturday, April 18, 2026",
-            volume="Vol. I · No. 108",
-            call_llm=fake_call,
-            client=None,
+        await generate_front_matter(
+            articles=_articles(), weather=WEATHER,
+            today="Sat", volume="Vol",
+            call_llm=fake, client=None,
         )
 
 
-def test_build_user_message_includes_articles_and_schema():
-    msg = build_user_message(
-        articles_by_panel=_articles(),
-        briefs_pool=_briefs_pool(),
-        weather={"temp_high": 70, "temp_low": 50, "conditions": "x", "sunrise": "6:00", "sunset": "8:00", "pollen": "low"},
-        today="Saturday, April 18, 2026",
-        volume="Vol. I · No. 108",
+async def test_front_matter_double_failure_raises():
+    async def fake(client, prompt: str) -> str:
+        return json.dumps({"bad": True})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_front_matter(
+            articles=_articles(), weather=WEATHER,
+            today="Sat", volume="Vol",
+            call_llm=fake, client=None,
+        )
+
+
+# ------------- panel -------------
+
+NATIONAL_SECTION = SectionDef(
+    key="national", title="National",
+    categories=("us_national_news", "us_local_news", "policy"),
+    limit=40,
+)
+
+
+async def test_generate_panel_happy_path():
+    async def fake(client, prompt: str) -> str:
+        return _panel_payload("National")
+
+    panel = await generate_panel(
+        section=NATIONAL_SECTION, articles=_articles(),
+        exclude_urls=set(),
+        call_llm=fake, client=None,
     )
-    assert "Saturday, April 18, 2026" in msg
-    assert "Vol. I · No. 108" in msg
-    assert "ai body" in msg
-    assert "tech body" in msg
-    # Pydantic schema reference
-    assert "panels" in msg
+    assert isinstance(panel, Panel)
+    assert panel.section == "National"
+
+
+async def test_generate_panel_filters_exclude_urls():
+    """Articles whose `link` is in exclude_urls must not appear in the prompt."""
+    seen_prompts: list[str] = []
+    async def fake(client, prompt: str) -> str:
+        seen_prompts.append(prompt)
+        return _panel_payload("National")
+
+    await generate_panel(
+        section=NATIONAL_SECTION, articles=_articles(),
+        exclude_urls={"https://a"},
+        call_llm=fake, client=None,
+    )
+    assert "https://a" not in seen_prompts[0]
+    assert "https://b" in seen_prompts[0]
+
+
+async def test_generate_panel_double_failure_raises():
+    async def fake(client, prompt: str) -> str:
+        return json.dumps({"bad": True})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_panel(
+            section=NATIONAL_SECTION, articles=_articles(),
+            exclude_urls=set(),
+            call_llm=fake, client=None,
+        )
+
+
+# ------------- briefs -------------
+
+async def test_generate_briefs_happy_path():
+    async def fake(client, prompt: str) -> str:
+        return _briefs_payload()
+
+    briefs = await generate_briefs(
+        articles=_articles(), exclude_urls=set(),
+        call_llm=fake, client=None,
+    )
+    assert isinstance(briefs, list)
+    assert len(briefs) >= 5
+    assert all(isinstance(b, Brief) for b in briefs)
+
+
+async def test_generate_briefs_double_failure_raises():
+    async def fake(client, prompt: str) -> str:
+        return json.dumps({"bad": True})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_briefs(
+            articles=_articles(), exclude_urls=set(),
+            call_llm=fake, client=None,
+        )

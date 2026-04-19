@@ -14,17 +14,17 @@ def test_sample_fixture_validates():
     raw = FIXTURE.read_text()
     briefing = Briefing.model_validate_json(raw)
     assert briefing.lead.headline
-    assert len(briefing.panels) == 3
+    assert len(briefing.panels) == 4
     assert {p.section for p in briefing.panels} == {
-        "AI & Technology", "National", "International",
+        "AI & Technology", "National", "Economy & Markets", "International",
     }
     assert 6 <= len(briefing.briefs) <= 9
 
 
-def test_two_panels_rejected():
+def test_three_panels_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    data["panels"] = data["panels"][:2]
+    data["panels"] = data["panels"][:3]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 

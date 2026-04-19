@@ -20,7 +20,12 @@ class LeadStory(BaseModel):
 
 
 class Panel(BaseModel):
-    section: Literal["AI & Technology", "National", "International"]
+    section: Literal[
+        "AI & Technology",
+        "National",
+        "Economy & Markets",
+        "International",
+    ]
     lede: str
     body: str
 
@@ -46,7 +51,7 @@ class Briefing(BaseModel):
     location: str = "Arlington, VA"
     weather: WeatherStrip
     lead: LeadStory
-    panels: list[Panel] = Field(min_length=3, max_length=3)
+    panels: list[Panel] = Field(min_length=4, max_length=4)
     pull_quote: str
     briefs: list[Brief] = Field(min_length=6, max_length=9)
     data_point: DataPoint

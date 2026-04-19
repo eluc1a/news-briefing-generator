@@ -12,11 +12,11 @@ from jina_clone.briefing.config import (
 CONFIG = Path("config/briefing_categories.yaml")
 
 
-def test_load_returns_three_panels():
+def test_load_returns_four_panels():
     cats = load_briefing_categories(CONFIG)
     assert isinstance(cats, BriefingCategories)
-    assert len(cats.panels) == 3
-    assert [p.key for p in cats.panels] == ["ai", "national", "international"]
+    assert len(cats.panels) == 4
+    assert [p.key for p in cats.panels] == ["ai", "national", "economy", "international"]
 
 
 def test_all_referenced_categories_are_unique():
@@ -40,6 +40,7 @@ def test_panel_for_category_lookup():
     cats = load_briefing_categories(CONFIG)
     assert cats.panel_for_category("ai") == "ai"
     assert cats.panel_for_category("us_local_news") == "national"
+    assert cats.panel_for_category("business") == "economy"
     assert cats.panel_for_category("regional_international_news") == "international"
     assert cats.panel_for_category("cybersecurity") is None  # in briefs pool, no panel
 

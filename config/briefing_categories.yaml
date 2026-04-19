@@ -10,8 +10,14 @@ panels:
     title: "National"
     categories:
       - us_national_news
-      - us_local_news
       - policy
+      - us_local_news
+  - key: economy
+    title: "Economy & Markets"
+    categories:
+      - business
+      - business_finance_news
+      - business_tech
   - key: international
     title: "International"
     categories:
@@ -20,9 +26,6 @@ panels:
 
 briefs:
   categories:
-    - business
-    - business_finance_news
-    - business_tech
     - cybersecurity
     - linux
     - science

@@ -38,7 +38,6 @@ def _partition_articles(
             by_panel[panel_key].append(dict(row))
         elif cat in briefs_set:
             briefs_pool.append(dict(row))
-        # else: silently drop unknown categories
     return by_panel, briefs_pool
 
 

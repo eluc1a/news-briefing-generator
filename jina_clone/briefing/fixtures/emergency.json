@@ -22,9 +22,10 @@
     ]
   },
   "panels": [
-    {"section": "AI & Technology", "lede": "(no panel today)", "body": "Generator failure — see lead."},
-    {"section": "National",       "lede": "(no panel today)", "body": "Generator failure — see lead."},
-    {"section": "International",  "lede": "(no panel today)", "body": "Generator failure — see lead."}
+    {"section": "AI & Technology",   "lede": "(no panel today)", "body": "Generator failure — see lead."},
+    {"section": "National",          "lede": "(no panel today)", "body": "Generator failure — see lead."},
+    {"section": "Economy & Markets", "lede": "(no panel today)", "body": "Generator failure — see lead."},
+    {"section": "International",     "lede": "(no panel today)", "body": "Generator failure — see lead."}
   ],
   "pull_quote": "Even a paper that can't be written must still come out — this is that paper.",
   "briefs": [

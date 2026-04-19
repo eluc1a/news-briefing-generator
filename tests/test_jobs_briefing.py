@@ -19,6 +19,7 @@ CATS = BriefingCategories(
     panels=(
         PanelDef("ai", "AI & Technology", ("ai", "llm_tools")),
         PanelDef("national", "National", ("us_national_news",)),
+        PanelDef("economy", "Economy & Markets", ("business",)),
         PanelDef("international", "International", ("international_news",)),
     ),
     briefs_categories=("tech", "science"),
@@ -44,8 +45,9 @@ async def test_happy_path_runs_full_pipeline(tmp_path):
             _row("https://a", "ai"),
             _row("https://b", "ai"),
             _row("https://c", "us_national_news"),
-            _row("https://d", "international_news"),
-            _row("https://e", "tech"),
+            _row("https://d", "business"),
+            _row("https://e", "international_news"),
+            _row("https://f", "tech"),
         ]
 
     generated_args = {}
@@ -101,7 +103,7 @@ async def test_happy_path_runs_full_pipeline(tmp_path):
     assert len(fetched_categories) == 1
     # Articles passed to generate are partitioned by panel
     by_panel = generated_args["articles_by_panel"]
-    assert {"ai", "national", "international"} <= set(by_panel.keys())
+    assert {"ai", "national", "economy", "international"} <= set(by_panel.keys())
     assert len(by_panel["ai"]) == 2
     # Briefs pool gets the leftover (tech)
     assert len(generated_args["briefs_pool"]) == 1

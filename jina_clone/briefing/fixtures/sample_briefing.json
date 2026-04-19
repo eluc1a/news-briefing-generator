@@ -13,46 +13,51 @@
   "lead": {
     "headline": "EU artificial-intelligence pact moves to enforcement phase",
     "deck": "Brussels publishes the first compliance deadlines for general-purpose model providers; US firms face a 90-day window to register.",
-    "body": "The European Commission released the long-awaited enforcement schedule for the AI Act on Friday, setting October 1 as the date by which providers of general-purpose AI must register their models with the new AI Office. Penalties of up to seven percent of global turnover apply to non-registration. Three of the five largest US-based labs have already filed; two have asked for extensions. Civil-society groups praised the speed of the rollout but flagged the narrow scope of the registry, which excludes models below ten-to-the-twenty-fifth FLOPs of training compute. Officials in Washington signalled that a parallel federal framework remains stalled in committee.",
+    "body": "The European Commission released the enforcement schedule for the AI Act on Friday, setting October 1, 2026 as the registration deadline for general-purpose AI providers with the new AI Office in Brussels. Penalties reach seven percent of global annual turnover for non-registration and three percent for late filings. OpenAI, Anthropic, and Google DeepMind have filed; Meta and xAI each requested 60-day extensions. The registry applies only to models trained above 10^25 floating-point operations, excluding most open-weights releases. Commission spokesperson Margrethe Vestager told reporters in Strasbourg that 41 filings had been received by Thursday midnight. A parallel US federal framework from Senator Maria Cantwell remains in the Commerce Committee with no markup scheduled. Enforcement actions begin January 15, 2027.",
     "at_a_glance": [
       "Registration deadline: October 1, 2026",
       "Penalty ceiling: 7% of global turnover",
       "Compute threshold: 10^25 training FLOPs",
-      "US federal framework: still stalled"
+      "Filings received by Thursday: 41"
     ]
   },
   "panels": [
     {
       "section": "AI & Technology",
-      "lede": "Open-weights coalition tops 200 signatories",
-      "body": "A petition urging governments to preserve open-weights releases of frontier models reached two hundred signatories overnight, including a former US Chief Technology Officer and two Turing Award winners. Organisers framed the effort as a counterweight to the EU's compute-threshold approach, arguing that registration burdens fall disproportionately on academic and nonprofit labs. Three large commercial labs declined to sign, citing legal review."
+      "lede": "Open-weights coalition tops 200 signatories, including two Turing laureates",
+      "body": "A petition urging governments to preserve open-weights releases of frontier models reached 214 signatories by Friday morning, organisers told Reuters. Signers include former US Chief Technology Officer Megan Smith, Turing laureates Yoshua Bengio and Geoffrey Hinton, and researchers from 37 universities across 14 countries. The text asks regulators to exempt OSI-licensed model weights from the EU AI Act's 10^25 FLOPs registration threshold. OpenAI, Anthropic, and Google DeepMind declined to sign, each citing ongoing legal review; Meta signed at 9:40 AM CET. The Mozilla Foundation and Allen Institute coordinated the effort with $1.2 million from the Ford Foundation. Signatures close April 30."
     },
     {
       "section": "National",
-      "lede": "Senate clears short-term spending extension",
-      "body": "The Senate voted 68-31 last night to extend federal funding through June 30, averting a shutdown that would have begun at midnight. The continuing resolution preserves current spending levels for most agencies but cuts a small grant program for state-level cybersecurity offices. The House is expected to take up the measure Saturday afternoon. The White House signalled it would sign the bill without comment on the cyber grant cut, which advocacy groups called a blow to local resilience."
+      "lede": "Senate clears 68-31 short-term spending extension through June 30",
+      "body": "The Senate voted 68-31 Thursday night to extend federal funding through June 30, averting a shutdown that would have begun at midnight Friday. The continuing resolution preserves fiscal-year 2026 spending levels for most agencies but cuts $340 million from the State and Local Cybersecurity Grant Program, a 19 percent reduction from its 2025 appropriation. Twelve Republicans joined 56 Democrats in favor; 28 Republicans and three Democrats opposed. The House takes up the measure Saturday at 2:00 PM ET. The White House indicated the President will sign without public remarks on the cyber grant reduction. The National Association of State CIOs called the cut a blow to 52 state-level cyber offices."
+    },
+    {
+      "section": "Economy & Markets",
+      "lede": "Treasury 10-year yield closes at 4.31%, down 4 bp after retail-sales miss",
+      "body": "US 10-year Treasury yields closed Friday at 4.31 percent, down 4 basis points on the day and 11 on the week, after March retail sales rose 0.2 percent versus a 0.5 percent consensus. The S&P 500 closed at 5,421.18, down 0.4 percent; the Nasdaq Composite fell 0.8 percent to 17,204.33. The dollar index dropped to 102.11. Federal funds futures now imply a 64 percent probability of a 25-basis-point cut at the June 17 FOMC meeting, up from 51 percent Thursday. Morgan Stanley reported first-quarter net revenue of $15.1 billion and earnings per share of $2.08, beating consensus of $1.94; its wealth-management division added $94 billion in net new assets."
     },
     {
       "section": "International",
       "lede": "Tokyo summit ends without joint statement on rare-earth supply",
-      "body": "Trade ministers from seven Indo-Pacific economies wrapped a two-day Tokyo summit on Friday without the expected joint declaration on rare-earth supply diversification. Participants cited disagreement over export-control language proposed by South Korea and Australia. Japan's foreign ministry said working-level talks would continue through May. Analysts noted that the absence of a joint statement may delay a planned procurement framework intended to reduce dependency on a single dominant supplier."
+      "body": "Trade ministers from seven Indo-Pacific economies — Japan, South Korea, Australia, India, Vietnam, the Philippines, and Indonesia — wrapped a two-day Tokyo summit Friday without the expected joint declaration on rare-earth diversification. Japan's METI cited disagreement over export-control language from Seoul and Canberra that would license outbound shipments above 500 metric tons. Minister Yasutoshi Nishimura said working-level talks continue through May 23 in Manila. The seven economies imported 73 percent of their rare-earth magnets from a single supplier in 2025. The $4.2 billion procurement framework was pushed to September's Quad meeting."
     }
   ],
-  "pull_quote": "The registry is a starting line, not a finishing tape — the hard work begins when models start changing faster than paperwork can keep up.",
+  "pull_quote": "The registry is a starting line, not a finishing tape — models will change faster than filings can be updated. — Margrethe Vestager, quoted by Reuters",
   "briefs": [
-    {"topic": "Cybersecurity", "body": "A widely-used open-source TLS library shipped a fix for a session-resumption bug; CVE pending. Patch within seven days."},
-    {"topic": "Markets", "body": "US 10-year yield closed at 4.31%, down 4 bp on softer-than-expected retail sales data."},
-    {"topic": "Science", "body": "ESA confirmed the launch window for the Comet Interceptor mission has slipped to early 2029."},
-    {"topic": "Linux", "body": "Kernel 6.14 enters its third release-candidate; networking subsystem sees the largest delta this cycle."},
-    {"topic": "Startups", "body": "Two AI-infrastructure startups disclosed combined Series B rounds totaling $340 million; both name training-cluster utilization as the bottleneck."},
-    {"topic": "Investigations", "body": "A regional newspaper consortium published a six-month investigation into private equity ownership of rural hospitals across four states."}
+    {"topic": "Cybersecurity", "body": "The OpenSSL project shipped version 3.3.1 Friday addressing CVE-2026-4082, a session-resumption flaw in TLS 1.3 that allowed reuse of expired tickets. Patch within seven days."},
+    {"topic": "Linux", "body": "Kernel 6.14 reached release candidate 3 on Friday. The networking subsystem sees the largest delta at 412 commits, including a rewrite of the nftables expression engine by Pablo Neira Ayuso."},
+    {"topic": "Science", "body": "The European Space Agency confirmed Friday that the Comet Interceptor launch window has slipped from 2028 to early 2029 following delays to the Ariane 6 manifest. Mission cost rises to €178 million."},
+    {"topic": "Startups", "body": "Perplexity AI and Groq jointly disclosed $340 million in Series B funding Friday. Both cited H100 cluster availability as the primary bottleneck on inference capacity expansion through Q3."},
+    {"topic": "Investigations", "body": "A consortium of the Raleigh News & Observer, Charlotte Observer, and Kentucky Lantern published a six-month investigation Friday into private-equity ownership of 47 rural hospitals across four states."},
+    {"topic": "Tech", "body": "GitHub announced Friday that copilot-agent enterprise tenants will receive SOC 2 Type II attestation by June 30. Audit scope covers code-suggestion logging and customer data isolation."}
   ],
   "data_point": {
-    "value": "10^25",
-    "context": "Training-compute threshold above which an AI model qualifies as 'general-purpose' under the EU AI Act, triggering registration requirements. Roughly the scale of GPT-4 at release."
+    "value": "10^25 FLOPs",
+    "context": "Training-compute threshold above which an AI model qualifies as 'general-purpose' under the EU AI Act, triggering registration with the AI Office in Brussels. Roughly the scale of GPT-4 at its 2023 release and Claude 3 Opus in 2024."
   },
   "on_this_day": {
     "year_and_title": "1906 — the San Francisco earthquake",
-    "body": "At 5:12 AM local time, a magnitude 7.9 quake struck the San Andreas Fault, destroying much of San Francisco in the fires that followed. The disaster killed an estimated 3,000 and left more than half the city's population homeless, but also drove modern seismic-engineering codes."
+    "body": "At 5:12 AM local time on April 18, 1906, a magnitude 7.9 earthquake struck along 296 miles of the San Andreas Fault. The quake and the three-day fire that followed destroyed 28,188 buildings across 490 city blocks. Estimates place the death toll at roughly 3,000 and displaced residents at 225,000, more than half the city's population at the time."
   }
 }

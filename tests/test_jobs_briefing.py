@@ -378,3 +378,108 @@ async def test_print_failure_still_raises(tmp_path):
     assert notified_fail and "queue not found" in notified_fail[0]
     pdfs = list(tmp_path.glob("*.pdf"))
     assert len(pdfs) == 1
+
+
+# ------------- assemble_briefing (pure core) -------------
+
+async def test_assemble_briefing_happy_path_returns_briefing_and_count():
+    from jina_clone.jobs.briefing import assemble_briefing
+
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+        # Return 5 rows per call; 4 sections + 1 briefs call = 25 total
+        return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
+
+    async def gen_fm(*, articles, weather, today, volume, **kw):
+        return FrontMatter(
+            lead=GOOD.lead,
+            lead_source_url=articles[0]["link"],
+            pull_quote=GOOD.pull_quote,
+            data_point=GOOD.data_point,
+            on_this_day=GOOD.on_this_day,
+        )
+
+    async def gen_panel(*, section, articles, exclude_urls, **kw):
+        return next(p for p in GOOD.panels if p.section == section.title)
+
+    async def gen_briefs(*, articles, exclude_urls, **kw):
+        return list(GOOD.briefs)
+
+    briefing, count = await assemble_briefing(
+        pool=MagicMock(),
+        config=CFG,
+        weather_provider=lambda: WeatherStrip(
+            temp_high=70, temp_low=50, conditions="x",
+            sunrise="6:00", sunset="8:00", pollen="low",
+        ).model_dump(),
+        today_label="Sat",
+        volume_label="Vol",
+        iso_date="2026-04-19",
+        fetch_articles=fetch,
+        generate_front_matter=gen_fm,
+        generate_panel=gen_panel,
+        generate_briefs=gen_briefs,
+    )
+    assert isinstance(briefing, Briefing)
+    assert briefing.date == "2026-04-19"
+    assert briefing.volume == "Vol"
+    assert len(briefing.panels) == 4
+    # 5 articles per section (4 sections) + 5 briefs = 25 total
+    assert count == 25
+
+
+async def test_assemble_briefing_raises_not_enough_articles():
+    from jina_clone.jobs.briefing import assemble_briefing, NotEnoughArticles
+
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+        return []  # Zero articles total
+
+    async def noop(*a, **kw):
+        raise AssertionError("generators should not run when articles are insufficient")
+
+    with pytest.raises(NotEnoughArticles):
+        await assemble_briefing(
+            pool=MagicMock(),
+            config=CFG,
+            weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
+                                      "conditions": "x", "sunrise": "6:00",
+                                      "sunset": "8:00", "pollen": "low"},
+            today_label="x",
+            volume_label="y",
+            iso_date="2026-04-19",
+            fetch_articles=fetch,
+            generate_front_matter=noop,
+            generate_panel=noop,
+            generate_briefs=noop,
+        )
+
+
+async def test_assemble_briefing_bubbles_generator_failure():
+    from jina_clone.jobs.briefing import assemble_briefing
+
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+        return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
+
+    async def gen_fm(*, articles, weather, today, volume, **kw):
+        raise GeneratorFailure("front matter failed twice")
+
+    async def gen_panel(*, section, articles, exclude_urls, **kw):
+        raise AssertionError("should not run if front matter fails")
+
+    async def gen_briefs(*, articles, exclude_urls, **kw):
+        raise AssertionError("should not run if front matter fails")
+
+    with pytest.raises(GeneratorFailure):
+        await assemble_briefing(
+            pool=MagicMock(),
+            config=CFG,
+            weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
+                                      "conditions": "x", "sunrise": "6:00",
+                                      "sunset": "8:00", "pollen": "low"},
+            today_label="x",
+            volume_label="y",
+            iso_date="2026-04-19",
+            fetch_articles=fetch,
+            generate_front_matter=gen_fm,
+            generate_panel=gen_panel,
+            generate_briefs=gen_briefs,
+        )

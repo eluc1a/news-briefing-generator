@@ -44,6 +44,120 @@ def _dedupe_by_link(articles: list[dict]) -> list[dict]:
     return out
 
 
+async def assemble_briefing(
+    *,
+    pool: Any,
+    config: BriefingConfig,
+    weather_provider: Callable[[], dict],
+    today_label: str,
+    volume_label: str,
+    iso_date: str,
+    fetch_articles: FetchFn,
+    generate_front_matter: FrontMatterFn,
+    generate_panel: PanelFn,
+    generate_briefs: BriefsFn,
+) -> tuple[Briefing, int]:
+    """Fetch → front-matter → panels+briefs → assemble.
+
+    Pure core shared by `run_briefing` (production, adds emergency
+    fallback + render + print + log) and the `briefing generate`
+    CLI subcommand (debug, just writes JSON). Returns the fully
+    assembled `Briefing` and the total article count used.
+
+    Raises
+    ------
+    NotEnoughArticles
+        Total fetched articles across all sections + briefs is below
+        `config.min_articles_total`.
+    GeneratorFailure
+        Any of the six Gemini calls returned invalid output twice.
+    """
+
+    # --- Step 1: fan-out fetches (4 sections + briefs) ---
+    section_pools: dict[str, list[dict]] = {}
+
+    async def _fetch_section(section: SectionDef) -> tuple[str, list[dict]]:
+        rows = await fetch_articles(
+            pool,
+            categories=list(section.categories),
+            per_source_cap=config.per_source_cap,
+            limit=section.limit,
+        )
+        return section.key, [dict(r) for r in rows]
+
+    async def _fetch_briefs() -> list[dict]:
+        rows = await fetch_articles(
+            pool,
+            categories=list(config.briefs.categories),
+            per_source_cap=config.per_source_cap,
+            limit=config.briefs.limit,
+        )
+        return [dict(r) for r in rows]
+
+    section_results, briefs_pool = await asyncio.gather(
+        asyncio.gather(*[_fetch_section(s) for s in config.sections]),
+        _fetch_briefs(),
+    )
+    for key, rows in section_results:
+        section_pools[key] = rows
+
+    total = sum(len(p) for p in section_pools.values()) + len(briefs_pool)
+    log.info(
+        "fetched %d articles across %d sections + briefs",
+        total, len(config.sections),
+    )
+
+    if total < config.min_articles_total:
+        raise NotEnoughArticles(
+            f"Too few articles: {total} < min {config.min_articles_total}. "
+            "Briefing aborted."
+        )
+
+    weather = weather_provider()
+
+    # --- Step 2: front matter (serial, so panels can exclude its URL) ---
+    front_pool = _dedupe_by_link([
+        a
+        for s in config.sections
+        for a in section_pools[s.key][: config.front_matter_top_per_section]
+    ])
+    front = await generate_front_matter(
+        articles=front_pool,
+        weather=weather,
+        today=today_label,
+        volume=volume_label,
+    )
+    exclude = {front.lead_source_url}
+
+    # --- Step 3: panels + briefs (parallel) ---
+    panel_coros = [
+        generate_panel(
+            section=s,
+            articles=section_pools[s.key],
+            exclude_urls=exclude,
+        )
+        for s in config.sections
+    ]
+    briefs_coro = generate_briefs(articles=briefs_pool, exclude_urls=exclude)
+
+    panels_and_briefs = await asyncio.gather(*panel_coros, briefs_coro)
+    panels: list[Panel] = list(panels_and_briefs[:-1])
+    briefs: list[Brief] = panels_and_briefs[-1]
+
+    briefing = Briefing(
+        date=iso_date,
+        volume=volume_label,
+        weather=WeatherStrip(**weather),
+        lead=front.lead,
+        panels=panels,
+        pull_quote=front.pull_quote,
+        briefs=briefs,
+        data_point=front.data_point,
+        on_this_day=front.on_this_day,
+    )
+    return briefing, total
+
+
 async def run_briefing(
     *,
     pool: Any,
@@ -67,94 +181,27 @@ async def run_briefing(
     insert_summary: Callable[..., Awaitable[int]],
     emergency_path: Path,
 ) -> BriefingResult:
-    """Full pipeline: six fetches, six Gemini calls, render, print, log."""
+    """Full pipeline: assemble → render → print → log, with
+    NotEnoughArticles and emergency-edition fallback around assemble."""
 
-    # --- Step 1: fan-out fetches (4 sections + briefs) ---
-    section_pools: dict[str, list[dict]] = {}
-    briefs_pool: list[dict] = []
-
-    async def _fetch_section(section: SectionDef) -> tuple[str, list[dict]]:
-        rows = await fetch_articles(
-            pool,
-            categories=list(section.categories),
-            per_source_cap=config.per_source_cap,
-            limit=section.limit,
-        )
-        return section.key, [dict(r) for r in rows]
-
-    async def _fetch_briefs() -> list[dict]:
-        rows = await fetch_articles(
-            pool,
-            categories=list(config.briefs.categories),
-            per_source_cap=config.per_source_cap,
-            limit=config.briefs.limit,
-        )
-        return [dict(r) for r in rows]
-
-    section_results, briefs_rows = await asyncio.gather(
-        asyncio.gather(*[_fetch_section(s) for s in config.sections]),
-        _fetch_briefs(),
-    )
-    for key, rows in section_results:
-        section_pools[key] = rows
-    briefs_pool = briefs_rows
-
-    total = sum(len(p) for p in section_pools.values()) + len(briefs_pool)
-    log.info("fetched %d articles across %d sections + briefs", total, len(config.sections))
-
-    if total < config.min_articles_total:
-        reason = (
-            f"Too few articles: {total} < min {config.min_articles_total}. "
-            "Briefing aborted."
-        )
-        log.warning(reason)
-        notify_failure(topic=ntfy_topic, reason=reason)
-        raise NotEnoughArticles(reason)
-
-    weather = weather_provider()
     emergency_used = False
-
     try:
-        # --- Step 2: front matter (serial, so panels can exclude its URL) ---
-        front_pool = _dedupe_by_link([
-            a
-            for s in config.sections
-            for a in section_pools[s.key][: config.front_matter_top_per_section]
-        ])
-        front = await generate_front_matter(
-            articles=front_pool,
-            weather=weather,
-            today=today_label,
-            volume=volume_label,
+        briefing, total = await assemble_briefing(
+            pool=pool,
+            config=config,
+            weather_provider=weather_provider,
+            today_label=today_label,
+            volume_label=volume_label,
+            iso_date=iso_date,
+            fetch_articles=fetch_articles,
+            generate_front_matter=generate_front_matter,
+            generate_panel=generate_panel,
+            generate_briefs=generate_briefs,
         )
-        exclude = {front.lead_source_url}
-
-        # --- Step 3: panels + briefs (parallel) ---
-        panel_coros = [
-            generate_panel(
-                section=s,
-                articles=section_pools[s.key],
-                exclude_urls=exclude,
-            )
-            for s in config.sections
-        ]
-        briefs_coro = generate_briefs(articles=briefs_pool, exclude_urls=exclude)
-
-        panels_and_briefs = await asyncio.gather(*panel_coros, briefs_coro)
-        panels: list[Panel] = list(panels_and_briefs[:-1])
-        briefs: list[Brief] = panels_and_briefs[-1]
-
-        briefing = Briefing(
-            date=iso_date,
-            volume=volume_label,
-            weather=WeatherStrip(**weather),
-            lead=front.lead,
-            panels=panels,
-            pull_quote=front.pull_quote,
-            briefs=briefs,
-            data_point=front.data_point,
-            on_this_day=front.on_this_day,
-        )
+    except NotEnoughArticles as e:
+        log.warning(str(e))
+        notify_failure(topic=ntfy_topic, reason=str(e))
+        raise
     except GeneratorFailure as e:
         log.error("generator failed — using emergency edition: %s", e)
         notify_failure(
@@ -163,6 +210,7 @@ async def run_briefing(
         )
         briefing = Briefing.model_validate_json(emergency_path.read_text())
         emergency_used = True
+        total = 0
 
     # --- Step 4: render + print ---
     briefings_dir.mkdir(parents=True, exist_ok=True)

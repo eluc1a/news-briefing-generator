@@ -1,0 +1,46 @@
+{
+  "date": "(emergency edition)",
+  "volume": "Vol. I · Emergency",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 0,
+    "temp_low": 0,
+    "conditions": "(weather unavailable)",
+    "sunrise": "—",
+    "sunset": "—",
+    "pollen": "—"
+  },
+  "lead": {
+    "headline": "Briefing generation failed — check the journal",
+    "deck": "Claude returned invalid output twice in a row. This is the emergency placeholder.",
+    "body": "The morning briefing generator failed schema validation on two consecutive attempts. The most likely causes are an API outage, a model-side regression, or a malformed prompt. Check the briefing job log and the ntfy alert for details. The article scrapers and database are unaffected; tomorrow's run will retry from a clean state.",
+    "at_a_glance": [
+      "Generator: failed twice",
+      "Articles: not summarized today",
+      "Action: check journalctl + ntfy",
+      "Next attempt: tomorrow at 08:10 ET"
+    ]
+  },
+  "panels": [
+    {"section": "AI & Technology", "lede": "(no panel today)", "body": "Generator failure — see lead."},
+    {"section": "National",       "lede": "(no panel today)", "body": "Generator failure — see lead."},
+    {"section": "International",  "lede": "(no panel today)", "body": "Generator failure — see lead."}
+  ],
+  "pull_quote": "Even a paper that can't be written must still come out — this is that paper.",
+  "briefs": [
+    {"topic": "Status", "body": "Briefing generator returned invalid JSON twice."},
+    {"topic": "Articles", "body": "Today's articles are still in the database; nothing was lost."},
+    {"topic": "Logs", "body": "Run: docker compose logs extractor | tail -200"},
+    {"topic": "ntfy", "body": "A high-priority notification was sent to the configured topic."},
+    {"topic": "Recovery", "body": "Tomorrow's 08:10 run retries from scratch — no manual intervention needed."},
+    {"topic": "Manual rerun", "body": "docker compose exec extractor python -m jina_clone briefing run"}
+  ],
+  "data_point": {
+    "value": "2",
+    "context": "Number of consecutive Claude validation failures that trigger this emergency edition."
+  },
+  "on_this_day": {
+    "year_and_title": "(unavailable)",
+    "body": "Generator failure prevented retrieval of the on-this-day entry."
+  }
+}

@@ -51,6 +51,11 @@ async def extract_article(
             headers={"User-Agent": user_agent},
         ) as client:
             response = await client.get(url)
+        if response.status_code >= 400:
+            return ExtractResult(
+                url=url, title=None, text=None,
+                error=f"HTTP {response.status_code}",
+            )
         content_type = response.headers.get("content-type", "")
         if "text/html" not in content_type:
             return ExtractResult(

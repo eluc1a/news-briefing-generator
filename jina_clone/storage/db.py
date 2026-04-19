@@ -42,7 +42,11 @@ async def insert_entry(
 
 
 async def fetch_unsummarized(
-    pool: asyncpg.Pool, *, source_names: Sequence[str]
+    pool: asyncpg.Pool,
+    *,
+    source_names: Sequence[str],
+    category: str,
+    since: datetime,
 ) -> list[asyncpg.Record]:
     async with pool.acquire() as conn:
         return await conn.fetch(
@@ -50,11 +54,15 @@ async def fetch_unsummarized(
             SELECT id, title, link, source, category, content, published, uploaded_at
             FROM entries
             WHERE source = ANY($1::text[])
+              AND category = $2
               AND summarized_at IS NULL
               AND content IS NOT NULL
+              AND COALESCE(published, uploaded_at) >= $3
             ORDER BY uploaded_at ASC
             """,
             list(source_names),
+            category,
+            since,
         )
 
 

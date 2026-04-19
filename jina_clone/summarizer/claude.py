@@ -27,3 +27,10 @@ class ClaudeProvider:
             block.text for block in response.content if block.type == "text"
         )
         return parse_json_response(text)
+
+    async def count_tokens(self, text: str) -> int:
+        response = await self._client.messages.count_tokens(
+            model=self.model,
+            messages=[{"role": "user", "content": text}],
+        )
+        return response.input_tokens

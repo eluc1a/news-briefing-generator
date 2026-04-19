@@ -27,10 +27,13 @@ class Settings:
     summaries_dir: Path
     fetch_concurrency: int
     fetch_delay_seconds: float
+    fetch_window_hours: float
     request_timeout: int
     max_text_length: int
     llm_provider: str
     llm_model: str | None
+    summary_token_cap: int
+    summary_window_hours: float
     api_keys: dict[str, str] = field(default_factory=dict)
 
     @classmethod
@@ -38,24 +41,24 @@ class Settings:
         provider = os.getenv("LLM_PROVIDER", "claude")
         if provider not in _PROVIDER_KEY:
             raise ValueError(f"Unknown LLM_PROVIDER: {provider}")
-        key_name = _PROVIDER_KEY[provider]
-        api_key = os.getenv(key_name)
-        if not api_key:
-            raise ValueError(f"{key_name} is required for LLM_PROVIDER={provider}")
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
             raise ValueError("DATABASE_URL is required")
+        api_keys = {name: val for name in _PROVIDER_KEY.values() if (val := os.getenv(name))}
         return cls(
             database_url=database_url,
             sources_file=Path(os.getenv("SOURCES_FILE", "sources.yaml")),
             summaries_dir=Path(os.getenv("SUMMARIES_DIR", "summaries")),
             fetch_concurrency=int(os.getenv("FETCH_CONCURRENCY", "4")),
             fetch_delay_seconds=float(os.getenv("FETCH_DELAY_SECONDS", "1")),
+            fetch_window_hours=float(os.getenv("FETCH_WINDOW_HOURS", "24")),
             request_timeout=int(os.getenv("REQUEST_TIMEOUT", "15")),
             max_text_length=int(os.getenv("MAX_TEXT_LENGTH", "4000")),
             llm_provider=provider,
             llm_model=os.getenv("LLM_MODEL") or None,
-            api_keys={key_name: api_key},
+            summary_token_cap=int(os.getenv("SUMMARY_TOKEN_CAP", "850000")),
+            summary_window_hours=float(os.getenv("SUMMARY_WINDOW_HOURS", "24")),
+            api_keys=api_keys,
         )
 
 

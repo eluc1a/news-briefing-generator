@@ -16,6 +16,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./sources.yaml:/app/sources.yaml:ro
+      - ./.env:/app/.env:ro
+      - ./config:/app/config:ro
       - ./summaries:/app/summaries
       - ./logs:/var/log/jina-clone

@@ -1,9 +1,9 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from jina_clone.storage.db import fetch_unsummarized, insert_summary, mark_summarized
-from jina_clone.summarizer.prompt import SYSTEM_PROMPT, build_user_prompt
+from jina_clone.summarizer.prompt import build_system_prompt, build_user_prompt
 
 log = logging.getLogger(__name__)
 
@@ -27,27 +27,37 @@ async def run_summarize(
     source_names: list[str],
     provider,
     summaries_dir: Path,
-    category: str = "ai",
+    category: str,
     per_article_cap: int = 4000,
-    total_cap: int = 200_000,
+    token_cap: int = 850_000,
+    window_hours: float = 24.0,
 ) -> dict | None:
-    rows = await fetch_unsummarized(pool, source_names=source_names)
+    since = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+    rows = await fetch_unsummarized(
+        pool, source_names=source_names, category=category, since=since,
+    )
     if not rows:
-        log.info("no unsummarized articles; nothing to do")
+        log.info("no unsummarized articles for category=%s; nothing to do", category)
         return None
 
     articles = [dict(r) for r in rows]
-    user_prompt, included = build_user_prompt(
-        articles, per_article_cap=per_article_cap, total_cap=total_cap
+    user_prompt, included = await build_user_prompt(
+        articles,
+        count_tokens=provider.count_tokens,
+        per_article_cap=per_article_cap,
+        token_cap=token_cap,
     )
 
-    log.info("summarizing %d articles with %s (%s)", len(included), provider.name, provider.model)
+    log.info(
+        "summarizing %d articles (category=%s) with %s (%s)",
+        len(included), category, provider.name, provider.model,
+    )
     # LLM call first — if it raises, nothing is written, no DB mutations occur
-    result = await provider.summarize(SYSTEM_PROMPT, user_prompt)
+    result = await provider.summarize(build_system_prompt(category), user_prompt)
 
     generated_at = datetime.now()
     summaries_dir.mkdir(parents=True, exist_ok=True)
-    path = summaries_dir / generated_at.strftime("%Y-%m-%d-%H%M.md")
+    path = summaries_dir / f"{generated_at.strftime('%Y-%m-%d-%H%M')}-{category}.md"
     path.write_text(
         _render_markdown(
             headline=result["headline"],

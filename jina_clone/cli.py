@@ -36,14 +36,16 @@ async def _run_fetch(settings: Settings):
             delay_seconds=settings.fetch_delay_seconds,
             request_timeout=settings.request_timeout,
             max_text_length=settings.max_text_length,
+            window_hours=settings.fetch_window_hours,
         )
         for name, s in stats.items():
             logging.info(
-                "%s: %d new, %d errors, %d skipped, %d failed",
+                "%s: %d new, %d errors, %d skipped, %d out-of-window, %d failed",
                 name,
                 s["new"],
                 s["errors"],
                 s["skipped"],
+                s.get("out_of_window", 0),
                 s.get("failed", 0),
             )
     finally:
@@ -52,19 +54,24 @@ async def _run_fetch(settings: Settings):
 
 async def _run_summarize(settings: Settings):
     sources = load_sources(settings.sources_file)
-    our_names = [s.name for s in sources]
+    by_category: dict[str, list[str]] = {}
+    for s in sources:
+        by_category.setdefault(s.category, []).append(s.name)
     provider = build_provider(settings)
     pool = await create_pool(settings.database_url)
     try:
-        result = await run_summarize(
-            pool,
-            source_names=our_names,
-            provider=provider,
-            summaries_dir=settings.summaries_dir,
-            category="ai",
-        )
-        if result:
-            logging.info("summary written: %s", result["output_path"])
+        for category, names in sorted(by_category.items()):
+            result = await run_summarize(
+                pool,
+                source_names=names,
+                provider=provider,
+                summaries_dir=settings.summaries_dir,
+                category=category,
+                token_cap=settings.summary_token_cap,
+                window_hours=settings.summary_window_hours,
+            )
+            if result:
+                logging.info("summary written: %s", result["output_path"])
     finally:
         await pool.close()
 

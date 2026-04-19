@@ -97,6 +97,11 @@ Postgres (bridge IPs are rejected by pg_hba.conf).
   `fetch_unsummarized`'s `content IS NOT NULL` filter.
 - **Config in `sources.yaml`, not DB.** File is mounted read-only into
   the container; edits take effect on the next job run, no rebuild.
+- **One summary per category per run.** `cli.py` groups `sources.yaml`
+  entries by `category` and invokes `run_summarize` once per distinct
+  category. Each run writes `YYYY-MM-DD-HHMM-<category>.md` and a
+  separate `news_summaries` row. Adding a new category to
+  `sources.yaml` is all it takes to get a new daily digest.
 - **LLM providers swappable.** New provider = new file in
   `jina_clone/summarizer/` + branch in `build_provider`. The
   `parse_json_response` helper handles code fences and whitespace.

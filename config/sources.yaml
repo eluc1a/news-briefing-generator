@@ -1,0 +1,116 @@
+sources:
+  - name: Simon Willison
+    type: rss
+    url: https://simonwillison.net/atom/everything/
+    category: ai
+
+  - name: Hacker News
+    type: scrape
+    url: https://news.ycombinator.com/
+    link_selector: ".titleline > a"
+    category: ai
+
+  - name: Anthropic Engineering
+    type: rss
+    url: https://raw.githubusercontent.com/conoro/anthropic-engineering-rss-feed/main/anthropic_engineering_rss.xml
+    category: ai
+
+  - name: AWS Machine Learning Blog
+    type: rss
+    url: https://aws.amazon.com/blogs/machine-learning/feed/
+    category: ai
+
+  - name: Latent Space
+    type: rss
+    url: https://www.latent.space/feed
+    category: ai
+
+  - name: arXiv cs.AI
+    type: rss
+    url: https://arxiv.org/rss/cs.AI
+    category: ai
+
+  - name: OpenAI News
+    type: rss
+    url: https://openai.com/news/rss.xml
+    category: ai
+
+  - name: Google DeepMind
+    type: rss
+    url: https://deepmind.google/blog/rss.xml
+    category: ai
+
+  - name: Google Research
+    type: rss
+    url: https://research.google/blog/rss/
+    category: ai
+
+  - name: NVIDIA Blog
+    type: rss
+    url: https://blogs.nvidia.com/feed/
+    category: ai
+
+  - name: Hugging Face
+    type: rss
+    url: https://huggingface.co/blog/feed.xml
+    category: ai
+
+  - name: Microsoft Research
+    type: rss
+    url: https://www.microsoft.com/en-us/research/feed/
+    category: ai
+
+  - name: Andrej Karpathy
+    type: rss
+    url: https://karpathy.github.io/feed.xml
+    category: ai
+
+  - name: Ahead of AI
+    type: rss
+    url: https://magazine.sebastianraschka.com/feed
+    category: ai
+
+  - name: Import AI
+    type: rss
+    url: https://importai.substack.com/feed
+    category: ai
+
+  - name: Interconnects
+    type: rss
+    url: https://www.interconnects.ai/feed
+    category: ai
+
+  - name: Language Models & Co.
+    type: rss
+    url: https://newsletter.languagemodels.co/feed
+    category: ai
+
+  - name: TLDR AI
+    type: rss
+    url: https://tldr.tech/api/rss/ai
+    category: ai
+
+  - name: The Gradient
+    type: rss
+    url: https://thegradient.pub/rss/
+    category: ai
+
+  - name: BAIR Blog
+    type: rss
+    url: https://bair.berkeley.edu/blog/feed.xml
+    category: ai
+
+  - name: MIT Tech Review AI
+    type: rss
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed
+    category: ai
+
+  - name: 404 Media
+    type: rss
+    url: https://www.404media.co/rss/
+    category: ai
+
+  - name: TechCrunch AI
+    type: rss
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    category: ai

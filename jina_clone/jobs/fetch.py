@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Awaitable, Callable
 
 from jina_clone.config import Source
@@ -24,10 +25,12 @@ async def run_fetch(
     delay_seconds: float = 1.0,
     request_timeout: int = 15,
     max_text_length: int = 4000,
+    window_hours: float = 24.0,
 ) -> dict[str, dict[str, int]]:
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
     stats: dict[str, dict[str, int]] = {}
     for source in sources:
-        s = {"new": 0, "errors": 0, "skipped": 0, "failed": 0}
+        s = {"new": 0, "errors": 0, "skipped": 0, "failed": 0, "out_of_window": 0}
         stats[source.name] = s
         try:
             if source.type == "rss":
@@ -41,8 +44,17 @@ async def run_fetch(
             s["failed"] = 1
             continue
 
-        log.info("discovered %d items from %s", len(items), source.name)
+        in_window: list[DiscoveredItem] = []
         for item in items:
+            if item.published is not None and item.published < cutoff:
+                s["out_of_window"] += 1
+                continue
+            in_window.append(item)
+        log.info(
+            "discovered %d items from %s (%d in %sh window)",
+            len(items), source.name, len(in_window), window_hours,
+        )
+        for item in in_window:
             if await link_exists(pool, item.url):
                 s["skipped"] += 1
                 continue

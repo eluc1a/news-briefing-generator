@@ -8,6 +8,7 @@ class LLMProvider(Protocol):
     model: str
 
     async def summarize(self, system: str, user: str) -> dict: ...
+    async def count_tokens(self, text: str) -> int: ...
 
 
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
@@ -26,14 +27,22 @@ def parse_json_response(raw: str) -> dict:
 
 
 def build_provider(settings) -> "LLMProvider":
+    from jina_clone.config import _PROVIDER_KEY
     from jina_clone.summarizer.claude import ClaudeProvider
     from jina_clone.summarizer.openai import OpenAIProvider
     from jina_clone.summarizer.gemini import GeminiProvider
 
+    key_name = _PROVIDER_KEY.get(settings.llm_provider)
+    if key_name is None:
+        raise ValueError(f"Unknown provider: {settings.llm_provider}")
+    api_key = settings.api_keys.get(key_name)
+    if not api_key:
+        raise ValueError(f"{key_name} is required for LLM_PROVIDER={settings.llm_provider}")
+
     if settings.llm_provider == "claude":
-        return ClaudeProvider(settings.api_keys["ANTHROPIC_API_KEY"], settings.llm_model)
+        return ClaudeProvider(api_key, settings.llm_model)
     if settings.llm_provider == "openai":
-        return OpenAIProvider(settings.api_keys["OPENAI_API_KEY"], settings.llm_model)
+        return OpenAIProvider(api_key, settings.llm_model)
     if settings.llm_provider == "gemini":
-        return GeminiProvider(settings.api_keys["GEMINI_API_KEY"], settings.llm_model)
+        return GeminiProvider(api_key, settings.llm_model)
     raise ValueError(f"Unknown provider: {settings.llm_provider}")

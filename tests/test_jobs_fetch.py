@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 from jina_clone.config import Source
 from jina_clone.extractor.core import ExtractResult
@@ -67,3 +68,30 @@ async def test_run_fetch_stores_new_articles_skips_seen_and_records_errors(db):
     )
     assert extractor.calls == []
     assert stats2["Feed"]["skipped"] == 2
+
+
+async def test_run_fetch_skips_items_older_than_window(db):
+    now = datetime.now(timezone.utc)
+    sources = [Source(name="Feed", type="rss", url="https://feed.example/a", category="ai")]
+    disc = FakeDiscoverer(per_source={
+        "https://feed.example/a": [
+            DiscoveredItem(url="https://feed.example/fresh", published=now - timedelta(hours=1)),
+            DiscoveredItem(url="https://feed.example/stale", published=now - timedelta(hours=48)),
+            DiscoveredItem(url="https://feed.example/notimestamp", published=None),
+        ],
+    })
+    extractor = FakeExtractor()
+
+    stats = await run_fetch(
+        db,
+        sources=sources,
+        rss_fetcher=disc.rss,
+        scrape_fetcher=disc.scrape,
+        extract=extractor.extract,
+        delay_seconds=0,
+        window_hours=24.0,
+    )
+
+    assert stats["Feed"]["new"] == 2  # fresh + notimestamp
+    assert stats["Feed"]["out_of_window"] == 1
+    assert "https://feed.example/stale" not in extractor.calls

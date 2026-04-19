@@ -11,5 +11,6 @@ pyyaml
 anthropic
 openai
 google-genai
+tiktoken
 pytest
 pytest-asyncio

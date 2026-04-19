@@ -21,3 +21,9 @@ class GeminiProvider:
             ),
         )
         return parse_json_response(response.text or "")
+
+    async def count_tokens(self, text: str) -> int:
+        response = await self._client.aio.models.count_tokens(
+            model=self.model, contents=text,
+        )
+        return response.total_tokens

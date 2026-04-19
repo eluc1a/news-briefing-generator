@@ -34,6 +34,10 @@ class Settings:
     llm_model: str | None
     summary_token_cap: int
     summary_window_hours: float
+    briefing_categories_file: Path
+    briefings_dir: Path
+    print_queue: str
+    ntfy_topic: str | None
     api_keys: dict[str, str] = field(default_factory=dict)
 
     @classmethod
@@ -58,6 +62,12 @@ class Settings:
             llm_model=os.getenv("LLM_MODEL") or None,
             summary_token_cap=int(os.getenv("SUMMARY_TOKEN_CAP", "850000")),
             summary_window_hours=float(os.getenv("SUMMARY_WINDOW_HOURS", "24")),
+            briefing_categories_file=Path(
+                os.getenv("BRIEFING_CATEGORIES_FILE", "config/briefing_categories.yaml")
+            ),
+            briefings_dir=Path(os.getenv("BRIEFINGS_DIR", "briefings")),
+            print_queue=os.getenv("PRINT_QUEUE", "brother"),
+            ntfy_topic=os.getenv("NTFY_TOPIC") or None,
             api_keys=api_keys,
         )
 

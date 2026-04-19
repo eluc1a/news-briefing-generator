@@ -19,11 +19,12 @@ from jina_clone.briefing import generator as briefing_generator
 from jina_clone.briefing import notify as briefing_notify
 from jina_clone.briefing import printer as briefing_printer
 from jina_clone.briefing import renderer as briefing_renderer
-from jina_clone.briefing.config import load_briefing_categories
-from jina_clone.briefing.schema import Briefing
+from jina_clone.briefing.config import load_briefing_config
+from jina_clone.briefing.schema import Briefing, WeatherStrip
 from jina_clone.jobs.briefing import run_briefing
 from jina_clone.storage.db import (
     fetch_recent_articles_by_category,
+    fetch_section_articles,
     insert_summary,
 )
 
@@ -108,30 +109,68 @@ def _volume_label(today: date) -> str:
 
 
 async def _briefing_generate(settings, out_path: Path):
-    cats = load_briefing_categories(settings.briefing_categories_file)
+    cfg = load_briefing_config(settings.briefing_categories_file)
     pool = await create_pool(settings.database_url)
     try:
-        rows = await fetch_recent_articles_by_category(
-            pool, categories=cats.all_categories(), since_hours=24, limit=80,
+        section_pools: dict[str, list[dict]] = {}
+        for s in cfg.sections:
+            rows = await fetch_section_articles(
+                pool, categories=list(s.categories),
+                per_source_cap=cfg.per_source_cap, limit=s.limit,
+            )
+            section_pools[s.key] = [dict(r) for r in rows]
+        briefs_rows = await fetch_section_articles(
+            pool, categories=list(cfg.briefs.categories),
+            per_source_cap=cfg.per_source_cap, limit=cfg.briefs.limit,
         )
+        briefs_pool = [dict(r) for r in briefs_rows]
     finally:
         await pool.close()
-    # Partition like the job does (without printing/persisting)
-    by_panel: dict[str, list[dict]] = {p.key: [] for p in cats.panels}
-    briefs_pool: list[dict] = []
-    briefs_set = set(cats.briefs_categories)
-    for row in rows:
-        panel_key = cats.panel_for_category(row["category"])
-        if panel_key:
-            by_panel[panel_key].append(dict(row))
-        elif row["category"] in briefs_set:
-            briefs_pool.append(dict(row))
-    briefing = await briefing_generator.generate(
-        articles_by_panel=by_panel,
-        briefs_pool=briefs_pool,
-        weather=_stub_weather(),
-        today=_today_label(),
-        volume=_volume_label(date.today()),
+
+    # Build front-matter input pool (dedupe on link)
+    seen: set[str] = set()
+    front_pool: list[dict] = []
+    for s in cfg.sections:
+        for a in section_pools[s.key][: cfg.front_matter_top_per_section]:
+            if a["link"] in seen:
+                continue
+            seen.add(a["link"])
+            front_pool.append(a)
+
+    weather = _stub_weather()
+    today = _today_label()
+    volume = _volume_label(date.today())
+
+    front = await briefing_generator.generate_front_matter(
+        articles=front_pool, weather=weather, today=today, volume=volume,
+    )
+    exclude = {front.lead_source_url}
+
+    import asyncio
+    panels_and_briefs = await asyncio.gather(
+        *[
+            briefing_generator.generate_panel(
+                section=s, articles=section_pools[s.key], exclude_urls=exclude,
+            )
+            for s in cfg.sections
+        ],
+        briefing_generator.generate_briefs(
+            articles=briefs_pool, exclude_urls=exclude,
+        ),
+    )
+    panels = list(panels_and_briefs[:-1])
+    briefs = panels_and_briefs[-1]
+
+    briefing = Briefing(
+        date=date.today().isoformat(),
+        volume=volume,
+        weather=WeatherStrip(**weather),
+        lead=front.lead,
+        panels=panels,
+        pull_quote=front.pull_quote,
+        briefs=briefs,
+        data_point=front.data_point,
+        on_this_day=front.on_this_day,
     )
     out_path.write_text(briefing.model_dump_json(indent=2))
     logging.info("wrote %s", out_path)
@@ -154,12 +193,12 @@ def _briefing_print(settings, pdf_path: Path):
 
 
 async def _briefing_run(settings):
-    cats = load_briefing_categories(settings.briefing_categories_file)
+    cfg = load_briefing_config(settings.briefing_categories_file)
     pool = await create_pool(settings.database_url)
     try:
         await run_briefing(
             pool=pool,
-            categories=cats,
+            config=cfg,
             briefings_dir=settings.briefings_dir,
             print_queue=settings.print_queue,
             ntfy_topic=settings.ntfy_topic,
@@ -168,8 +207,10 @@ async def _briefing_run(settings):
             volume_label=_volume_label(date.today()),
             generated_at_label=datetime.now().strftime("%H:%M ET"),
             iso_date=date.today().isoformat(),
-            fetch_articles=fetch_recent_articles_by_category,
-            generate=briefing_generator.generate,
+            fetch_articles=fetch_section_articles,
+            generate_front_matter=briefing_generator.generate_front_matter,
+            generate_panel=briefing_generator.generate_panel,
+            generate_briefs=briefing_generator.generate_briefs,
             render=briefing_renderer.render_pdf,
             print_pdf=briefing_printer.print_pdf,
             notify_printed=briefing_notify.notify_printed,

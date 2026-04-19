@@ -32,7 +32,7 @@ def test_render_pdf_is_exactly_two_pages(tmp_path):
     assert len(reader.pages) == 2
 
 
-def test_rendered_html_contains_panel_item(tmp_path):
+def test_rendered_html_contains_panel_item():
     """The template must render each panel's `also` entries as .panel-item blocks."""
     from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -54,7 +54,7 @@ def test_rendered_html_contains_panel_item(tmp_path):
     assert "#fcfaf4" not in html_str
 
 
-def test_rendered_html_has_no_forced_page_break(tmp_path):
+def test_rendered_html_has_no_forced_page_break():
     """The template must not force a page break between main content and briefs."""
     from jinja2 import Environment, FileSystemLoader, select_autoescape
 

@@ -23,7 +23,6 @@ from jina_clone.briefing.config import load_briefing_config
 from jina_clone.briefing.schema import Briefing, WeatherStrip
 from jina_clone.jobs.briefing import run_briefing
 from jina_clone.storage.db import (
-    fetch_recent_articles_by_category,
     fetch_section_articles,
     insert_summary,
 )

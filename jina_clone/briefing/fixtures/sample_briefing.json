@@ -1,0 +1,58 @@
+{
+  "date": "Saturday, April 18, 2026",
+  "volume": "Vol. I · No. 108",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 71,
+    "temp_low": 49,
+    "conditions": "partly cloudy, light wind",
+    "sunrise": "6:24",
+    "sunset": "7:48",
+    "pollen": "high — oak, birch"
+  },
+  "lead": {
+    "headline": "EU artificial-intelligence pact moves to enforcement phase",
+    "deck": "Brussels publishes the first compliance deadlines for general-purpose model providers; US firms face a 90-day window to register.",
+    "body": "The European Commission released the long-awaited enforcement schedule for the AI Act on Friday, setting October 1 as the date by which providers of general-purpose AI must register their models with the new AI Office. Penalties of up to seven percent of global turnover apply to non-registration. Three of the five largest US-based labs have already filed; two have asked for extensions. Civil-society groups praised the speed of the rollout but flagged the narrow scope of the registry, which excludes models below ten-to-the-twenty-fifth FLOPs of training compute. Officials in Washington signalled that a parallel federal framework remains stalled in committee.",
+    "at_a_glance": [
+      "Registration deadline: October 1, 2026",
+      "Penalty ceiling: 7% of global turnover",
+      "Compute threshold: 10^25 training FLOPs",
+      "US federal framework: still stalled"
+    ]
+  },
+  "panels": [
+    {
+      "section": "AI & Technology",
+      "lede": "Open-weights coalition tops 200 signatories",
+      "body": "A petition urging governments to preserve open-weights releases of frontier models reached two hundred signatories overnight, including a former US Chief Technology Officer and two Turing Award winners. Organisers framed the effort as a counterweight to the EU's compute-threshold approach, arguing that registration burdens fall disproportionately on academic and nonprofit labs. Three large commercial labs declined to sign, citing legal review."
+    },
+    {
+      "section": "National",
+      "lede": "Senate clears short-term spending extension",
+      "body": "The Senate voted 68-31 last night to extend federal funding through June 30, averting a shutdown that would have begun at midnight. The continuing resolution preserves current spending levels for most agencies but cuts a small grant program for state-level cybersecurity offices. The House is expected to take up the measure Saturday afternoon. The White House signalled it would sign the bill without comment on the cyber grant cut, which advocacy groups called a blow to local resilience."
+    },
+    {
+      "section": "International",
+      "lede": "Tokyo summit ends without joint statement on rare-earth supply",
+      "body": "Trade ministers from seven Indo-Pacific economies wrapped a two-day Tokyo summit on Friday without the expected joint declaration on rare-earth supply diversification. Participants cited disagreement over export-control language proposed by South Korea and Australia. Japan's foreign ministry said working-level talks would continue through May. Analysts noted that the absence of a joint statement may delay a planned procurement framework intended to reduce dependency on a single dominant supplier."
+    }
+  ],
+  "pull_quote": "The registry is a starting line, not a finishing tape — the hard work begins when models start changing faster than paperwork can keep up.",
+  "briefs": [
+    {"topic": "Cybersecurity", "body": "A widely-used open-source TLS library shipped a fix for a session-resumption bug; CVE pending. Patch within seven days."},
+    {"topic": "Markets", "body": "US 10-year yield closed at 4.31%, down 4 bp on softer-than-expected retail sales data."},
+    {"topic": "Science", "body": "ESA confirmed the launch window for the Comet Interceptor mission has slipped to early 2029."},
+    {"topic": "Linux", "body": "Kernel 6.14 enters its third release-candidate; networking subsystem sees the largest delta this cycle."},
+    {"topic": "Startups", "body": "Two AI-infrastructure startups disclosed combined Series B rounds totaling $340 million; both name training-cluster utilization as the bottleneck."},
+    {"topic": "Investigations", "body": "A regional newspaper consortium published a six-month investigation into private equity ownership of rural hospitals across four states."}
+  ],
+  "data_point": {
+    "value": "10^25",
+    "context": "Training-compute threshold above which an AI model qualifies as 'general-purpose' under the EU AI Act, triggering registration requirements. Roughly the scale of GPT-4 at release."
+  },
+  "on_this_day": {
+    "year_and_title": "1906 — the San Francisco earthquake",
+    "body": "At 5:12 AM local time, a magnitude 7.9 quake struck the San Andreas Fault, destroying much of San Francisco in the fires that followed. The disaster killed an estimated 3,000 and left more than half the city's population homeless, but also drove modern seismic-engineering codes."
+  }
+}

@@ -1,0 +1,53 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class WeatherStrip(BaseModel):
+    temp_high: int
+    temp_low: int
+    conditions: str
+    sunrise: str
+    sunset: str
+    pollen: str
+
+
+class LeadStory(BaseModel):
+    headline: str
+    deck: str
+    body: str
+    at_a_glance: list[str] = Field(min_length=3, max_length=4)
+
+
+class Panel(BaseModel):
+    section: Literal["AI & Technology", "National", "International"]
+    lede: str
+    body: str
+
+
+class Brief(BaseModel):
+    topic: str
+    body: str
+
+
+class DataPoint(BaseModel):
+    value: str
+    context: str
+
+
+class OnThisDay(BaseModel):
+    year_and_title: str
+    body: str
+
+
+class Briefing(BaseModel):
+    date: str
+    volume: str
+    location: str = "Arlington, VA"
+    weather: WeatherStrip
+    lead: LeadStory
+    panels: list[Panel] = Field(min_length=3, max_length=3)
+    pull_quote: str
+    briefs: list[Brief] = Field(min_length=6, max_length=9)
+    data_point: DataPoint
+    on_this_day: OnThisDay

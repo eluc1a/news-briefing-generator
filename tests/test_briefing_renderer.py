@@ -1,7 +1,23 @@
 from pathlib import Path
 
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from jina_clone.briefing.live_data import weather_glyph
 from jina_clone.briefing.renderer import render_pdf
 from jina_clone.briefing.schema import Briefing
+
+
+def _make_env(tmpl_dir):
+    """Build a Jinja2 Environment matching the renderer, with the
+    `weather_glyph` filter registered. Every manual-render test in this
+    file uses this helper so adding future filters only touches one
+    spot."""
+    env = Environment(
+        loader=FileSystemLoader(str(tmpl_dir)),
+        autoescape=select_autoescape(["html", "j2"]),
+    )
+    env.filters["weather_glyph"] = weather_glyph
+    return env
 
 
 FIXTURE = Path("jina_clone/briefing/fixtures/sample_briefing.json")
@@ -34,14 +50,9 @@ def test_render_pdf_is_exactly_two_pages(tmp_path):
 
 def test_rendered_html_contains_panel_item():
     """The template must render each panel's `also` entries as .panel-item blocks."""
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
-
     briefing = Briefing.model_validate_json(FIXTURE.read_text())
     tmpl_dir = Path("jina_clone/briefing/templates")
-    env = Environment(
-        loader=FileSystemLoader(str(tmpl_dir)),
-        autoescape=select_autoescape(["html", "j2"]),
-    )
+    env = _make_env(tmpl_dir)
     tmpl = env.get_template("briefing.html.j2")
     html_str = tmpl.render(
         **briefing.model_dump(),
@@ -56,16 +67,12 @@ def test_rendered_html_contains_panel_item():
 
 def test_rendered_html_uses_briefing_title():
     import json
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
 
     data = json.loads(FIXTURE.read_text())
     data["title"] = "The Evening Fox"
     briefing = Briefing.model_validate(data)
     tmpl_dir = Path("jina_clone/briefing/templates")
-    env = Environment(
-        loader=FileSystemLoader(str(tmpl_dir)),
-        autoescape=select_autoescape(["html", "j2"]),
-    )
+    env = _make_env(tmpl_dir)
     tmpl = env.get_template("briefing.html.j2")
     html_str = tmpl.render(
         **briefing.model_dump(),
@@ -78,14 +85,9 @@ def test_rendered_html_uses_briefing_title():
 
 def test_rendered_html_has_no_forced_page_break():
     """The template must not force a page break between main content and briefs."""
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
-
     briefing = Briefing.model_validate_json(FIXTURE.read_text())
     tmpl_dir = Path("jina_clone/briefing/templates")
-    env = Environment(
-        loader=FileSystemLoader(str(tmpl_dir)),
-        autoescape=select_autoescape(["html", "j2"]),
-    )
+    env = _make_env(tmpl_dir)
     tmpl = env.get_template("briefing.html.j2")
     html_str = tmpl.render(
         **briefing.model_dump(),
@@ -97,14 +99,9 @@ def test_rendered_html_has_no_forced_page_break():
 
 def test_rendered_html_respects_include_extras_flag():
     """data_point and on_this_day sections must be omittable via include_extras=False."""
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
-
     briefing = Briefing.model_validate_json(FIXTURE.read_text())
     tmpl_dir = Path("jina_clone/briefing/templates")
-    env = Environment(
-        loader=FileSystemLoader(str(tmpl_dir)),
-        autoescape=select_autoescape(["html", "j2"]),
-    )
+    env = _make_env(tmpl_dir)
     tmpl = env.get_template("briefing.html.j2")
 
     # Default render — extras present.
@@ -137,7 +134,9 @@ def test_render_drops_extras_on_overflow(tmp_path, caplog):
     # but dropping extras brings it back under 2 pages. (Inflating the lead
     # body instead doesn't exercise the safety net — lead-body overflow
     # occupies its own page independent of whether extras are rendered.)
-    bloat = " ".join(["Additional filler content."] * 15)
+    # Note: with 4 `also` items per panel (Task 9 density bump) we need a
+    # smaller bloat factor — 10 repetitions overflows but recovers; 15 does not.
+    bloat = " ".join(["Additional filler content."] * 10)
     briefing = briefing.model_copy(update={
         "briefs": [
             br.model_copy(update={"body": br.body + " " + bloat})
@@ -177,3 +176,43 @@ def test_render_keeps_extras_when_fits(tmp_path):
     assert len(reader.pages) == 2
     text = "".join(page.extract_text() for page in reader.pages)
     assert briefing.data_point.value in text
+
+
+def test_renders_markets_block():
+    """Sidebar must carry all 6 market cells."""
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    tmpl_dir = Path("jina_clone/briefing/templates")
+    env = _make_env(tmpl_dir)
+    tmpl = env.get_template("briefing.html.j2")
+    html_str = tmpl.render(
+        **briefing.model_dump(),
+        generated_at="08:11 ET",
+        iso_date="2026-04-20",
+    )
+    # 6 rows of market data.
+    assert html_str.count('class="sym"') == 6
+    # All six expected symbols present.
+    for sym in ["SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI"]:
+        assert f">{sym}<" in html_str
+    assert "tabular-nums" in html_str
+
+
+def test_render_pdf_fits_two_pages_with_full_density(tmp_path):
+    """Regression guard for the live-data + density work: with 4 also
+    per panel, 6 briefs, hourly band, markets block, and extras (data
+    point + on this day) all included, the rendered PDF is exactly 2
+    pages. This is the load-bearing fit-test."""
+    import pypdf
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    # Sanity: fixture is at full density.
+    for panel in briefing.panels:
+        assert len(panel.also) == 4
+    assert len(briefing.briefs) == 6
+    assert len(briefing.hourly.slots) == 4
+    assert len(briefing.markets.items) == 6
+
+    out = tmp_path / "briefing.pdf"
+    render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-20")
+    reader = pypdf.PdfReader(str(out))
+    assert len(reader.pages) == 2
+

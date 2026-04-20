@@ -38,6 +38,9 @@ class Settings:
     briefings_dir: Path
     print_queue: str
     ntfy_topic: str | None
+    weather_api_key: str = ""
+    stock_api_key: str = ""
+    fred_api_key: str = ""
     api_keys: dict[str, str] = field(default_factory=dict)
 
     @classmethod
@@ -49,6 +52,9 @@ class Settings:
         if not database_url:
             raise ValueError("DATABASE_URL is required")
         api_keys = {name: val for name in _PROVIDER_KEY.values() if (val := os.getenv(name))}
+        weather_api_key = os.getenv("WEATHER_API_KEY", "")
+        stock_api_key = os.getenv("STOCK_API_KEY", "")
+        fred_api_key = os.getenv("FRED_API_KEY", "")
         return cls(
             database_url=database_url,
             sources_file=Path(os.getenv("SOURCES_FILE", "sources.yaml")),
@@ -68,6 +74,9 @@ class Settings:
             briefings_dir=Path(os.getenv("BRIEFINGS_DIR", "briefings")),
             print_queue=os.getenv("PRINT_QUEUE", "brother"),
             ntfy_topic=os.getenv("NTFY_TOPIC") or None,
+            weather_api_key=weather_api_key,
+            stock_api_key=stock_api_key,
+            fred_api_key=fred_api_key,
             api_keys=api_keys,
         )
 

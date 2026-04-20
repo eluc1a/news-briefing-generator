@@ -9,7 +9,25 @@
     "conditions": "partly cloudy, light wind",
     "sunrise": "6:24",
     "sunset": "7:48",
-    "pollen": "high — oak, birch"
+    "daylight": "13h 24m"
+  },
+  "hourly": {
+    "slots": [
+      {"time_label": "11am", "temp_f": 62, "precip_pct": 10, "code": 800},
+      {"time_label": "2pm",  "temp_f": 68, "precip_pct": 20, "code": 801},
+      {"time_label": "5pm",  "temp_f": 71, "precip_pct": 40, "code": 802},
+      {"time_label": "8pm",  "temp_f": 60, "precip_pct": 20, "code": 803}
+    ]
+  },
+  "markets": {
+    "items": [
+      {"symbol": "SPY",  "value": "583.12",  "change": "▲0.42%"},
+      {"symbol": "QQQ",  "value": "498.77",  "change": "▲0.31%"},
+      {"symbol": "TQQQ", "value": "82.14",   "change": "▲0.94%"},
+      {"symbol": "BTC",  "value": "68,241",  "change": "▼1.20%"},
+      {"symbol": "10Y",  "value": "4.38%",   "change": "▲3bp"},
+      {"symbol": "CPI",  "value": "2.9%",    "change": "YoY"}
+    ]
   },
   "lead": {
     "headline": "EU artificial-intelligence pact moves to enforcement phase",
@@ -30,7 +48,8 @@
       "also": [
         {"headline": "Mistral ships Codestral 2", "body": "Mistral released Codestral 2 on Friday with 22B active parameters and a context window of 256k tokens. Available under the Mistral Research License for non-commercial use."},
         {"headline": "Anthropic adds prompt caching beta", "body": "Claude API prompt caching entered public beta Friday, cutting per-token input cost by 90 percent for cached content. Minimum cached block size is 1024 tokens."},
-        {"headline": "UK AI Safety Institute staffs up", "body": "The UK AISI announced 41 new hires Friday, bringing headcount to 127. The institute's 2026 budget rose to £50 million, a 38 percent increase from 2025."}
+        {"headline": "UK AI Safety Institute staffs up", "body": "The UK AISI announced 41 new hires Friday, bringing headcount to 127. The institute's 2026 budget rose to £50 million, a 38 percent increase from 2025."},
+        {"headline": "DeepMind opens Gemma 3 repo", "body": "Google DeepMind released Gemma 3 model weights Friday under an open license, offering 9B and 27B parameter variants with 128k context windows."}
       ]
     },
     {
@@ -40,7 +59,8 @@
       "also": [
         {"headline": "Texas flooding displaces 3,200", "body": "Harris County issued mandatory evacuations for 3,200 residents Friday after the San Jacinto River crested at 87.4 feet, its highest mark since 2017. FEMA opened three shelters."},
         {"headline": "DOJ indicts 14 in Medicare fraud case", "body": "A federal grand jury in the Southern District of Florida unsealed indictments Friday against 14 defendants accused of submitting $412 million in false Medicare claims across 2022-2025."},
-        {"headline": "Supreme Court declines ATF rule challenge", "body": "The Supreme Court denied cert Friday in Vanderstok v. Garland, leaving in place the ATF's 2022 rule regulating 80 percent lower receivers as firearms under the GCA."}
+        {"headline": "Supreme Court declines ATF rule challenge", "body": "The Supreme Court denied cert Friday in Vanderstok v. Garland, leaving in place the ATF's 2022 rule regulating 80 percent lower receivers as firearms under the GCA."},
+        {"headline": "California wildfire contained", "body": "Cal Fire reported 78 percent containment on the 41,200-acre Butte fire Friday night. Evacuation orders lifted for 1,100 residents."}
       ]
     },
     {
@@ -50,7 +70,8 @@
       "also": [
         {"headline": "Morgan Stanley Q1 beats consensus", "body": "Morgan Stanley reported Q1 net revenue of $15.1 billion and EPS of $2.08, beating the $1.94 consensus. Wealth-management added $94 billion in net new assets during the quarter."},
         {"headline": "Dollar index falls to 102.11", "body": "The DXY dropped 0.3 percent to 102.11 Friday, its lowest close since January. Euro strength and a weaker-than-expected retail-sales print drove the move."},
-        {"headline": "Oil settles at $79.40 on OPEC+ signal", "body": "WTI crude rose $1.20 to $79.40 Friday after OPEC+ delegates told Reuters the June ministerial would extend voluntary production cuts through Q3."}
+        {"headline": "Oil settles at $79.40 on OPEC+ signal", "body": "WTI crude rose $1.20 to $79.40 Friday after OPEC+ delegates told Reuters the June ministerial would extend voluntary production cuts through Q3."},
+        {"headline": "Apple supplier Foxconn beats Q1", "body": "Foxconn reported Q1 revenue of NT$1.61 trillion Friday, up 14 percent year-over-year, on strong iPhone and AI-server shipments."}
       ]
     },
     {
@@ -60,7 +81,8 @@
       "also": [
         {"headline": "Germany raises 2026 growth forecast", "body": "The German Economic Ministry raised its 2026 GDP growth forecast Friday to 1.1 percent from 0.8 percent, citing stronger export orders from southern Europe and a mild winter."},
         {"headline": "Brazil inflation hits 4.8%", "body": "Brazil's IBGE reported April annualised CPI at 4.8 percent, above the 4.6 percent consensus and the central bank's 4.5 percent target ceiling for the third straight month."},
-        {"headline": "Kenya-Ethiopia rail line opens", "body": "Presidents Ruto and Abiy jointly opened the 1,080-km Mombasa-Addis Ababa standard-gauge freight line Friday. Construction took seven years and cost $4.1 billion."}
+        {"headline": "Kenya-Ethiopia rail line opens", "body": "Presidents Ruto and Abiy jointly opened the 1,080-km Mombasa-Addis Ababa standard-gauge freight line Friday. Construction took seven years and cost $4.1 billion."},
+        {"headline": "France passes pension compromise", "body": "The National Assembly approved a pension-reform compromise Friday 287-249, restoring the retirement age to 62 for workers with 43 contribution years."}
       ]
     }
   ],

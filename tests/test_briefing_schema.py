@@ -18,15 +18,15 @@ def test_sample_fixture_validates():
     assert {p.section for p in briefing.panels} == {
         "AI & Technology", "National", "Economy & Markets", "International",
     }
-    # Each panel now has a lede_headline, lede_body, and 3-4 `also` items.
+    # Each panel now has a lede_headline, lede_body, and exactly 4 `also` items.
     for panel in briefing.panels:
         assert panel.lede_headline
         assert panel.lede_body
-        assert len(panel.also) == 3
+        assert len(panel.also) == 4       # was 3
         for item in panel.also:
             assert item.headline
             assert item.body
-    assert 5 <= len(briefing.briefs) <= 6
+    assert len(briefing.briefs) == 6       # was `5 <= x <= 6`
 
 
 def test_three_panels_rejected():
@@ -40,7 +40,7 @@ def test_three_panels_rejected():
 def test_briefs_too_few_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    data["briefs"] = data["briefs"][:4]  # below new floor of 5
+    data["briefs"] = data["briefs"][:5]  # 5 below new floor of 6
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 
@@ -48,8 +48,7 @@ def test_briefs_too_few_rejected():
 def test_briefs_too_many_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    # Double the briefs to push above the new ceiling of 7.
-    data["briefs"] = (data["briefs"] * 2)[:7]
+    data["briefs"] = (data["briefs"] * 2)[:7]  # 7 above new ceiling of 6
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 
@@ -73,7 +72,8 @@ def test_panel_missing_also_rejected():
 def test_panel_also_too_few_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    data["panels"][0]["also"] = data["panels"][0]["also"][:2]
+    # 3 items must now fail (new floor is 4).
+    data["panels"][0]["also"] = data["panels"][0]["also"][:3]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 
@@ -81,7 +81,7 @@ def test_panel_also_too_few_rejected():
 def test_panel_also_too_many_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    # Push to 4 `also` items — must now fail (new ceiling is 3).
+    # 5 `also` items must fail (new ceiling is 4).
     first_item = data["panels"][0]["also"][0]
     data["panels"][0]["also"] = data["panels"][0]["also"] + [first_item]
     with pytest.raises(ValidationError):
@@ -102,3 +102,58 @@ def test_briefing_title_round_trips():
     data["title"] = "The Evening Fox"
     b = Briefing.model_validate(data)
     assert b.title == "The Evening Fox"
+
+
+def test_weather_requires_daylight_not_pollen():
+    """Weather strip gained `daylight`; `pollen` is no longer a field."""
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    # Fixture should already have daylight (added in this task).
+    assert "daylight" in data["weather"]
+    assert "pollen" not in data["weather"]
+    b = Briefing.model_validate(data)
+    assert b.weather.daylight
+    # Adding pollen back should not break (Pydantic ignores unknown by default),
+    # but removing daylight must fail:
+    data_bad = json.loads(raw)
+    del data_bad["weather"]["daylight"]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad)
+
+
+def test_briefing_requires_hourly_forecast():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    assert "hourly" in data
+    assert len(data["hourly"]["slots"]) == 4
+    b = Briefing.model_validate(data)
+    assert len(b.hourly.slots) == 4
+    assert b.hourly.slots[0].time_label  # e.g. "8am"
+
+    # Exactly 4 slots — not 3, not 5.
+    data_bad = json.loads(raw)
+    data_bad["hourly"]["slots"] = data_bad["hourly"]["slots"][:3]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad)
+
+    data_bad2 = json.loads(raw)
+    extra_slot = data_bad2["hourly"]["slots"][0]
+    data_bad2["hourly"]["slots"] = data_bad2["hourly"]["slots"] + [extra_slot]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad2)
+
+
+def test_briefing_requires_markets_block_of_six():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    assert "markets" in data
+    assert len(data["markets"]["items"]) == 6
+    b = Briefing.model_validate(data)
+    assert len(b.markets.items) == 6
+    symbols = {item.symbol for item in b.markets.items}
+    assert symbols == {"SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI"}
+
+    data_bad = json.loads(raw)
+    data_bad["markets"]["items"] = data_bad["markets"]["items"][:5]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad)

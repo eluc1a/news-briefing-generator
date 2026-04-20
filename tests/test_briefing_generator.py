@@ -24,7 +24,7 @@ GOOD_BRIEFING = json.loads(FIXTURE.read_text())
 
 WEATHER = {
     "temp_high": 70, "temp_low": 50, "conditions": "x",
-    "sunrise": "6:00", "sunset": "8:00", "pollen": "low",
+    "sunrise": "6:00", "sunset": "8:00", "daylight": "14h 00m",
 }
 
 

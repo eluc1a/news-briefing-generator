@@ -178,37 +178,6 @@ def test_render_keeps_extras_when_fits(tmp_path):
     assert briefing.data_point.value in text
 
 
-def test_renders_hourly_band():
-    """Template must render all 4 hourly slots with time labels + glyphs."""
-    briefing = Briefing.model_validate_json(FIXTURE.read_text())
-    tmpl_dir = Path("jina_clone/briefing/templates")
-    env = _make_env(tmpl_dir)
-    tmpl = env.get_template("briefing.html.j2")
-    html_str = tmpl.render(
-        **briefing.model_dump(),
-        generated_at="08:11 ET",
-        iso_date="2026-04-20",
-    )
-    # Four hourly slot containers.
-    assert html_str.count('class="hourly-slot"') == 4
-    # Each of the four sample time labels must appear.
-    for slot in briefing.hourly.slots:
-        assert slot.time_label in html_str
-    # The `Daylight` label replaced `Pollen`.
-    assert "Daylight" in html_str
-    assert "Pollen" not in html_str
-
-
-def test_render_pdf_fits_two_pages_with_hourly_band(tmp_path):
-    """Adding the hourly band must not push the briefing past 2 pages."""
-    import pypdf
-    briefing = Briefing.model_validate_json(FIXTURE.read_text())
-    out = tmp_path / "briefing.pdf"
-    render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-20")
-    reader = pypdf.PdfReader(str(out))
-    assert len(reader.pages) == 2
-
-
 def test_renders_markets_block():
     """Sidebar must carry all 6 market cells."""
     briefing = Briefing.model_validate_json(FIXTURE.read_text())

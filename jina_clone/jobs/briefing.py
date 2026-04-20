@@ -8,7 +8,7 @@ from jina_clone.briefing.config import BriefingConfig, SectionDef
 from jina_clone.briefing.generator import GeneratorFailure
 from jina_clone.briefing.markdown import briefing_to_markdown
 from jina_clone.briefing.schema import (
-    Brief, Briefing, FrontMatter, HourlyForecast, HourlySlot, Panel,
+    Brief, Briefing, FrontMatter, HourlyForecast, Panel,
     WeatherStrip,
 )
 
@@ -32,6 +32,7 @@ FetchFn = Callable[..., Awaitable[list[dict]]]
 FrontMatterFn = Callable[..., Awaitable[FrontMatter]]
 PanelFn = Callable[..., Awaitable[Panel]]
 BriefsFn = Callable[..., Awaitable[list[Brief]]]
+WeatherFn = Callable[[], Awaitable[dict]]
 
 
 def _dedupe_by_link(articles: list[dict]) -> list[dict]:
@@ -51,7 +52,7 @@ async def assemble_briefing(
     config: BriefingConfig,
     window_hours: float,
     title: str,
-    weather_provider: Callable[[], dict],
+    weather_provider: WeatherFn,
     today_label: str,
     volume_label: str,
     iso_date: str,
@@ -118,7 +119,7 @@ async def assemble_briefing(
             "Briefing aborted."
         )
 
-    weather = weather_provider()
+    weather = await weather_provider()
 
     # --- Step 2: front matter (serial, so panels can exclude its URL) ---
     front_pool = _dedupe_by_link([
@@ -155,22 +156,13 @@ async def assemble_briefing(
     panels: list[Panel] = list(panels_and_briefs[:-1])
     briefs: list[Brief] = panels_and_briefs[-1]
 
-    # `hourly` arrives from weather_provider once Task 5 lands; until then
-    # fall back to a four-slot placeholder so the schema validates.
-    hourly_raw = weather.get("hourly")
-    if hourly_raw is not None:
-        hourly = HourlyForecast.model_validate(hourly_raw)
-    else:
-        hourly = HourlyForecast(slots=[
-            HourlySlot(time_label="—", temp_f=0, precip_pct=0, code=800)
-            for _ in range(4)
-        ])
+    hourly = HourlyForecast.model_validate(weather.pop("hourly"))
 
     briefing = Briefing(
         title=title,
         date=iso_date,
         volume=volume_label,
-        weather=WeatherStrip(**{k: v for k, v in weather.items() if k != "hourly"}),
+        weather=WeatherStrip(**weather),
         hourly=hourly,
         lead=front.lead,
         panels=panels,
@@ -191,7 +183,7 @@ async def run_briefing(
     pdf_path: Path,
     print_queue: str,
     ntfy_topic: str | None,
-    weather_provider: Callable[[], dict],
+    weather_provider: WeatherFn,
     today_label: str,
     volume_label: str,
     generated_at_label: str,

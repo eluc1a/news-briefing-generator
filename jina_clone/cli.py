@@ -21,7 +21,7 @@ from jina_clone.briefing import printer as briefing_printer
 from jina_clone.briefing import renderer as briefing_renderer
 from jina_clone.briefing.config import load_briefing_config
 from jina_clone.briefing.schema import Briefing, WeatherStrip
-from jina_clone.jobs.briefing import assemble_briefing, run_briefing
+from jina_clone.jobs.briefing import WeatherFn, assemble_briefing, run_briefing
 from jina_clone.storage.db import (
     fetch_section_articles,
     insert_summary,
@@ -89,14 +89,38 @@ async def _run_summarize(settings: Settings):
         await pool.close()
 
 
-def _stub_weather() -> dict:
-    # Phase-1 stub. Real NWS integration is deferred (see spec §17 / Risks).
+_CACHE_DIR = Path("cache")
+_WEATHER_CACHE = _CACHE_DIR / "weather.json"
+
+
+def _stub_weather_dict() -> dict:
+    """Last-resort fallback when the OWM key is unset AND no cache
+    exists. Shape matches live_data.fetch_weather's return."""
     return {
         "temp_high": 68, "temp_low": 48,
         "conditions": "partly cloudy",
         "sunrise": "6:24", "sunset": "7:48",
         "daylight": "13h 24m",
+        "hourly": {"slots": [
+            {"time_label": "11am", "temp_f": 62, "precip_pct": 10, "code": 800},
+            {"time_label": "2pm",  "temp_f": 68, "precip_pct": 20, "code": 801},
+            {"time_label": "5pm",  "temp_f": 71, "precip_pct": 40, "code": 802},
+            {"time_label": "8pm",  "temp_f": 60, "precip_pct": 20, "code": 803},
+        ]},
     }
+
+
+def _make_weather_provider(settings: Settings) -> WeatherFn:
+    """Returns an async callable matching jobs.briefing.WeatherFn."""
+    from jina_clone.briefing.live_data import fetch_weather
+
+    async def provider() -> dict:
+        return await fetch_weather(
+            cache_path=_WEATHER_CACHE,
+            owm_api_key=settings.weather_api_key,
+            stub=_stub_weather_dict,
+        )
+    return provider
 
 
 def _today_label() -> str:
@@ -116,7 +140,7 @@ async def _briefing_generate(settings, out_path: Path):
             config=cfg,
             window_hours=12,
             title="The Morning Fox",
-            weather_provider=_stub_weather,
+            weather_provider=_make_weather_provider(settings),
             today_label=_today_label(),
             volume_label=_volume_label(date.today()),
             iso_date=date.today().isoformat(),
@@ -173,7 +197,7 @@ async def _briefing_run(settings, *, edition: str):
             pdf_path=pdf_path,
             print_queue=settings.print_queue,
             ntfy_topic=settings.ntfy_topic,
-            weather_provider=_stub_weather,
+            weather_provider=_make_weather_provider(settings),
             today_label=_today_label(),
             volume_label=volume_label,
             generated_at_label=datetime.now().strftime("%H:%M ET"),

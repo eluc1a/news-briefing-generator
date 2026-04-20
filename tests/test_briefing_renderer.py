@@ -205,3 +205,24 @@ def test_render_pdf_fits_two_pages_with_hourly_band(tmp_path):
     render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-20")
     reader = pypdf.PdfReader(str(out))
     assert len(reader.pages) == 2
+
+
+def test_renders_markets_block():
+    """Sidebar must carry all 6 market cells."""
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    tmpl_dir = Path("jina_clone/briefing/templates")
+    env = _make_env(tmpl_dir)
+    tmpl = env.get_template("briefing.html.j2")
+    html_str = tmpl.render(
+        **briefing.model_dump(),
+        generated_at="08:11 ET",
+        iso_date="2026-04-20",
+    )
+    # 6 rows of market data.
+    assert html_str.count('class="sym"') == 6
+    # All six expected symbols present.
+    for sym in ["SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI"]:
+        assert f">{sym}<" in html_str
+    assert "tabular-nums" in html_str
+
+

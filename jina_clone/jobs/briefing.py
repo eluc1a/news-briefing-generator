@@ -8,7 +8,7 @@ from jina_clone.briefing.config import BriefingConfig, SectionDef
 from jina_clone.briefing.generator import GeneratorFailure
 from jina_clone.briefing.markdown import briefing_to_markdown
 from jina_clone.briefing.schema import (
-    Brief, Briefing, FrontMatter, HourlyForecast, MarketItem, MarketsBlock,
+    Brief, Briefing, FrontMatter, HourlyForecast, MarketsBlock,
     Panel, WeatherStrip,
 )
 
@@ -33,6 +33,7 @@ FrontMatterFn = Callable[..., Awaitable[FrontMatter]]
 PanelFn = Callable[..., Awaitable[Panel]]
 BriefsFn = Callable[..., Awaitable[list[Brief]]]
 WeatherFn = Callable[[], Awaitable[dict]]
+MarketsFn = Callable[[], Awaitable[dict]]
 
 
 def _dedupe_by_link(articles: list[dict]) -> list[dict]:
@@ -53,6 +54,7 @@ async def assemble_briefing(
     window_hours: float,
     title: str,
     weather_provider: WeatherFn,
+    markets_provider: MarketsFn,
     today_label: str,
     volume_label: str,
     iso_date: str,
@@ -120,6 +122,8 @@ async def assemble_briefing(
         )
 
     weather = await weather_provider()
+    hourly = HourlyForecast.model_validate(weather.pop("hourly"))
+    markets = MarketsBlock.model_validate(await markets_provider())
 
     # --- Step 2: front matter (serial, so panels can exclude its URL) ---
     front_pool = _dedupe_by_link([
@@ -156,20 +160,13 @@ async def assemble_briefing(
     panels: list[Panel] = list(panels_and_briefs[:-1])
     briefs: list[Brief] = panels_and_briefs[-1]
 
-    hourly = HourlyForecast.model_validate(weather.pop("hourly"))
-
-    _MARKET_SYMBOLS = ("SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI")
-    markets_placeholder = MarketsBlock(items=[
-        MarketItem(symbol=s, value="—", change=None) for s in _MARKET_SYMBOLS
-    ])
-
     briefing = Briefing(
         title=title,
         date=iso_date,
         volume=volume_label,
         weather=WeatherStrip(**weather),
         hourly=hourly,
-        markets=markets_placeholder,
+        markets=markets,
         lead=front.lead,
         panels=panels,
         pull_quote=front.pull_quote,
@@ -190,6 +187,7 @@ async def run_briefing(
     print_queue: str,
     ntfy_topic: str | None,
     weather_provider: WeatherFn,
+    markets_provider: MarketsFn,
     today_label: str,
     volume_label: str,
     generated_at_label: str,
@@ -216,6 +214,7 @@ async def run_briefing(
             window_hours=window_hours,
             title=title,
             weather_provider=weather_provider,
+            markets_provider=markets_provider,
             today_label=today_label,
             volume_label=volume_label,
             iso_date=iso_date,

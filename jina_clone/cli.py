@@ -21,7 +21,7 @@ from jina_clone.briefing import printer as briefing_printer
 from jina_clone.briefing import renderer as briefing_renderer
 from jina_clone.briefing.config import load_briefing_config
 from jina_clone.briefing.schema import Briefing, WeatherStrip
-from jina_clone.jobs.briefing import WeatherFn, assemble_briefing, run_briefing
+from jina_clone.jobs.briefing import WeatherFn, MarketsFn, assemble_briefing, run_briefing
 from jina_clone.storage.db import (
     fetch_section_articles,
     insert_summary,
@@ -123,6 +123,18 @@ def _make_weather_provider(settings: Settings) -> WeatherFn:
     return provider
 
 
+def _make_markets_provider(settings: Settings) -> MarketsFn:
+    """Returns an async callable matching jobs.briefing.MarketsFn."""
+    from jina_clone.briefing.live_data import fetch_markets
+
+    async def provider() -> dict:
+        return await fetch_markets(
+            finnhub_api_key=settings.stock_api_key,
+            fred_api_key=settings.fred_api_key,
+        )
+    return provider
+
+
 def _today_label() -> str:
     return datetime.now().strftime("%A, %B %-d, %Y")
 
@@ -141,6 +153,7 @@ async def _briefing_generate(settings, out_path: Path):
             window_hours=12,
             title="The Morning Fox",
             weather_provider=_make_weather_provider(settings),
+            markets_provider=_make_markets_provider(settings),
             today_label=_today_label(),
             volume_label=_volume_label(date.today()),
             iso_date=date.today().isoformat(),
@@ -198,6 +211,7 @@ async def _briefing_run(settings, *, edition: str):
             print_queue=settings.print_queue,
             ntfy_topic=settings.ntfy_topic,
             weather_provider=_make_weather_provider(settings),
+            markets_provider=_make_markets_provider(settings),
             today_label=_today_label(),
             volume_label=volume_label,
             generated_at_label=datetime.now().strftime("%H:%M ET"),

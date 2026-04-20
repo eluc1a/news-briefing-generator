@@ -58,6 +58,16 @@ def _async_weather(payload):
     return _fn
 
 
+def _async_markets(items: list[dict] | None = None):
+    payload = {"items": items or [
+        {"symbol": s, "value": "—", "change": None}
+        for s in ["SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI"]
+    ]}
+    async def _fn():
+        return payload
+    return _fn
+
+
 def _row(link, category, source="s", content="ok"):
     return {"id": link, "title": "t", "link": link, "category": category,
             "source": source, "content": content, "published": None,
@@ -140,6 +150,7 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
             temp_high=70, temp_low=50, conditions="x",
             sunrise="6:00", sunset="8:00", daylight="13h 24m",
         ).model_dump()),
+        markets_provider=_async_markets(),
         today_label="Sat",
         volume_label="Vol",
         generated_at_label="08:11 ET",
@@ -245,6 +256,7 @@ async def test_run_briefing_evening_edition_threads_title_and_window(tmp_path):
         weather_provider=_async_weather({"temp_high": 60, "temp_low": 48,
                                   "conditions": "clear", "sunrise": "6:24",
                                   "sunset": "7:48", "daylight": "13h 24m"}),
+        markets_provider=_async_markets(),
         today_label="Sun",
         volume_label="Vol. I · No. 109 · Evening",
         generated_at_label="20:11 ET",
@@ -301,6 +313,7 @@ async def test_run_briefing_emergency_overwrites_title_from_param(tmp_path):
         weather_provider=_async_weather({"temp_high": 0, "temp_low": 0,
                                   "conditions": "x", "sunrise": "-",
                                   "sunset": "-", "daylight": "13h 24m"}),
+        markets_provider=_async_markets(),
         today_label="x", volume_label="y",
         generated_at_label="z", iso_date="2026-04-19",
         fetch_articles=fetch,
@@ -345,6 +358,7 @@ async def test_aborts_when_zero_articles(tmp_path):
             weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
                                       "conditions": "x", "sunrise": "6:00",
                                       "sunset": "8:00", "daylight": "13h 24m"}),
+            markets_provider=_async_markets(),
             today_label="x", volume_label="y",
             generated_at_label="z", iso_date="2026-04-19",
             fetch_articles=fetch,
@@ -411,6 +425,7 @@ async def test_any_generator_failure_triggers_emergency(tmp_path):
         weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
                                   "conditions": "x", "sunrise": "6:00",
                                   "sunset": "8:00", "daylight": "13h 24m"}),
+        markets_provider=_async_markets(),
         today_label="x", volume_label="y",
         generated_at_label="z", iso_date="2026-04-19",
         fetch_articles=fetch,
@@ -466,6 +481,7 @@ async def test_front_matter_failure_also_triggers_emergency(tmp_path):
         weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
                                   "conditions": "x", "sunrise": "6:00",
                                   "sunset": "8:00", "daylight": "13h 24m"}),
+        markets_provider=_async_markets(),
         today_label="x", volume_label="y",
         generated_at_label="z", iso_date="2026-04-19",
         fetch_articles=fetch,
@@ -527,6 +543,7 @@ async def test_print_failure_still_raises(tmp_path):
             weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
                                       "conditions": "x", "sunrise": "6:00",
                                       "sunset": "8:00", "daylight": "13h 24m"}),
+            markets_provider=_async_markets(),
             today_label="x", volume_label="y",
             generated_at_label="z", iso_date="2026-04-19",
             fetch_articles=fetch,
@@ -578,6 +595,7 @@ async def test_assemble_briefing_happy_path_returns_briefing_and_count():
             temp_high=70, temp_low=50, conditions="x",
             sunrise="6:00", sunset="8:00", daylight="13h 24m",
         ).model_dump()),
+        markets_provider=_async_markets(),
         today_label="Sat",
         volume_label="Vol",
         iso_date="2026-04-19",
@@ -612,6 +630,7 @@ async def test_assemble_briefing_raises_not_enough_articles():
             weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
                                       "conditions": "x", "sunrise": "6:00",
                                       "sunset": "8:00", "daylight": "13h 24m"}),
+            markets_provider=_async_markets(),
             today_label="x",
             volume_label="y",
             iso_date="2026-04-19",
@@ -646,6 +665,7 @@ async def test_assemble_briefing_bubbles_generator_failure():
             weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
                                       "conditions": "x", "sunrise": "6:00",
                                       "sunset": "8:00", "daylight": "13h 24m"}),
+            markets_provider=_async_markets(),
             today_label="x",
             volume_label="y",
             iso_date="2026-04-19",

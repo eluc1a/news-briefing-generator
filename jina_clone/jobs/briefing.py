@@ -145,6 +145,7 @@ async def assemble_briefing(
     briefs: list[Brief] = panels_and_briefs[-1]
 
     briefing = Briefing(
+        title="The Morning Fox",  # parametrized in Task 6
         date=iso_date,
         volume=volume_label,
         weather=WeatherStrip(**weather),

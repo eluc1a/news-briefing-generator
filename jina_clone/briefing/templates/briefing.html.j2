@@ -221,6 +221,7 @@
 </style>
 </head>
 <body>
+{% set include_extras = include_extras | default(true) %}
 
 <div class="masthead">
   <h1 class="masthead-title">{{ title }}</h1>
@@ -303,6 +304,7 @@
   </div>
 </div>
 
+{% if include_extras %}
 <div class="section-grid">
   <div class="panel">
     <h3 class="panel-title">Data point of the day</h3>
@@ -315,6 +317,7 @@
     <p class="panel-body">{{ on_this_day.body }}</p>
   </div>
 </div>
+{% endif %}
 
 </body>
 </html>

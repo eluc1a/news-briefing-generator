@@ -93,3 +93,35 @@ def test_rendered_html_has_no_forced_page_break():
         iso_date="2026-04-18",
     )
     assert "page-break-after: always" not in html_str
+
+
+def test_rendered_html_respects_include_extras_flag():
+    """data_point and on_this_day sections must be omittable via include_extras=False."""
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    tmpl_dir = Path("jina_clone/briefing/templates")
+    env = Environment(
+        loader=FileSystemLoader(str(tmpl_dir)),
+        autoescape=select_autoescape(["html", "j2"]),
+    )
+    tmpl = env.get_template("briefing.html.j2")
+
+    # Default render — extras present.
+    html_with = tmpl.render(
+        **briefing.model_dump(),
+        generated_at="08:11 ET",
+        iso_date="2026-04-18",
+    )
+    assert "Data point of the day" in html_with
+    assert "On this day" in html_with
+
+    # Explicit off — extras omitted.
+    html_without = tmpl.render(
+        **briefing.model_dump(),
+        generated_at="08:11 ET",
+        iso_date="2026-04-18",
+        include_extras=False,
+    )
+    assert "Data point of the day" not in html_without
+    assert "On this day" not in html_without

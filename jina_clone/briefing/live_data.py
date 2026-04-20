@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import math
@@ -176,3 +177,131 @@ async def fetch_weather(
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(json.dumps(parsed))
     return parsed
+
+
+# ==================================================================
+# Markets: Finnhub (equities + crypto) + FRED (yields + CPI)
+# ==================================================================
+
+_FINNHUB_URL = "https://finnhub.io/api/v1/quote"
+_FRED_URL = "https://api.stlouisfed.org/fred/series/observations"
+
+
+def _fmt_equity(price: float, dp: float | None) -> tuple[str, str | None]:
+    # Under $10k: two decimals ("583.12", "1,234.56"). $10k and above:
+    # whole dollars with commas ("68,241"). The threshold is chosen so
+    # ETFs and equities (SPY, QQQ, TQQQ, individual stocks) keep cents
+    # while crypto-scale prices drop them.
+    if price < 10000:
+        value = f"{price:,.2f}"
+    else:
+        value = f"{_round(price):,}"
+    if dp is None:
+        return value, None
+    arrow = "▲" if dp > 0 else ("▼" if dp < 0 else "—")
+    change = f"{arrow}{abs(dp):.2f}%" if arrow in "▲▼" else "—"
+    return value, change
+
+
+def _fmt_yield(latest_str: str, prior_str: str) -> tuple[str, str]:
+    latest = float(latest_str)
+    prior = float(prior_str)
+    bp = _round((latest - prior) * 100)
+    arrow = "▲" if bp > 0 else ("▼" if bp < 0 else "—")
+    change = f"{arrow}{abs(bp)}bp" if arrow in "▲▼" else "—"
+    return f"{latest:.2f}%", change
+
+
+def _compute_cpi_yoy(observations: list[dict]) -> str:
+    """Observations come newest-first from FRED (sort_order=desc).
+    YoY = (latest - month_12_ago) / month_12_ago * 100."""
+    latest = float(observations[0]["value"])
+    year_ago = float(observations[12]["value"])
+    yoy = (latest - year_ago) / year_ago * 100
+    return f"{yoy:.1f}%"
+
+
+async def _fetch_finnhub(client, api_key: str, symbol: str) -> dict:
+    resp = await _http_get_json(
+        client, _FINNHUB_URL,
+        {"symbol": symbol, "token": api_key},
+    )
+    if resp.status_code >= 400:
+        resp.raise_for_status()
+    return resp.json()
+
+
+async def _fetch_fred(
+    client, api_key: str, series_id: str, limit: int,
+    sort_order: str = "desc",
+) -> dict:
+    resp = await _http_get_json(
+        client, _FRED_URL,
+        {
+            "series_id": series_id, "api_key": api_key,
+            "file_type": "json", "limit": limit, "sort_order": sort_order,
+        },
+    )
+    if resp.status_code >= 400:
+        resp.raise_for_status()
+    return resp.json()
+
+
+def _dash_item(symbol: str) -> dict:
+    return {"symbol": symbol, "value": "—", "change": None}
+
+
+async def fetch_markets(
+    *, finnhub_api_key: str, fred_api_key: str,
+) -> dict:
+    """Fetch SPY/QQQ/TQQQ/BTC via Finnhub + 10Y/CPI via FRED in parallel.
+
+    Any per-symbol failure isolates to a single dashed cell. Returns a
+    dict matching MarketsBlock.model_dump() with items of length 6.
+    Empty keys short-circuit the corresponding cells to dashes.
+    """
+    async def _equity(client, sym: str) -> dict:
+        display = "BTC" if sym == "BINANCE:BTCUSDT" else sym
+        if not finnhub_api_key:
+            return _dash_item(display)
+        try:
+            data = await _fetch_finnhub(client, finnhub_api_key, sym)
+            value, change = _fmt_equity(data["c"], data.get("dp"))
+            return {"symbol": display, "value": value, "change": change}
+        except Exception as exc:
+            _log.warning("finnhub %s failed: %s", sym, exc)
+            return _dash_item(display)
+
+    async def _yield10(client) -> dict:
+        if not fred_api_key:
+            return _dash_item("10Y")
+        try:
+            data = await _fetch_fred(client, fred_api_key, "DGS10", 2)
+            obs = data["observations"]
+            value, change = _fmt_yield(obs[0]["value"], obs[1]["value"])
+            return {"symbol": "10Y", "value": value, "change": change}
+        except Exception as exc:
+            _log.warning("fred DGS10 failed: %s", exc)
+            return _dash_item("10Y")
+
+    async def _cpi(client) -> dict:
+        if not fred_api_key:
+            return _dash_item("CPI")
+        try:
+            data = await _fetch_fred(client, fred_api_key, "CPIAUCSL", 13)
+            value = _compute_cpi_yoy(data["observations"])
+            return {"symbol": "CPI", "value": value, "change": "YoY"}
+        except Exception as exc:
+            _log.warning("fred CPIAUCSL failed: %s", exc)
+            return _dash_item("CPI")
+
+    async with httpx.AsyncClient() as client:
+        results = await asyncio.gather(
+            _equity(client, "SPY"),
+            _equity(client, "QQQ"),
+            _equity(client, "TQQQ"),
+            _equity(client, "BINANCE:BTCUSDT"),
+            _yield10(client),
+            _cpi(client),
+        )
+    return {"items": list(results)}

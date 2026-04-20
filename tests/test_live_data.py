@@ -160,3 +160,114 @@ async def test_fetch_weather_missing_api_key_uses_stub(tmp_path):
         cache_path=cache, owm_api_key="", stub=_stub,
     )
     assert result["conditions"] == "stub"
+
+
+# ==================================================================
+# Markets
+# ==================================================================
+
+from jina_clone.briefing.live_data import fetch_markets
+
+
+_FINNHUB_SPY = {"c": 583.12, "dp": 0.42}
+_FINNHUB_QQQ = {"c": 498.77, "dp": 0.31}
+_FINNHUB_TQQQ = {"c": 82.14, "dp": 0.94}
+_FINNHUB_BTC = {"c": 68241.5, "dp": -1.20}
+
+
+_FRED_DGS10 = {
+    "observations": [
+        {"date": "2026-04-18", "value": "4.38"},
+        {"date": "2026-04-17", "value": "4.35"},
+    ],
+}
+
+# FRED returns newest-first when sort_order=desc. Latest reading 309.0,
+# 12 months earlier 300.2 → YoY = (309.0-300.2)/300.2*100 = 2.93% → "2.9%".
+_FRED_CPI = {
+    "observations": [
+        {"date": "2026-04-01", "value": "309.0"},  # latest (this month)
+        {"date": "2026-03-01", "value": "308.1"},
+        {"date": "2026-02-01", "value": "307.3"},
+        {"date": "2026-01-01", "value": "306.4"},
+        {"date": "2025-12-01", "value": "305.6"},
+        {"date": "2025-11-01", "value": "304.9"},
+        {"date": "2025-10-01", "value": "304.0"},
+        {"date": "2025-09-01", "value": "303.1"},
+        {"date": "2025-08-01", "value": "302.5"},
+        {"date": "2025-07-01", "value": "302.0"},
+        {"date": "2025-06-01", "value": "301.2"},
+        {"date": "2025-05-01", "value": "300.7"},
+        {"date": "2025-04-01", "value": "300.2"},  # year-ago
+    ],
+}
+
+
+async def test_fetch_markets_happy_path():
+    """All 6 cells parse into the expected pre-formatted strings."""
+    async def fake(client, url, params):
+        import httpx
+        if "finnhub.io" in url:
+            sym = params.get("symbol", "")
+            if sym == "SPY":  return httpx.Response(200, json=_FINNHUB_SPY)
+            if sym == "QQQ":  return httpx.Response(200, json=_FINNHUB_QQQ)
+            if sym == "TQQQ": return httpx.Response(200, json=_FINNHUB_TQQQ)
+            if sym == "BINANCE:BTCUSDT": return httpx.Response(200, json=_FINNHUB_BTC)
+        if "stlouisfed.org" in url:
+            sid = params.get("series_id", "")
+            if sid == "DGS10":    return httpx.Response(200, json=_FRED_DGS10)
+            if sid == "CPIAUCSL": return httpx.Response(200, json=_FRED_CPI)
+        raise AssertionError(f"unexpected url {url} {params}")
+
+    with patch(
+        "jina_clone.briefing.live_data._http_get_json",
+        side_effect=fake,
+    ):
+        out = await fetch_markets(finnhub_api_key="f", fred_api_key="r")
+
+    items = out["items"]
+    assert len(items) == 6
+    by_sym = {i["symbol"]: i for i in items}
+    assert by_sym["SPY"]  == {"symbol": "SPY",  "value": "583.12",  "change": "▲0.42%"}
+    assert by_sym["QQQ"]  == {"symbol": "QQQ",  "value": "498.77",  "change": "▲0.31%"}
+    assert by_sym["TQQQ"] == {"symbol": "TQQQ", "value": "82.14",   "change": "▲0.94%"}
+    # BTC is rounded to whole dollars with comma separators.
+    assert by_sym["BTC"]["value"] == "68,242"
+    assert by_sym["BTC"]["change"] == "▼1.20%"
+    # 10Y change expressed in basis points.
+    assert by_sym["10Y"] == {"symbol": "10Y", "value": "4.38%", "change": "▲3bp"}
+    assert by_sym["CPI"] == {"symbol": "CPI", "value": "2.9%",  "change": "YoY"}
+
+
+async def test_fetch_markets_single_symbol_failure_isolated():
+    """A failure on SPY must not sink the other 5 cells."""
+    async def fake(client, url, params):
+        import httpx
+        if "finnhub.io" in url and params.get("symbol") == "SPY":
+            raise httpx.ConnectError("finnhub blew up")
+        if "finnhub.io" in url:
+            return httpx.Response(200, json=_FINNHUB_QQQ)  # reuse
+        if "stlouisfed.org" in url:
+            sid = params.get("series_id", "")
+            if sid == "DGS10":    return httpx.Response(200, json=_FRED_DGS10)
+            if sid == "CPIAUCSL": return httpx.Response(200, json=_FRED_CPI)
+        raise AssertionError
+
+    with patch(
+        "jina_clone.briefing.live_data._http_get_json",
+        side_effect=fake,
+    ):
+        out = await fetch_markets(finnhub_api_key="f", fred_api_key="r")
+
+    by_sym = {i["symbol"]: i for i in out["items"]}
+    assert by_sym["SPY"]["value"] == "—"
+    assert by_sym["SPY"]["change"] is None
+    # The others render normally.
+    assert by_sym["10Y"]["value"] == "4.38%"
+
+
+async def test_fetch_markets_missing_keys_returns_all_dashes():
+    out = await fetch_markets(finnhub_api_key="", fred_api_key="")
+    values = {i["value"] for i in out["items"]}
+    assert values == {"—"}
+    assert len(out["items"]) == 6

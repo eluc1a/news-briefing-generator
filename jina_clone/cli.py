@@ -162,6 +162,7 @@ async def _briefing_run(settings, *, edition: str):
     pdf_path = settings.briefings_dir / f"{iso_date}-{edition}.pdf"
     volume_label = f"{_volume_label(today)} · {edition.title()}"
 
+    briefing_generator.reset_usage()
     pool = await create_pool(settings.database_url)
     try:
         await run_briefing(
@@ -190,6 +191,15 @@ async def _briefing_run(settings, *, edition: str):
         )
     finally:
         await pool.close()
+        totals = briefing_generator.pop_usage_totals()
+        if totals["calls"]:
+            logging.info(
+                "briefing llm totals (%s %s): calls=%d input=%d output=%d "
+                "cache_read=%d cache_creation=%d",
+                iso_date, edition,
+                totals["calls"], totals["input"], totals["output"],
+                totals["cache_read"], totals["cache_creation"],
+            )
 
 
 def main():

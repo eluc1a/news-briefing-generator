@@ -1,9 +1,10 @@
 import json
+import logging
 import os
+import re
 from typing import Awaitable, Callable, TypeVar
 
-from google import genai
-from google.genai import types
+from anthropic import AsyncAnthropic
 from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
@@ -12,12 +13,36 @@ from jina_clone.briefing.schema import (
 )
 
 
-MODEL = "gemini-3.1-flash-lite-preview"
+MODEL = os.environ.get("LLM_MODEL", "claude-sonnet-4-6")
+MAX_TOKENS = 4096
 PER_ARTICLE_BODY_CAP = 3000
+
+_FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
+_log = logging.getLogger(__name__)
+
+# Per-run usage accumulator. Not thread-safe — relies on briefing runs being
+# serial, which they are (one cron firing at a time).
+_USAGE: list[dict] = []
+
+
+def reset_usage() -> None:
+    _USAGE.clear()
+
+
+def pop_usage_totals() -> dict:
+    totals = {
+        "calls": len(_USAGE),
+        "input": sum(u["input"] for u in _USAGE),
+        "output": sum(u["output"] for u in _USAGE),
+        "cache_read": sum(u["cache_read"] for u in _USAGE),
+        "cache_creation": sum(u["cache_creation"] for u in _USAGE),
+    }
+    _USAGE.clear()
+    return totals
 
 
 class GeneratorFailure(RuntimeError):
-    """Raised when a Gemini call returns invalid JSON twice in a row."""
+    """Raised when an LLM call returns invalid JSON twice in a row."""
 
 
 CallLLM = Callable[[object, str], Awaitable[str]]
@@ -253,26 +278,45 @@ def _build_briefs_user_msg(*, articles: list[dict]) -> str:
 
 
 # ==================================================================
-# Real Gemini call
+# Real Anthropic call
 # ==================================================================
 
 async def _real_call_llm(
-    client: genai.Client, prompt: str, *, system: str,
+    client: AsyncAnthropic, prompt: str, *, system: str,
 ) -> str:
-    response = await client.aio.models.generate_content(
+    response = await client.messages.create(
         model=MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=system,
-            response_mime_type="application/json",
-        ),
+        max_tokens=MAX_TOKENS,
+        system=[
+            {
+                "type": "text",
+                "text": system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+        messages=[{"role": "user", "content": prompt}],
     )
-    return (response.text or "").strip()
+    u = response.usage
+    entry = {
+        "input": u.input_tokens,
+        "output": u.output_tokens,
+        "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0,
+        "cache_creation": getattr(u, "cache_creation_input_tokens", 0) or 0,
+    }
+    _USAGE.append(entry)
+    _log.info(
+        "briefing claude call: input=%d output=%d cache_read=%d cache_creation=%d",
+        entry["input"], entry["output"], entry["cache_read"], entry["cache_creation"],
+    )
+    text = "".join(
+        block.text for block in response.content if block.type == "text"
+    )
+    return _FENCE.sub("", text).strip()
 
 
-def _ensure_client(client: genai.Client | None) -> genai.Client:
+def _ensure_client(client: AsyncAnthropic | None) -> AsyncAnthropic:
     if client is None:
-        return genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        return AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     return client
 
 
@@ -318,7 +362,7 @@ async def generate_front_matter(
     volume: str,
     title: str,
     call_llm: CallLLM | None = None,
-    client: genai.Client | None = None,
+    client: AsyncAnthropic | None = None,
 ) -> FrontMatter:
     system_prompt = _front_matter_system_prompt(title)
     if call_llm is None:
@@ -354,7 +398,7 @@ async def generate_panel(
     exclude_urls: set[str],
     title: str,
     call_llm: CallLLM | None = None,
-    client: genai.Client | None = None,
+    client: AsyncAnthropic | None = None,
 ) -> Panel:
     system_prompt = _panel_system_prompt(section, title)
     if call_llm is None:
@@ -378,7 +422,7 @@ async def generate_briefs(
     exclude_urls: set[str],
     title: str,
     call_llm: CallLLM | None = None,
-    client: genai.Client | None = None,
+    client: AsyncAnthropic | None = None,
 ) -> list[Brief]:
     system_prompt = _briefs_system_prompt(title)
     if call_llm is None:

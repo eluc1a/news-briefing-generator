@@ -134,7 +134,9 @@ def test_render_drops_extras_on_overflow(tmp_path, caplog):
     # but dropping extras brings it back under 2 pages. (Inflating the lead
     # body instead doesn't exercise the safety net — lead-body overflow
     # occupies its own page independent of whether extras are rendered.)
-    bloat = " ".join(["Additional filler content."] * 15)
+    # Note: with 4 `also` items per panel (Task 9 density bump) we need a
+    # smaller bloat factor — 10 repetitions overflows but recovers; 15 does not.
+    bloat = " ".join(["Additional filler content."] * 10)
     briefing = briefing.model_copy(update={
         "briefs": [
             br.model_copy(update={"body": br.body + " " + bloat})

@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field
 # Shared with generator.py — keep both files in sync by importing
 # these constants rather than duplicating the bounds.
 BRIEFS_COUNT_MAX = 6
-BRIEFS_COUNT_MIN = 5   # will tighten to 6-exact in Task 9
+BRIEFS_COUNT_MIN = 6   # tightened in Task 9
 MARKETS_COUNT = 6
-PANEL_ALSO_COUNT = 3   # will bump to 4 in the density phase (Task 9)
+PANEL_ALSO_COUNT = 4   # bumped in Task 9 density phase
 
 
 class WeatherStrip(BaseModel):

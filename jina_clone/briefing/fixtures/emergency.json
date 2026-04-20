@@ -48,6 +48,7 @@
       "also": [
         {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."}
       ]
     },
@@ -56,6 +57,7 @@
       "lede_headline": "(no panel today)",
       "lede_body": "Generator failure — see lead.",
       "also": [
+        {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."}
@@ -68,6 +70,7 @@
       "also": [
         {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."},
+        {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."}
       ]
     },
@@ -76,6 +79,7 @@
       "lede_headline": "(no panel today)",
       "lede_body": "Generator failure — see lead.",
       "also": [
+        {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."},
         {"headline": "No data", "body": "Generator failure — see lead."}
@@ -88,7 +92,8 @@
     {"topic": "Articles", "body": "Today's articles are still in the database; nothing was lost."},
     {"topic": "Logs", "body": "Run: docker compose logs extractor | tail -200"},
     {"topic": "ntfy", "body": "A high-priority notification was sent to the configured topic."},
-    {"topic": "Recovery", "body": "Tomorrow's 08:10 run retries from scratch — no manual intervention needed."}
+    {"topic": "Recovery", "body": "Tomorrow's 08:10 run retries from scratch — no manual intervention needed."},
+    {"topic": "Manual", "body": "Edit jina_clone/briefing/fixtures/emergency.json to customise this placeholder edition."}
   ],
   "data_point": {
     "value": "2",

@@ -127,9 +127,9 @@ Output {"briefs": [...]} containing 5-7 Brief entries. Each entry:
 Each brief covers a distinct story. Consequence beats curiosity."""
 
 
-def _panel_system_prompt(section: SectionDef) -> str:
+def _panel_system_prompt(section: SectionDef, title: str) -> str:
     scope = SECTION_SCOPE_RULES[section.key]
-    return f"""You are a section editor of "The Morning Fox" daily briefing.
+    return f"""You are a section editor of "{title}" daily briefing.
 Your task: produce the JSON for the "{section.title}" panel only.
 
 {scope}
@@ -145,7 +145,8 @@ markdown fence. The `section` field must be exactly "{section.title}".
 """
 
 
-FRONT_MATTER_SYSTEM_PROMPT = f"""You are the editor of "The Morning Fox" daily
+def _front_matter_system_prompt(title: str) -> str:
+    return f"""You are the editor of "{title}" daily
 briefing. Your task: produce the front-matter JSON (lead, pull_quote,
 data_point, on_this_day) given input articles across all sections.
 
@@ -160,7 +161,8 @@ markdown fence.
 """
 
 
-BRIEFS_SYSTEM_PROMPT = f"""You are a section editor of "The Morning Fox"
+def _briefs_system_prompt(title: str) -> str:
+    return f"""You are a section editor of "{title}"
 daily briefing. Your task: produce the "briefs" rundown — a list of short
 factual items from the supplementary pool.
 
@@ -314,15 +316,15 @@ async def generate_front_matter(
     weather: dict,
     today: str,
     volume: str,
+    title: str,
     call_llm: CallLLM | None = None,
     client: genai.Client | None = None,
 ) -> FrontMatter:
+    system_prompt = _front_matter_system_prompt(title)
     if call_llm is None:
         client = _ensure_client(client)
         async def call_llm_wrapper(cl: object, prompt: str) -> str:
-            return await _real_call_llm(
-                cl, prompt, system=FRONT_MATTER_SYSTEM_PROMPT,
-            )
+            return await _real_call_llm(cl, prompt, system=system_prompt)
         call_llm = call_llm_wrapper
 
     user_msg = _build_front_matter_user_msg(
@@ -350,10 +352,11 @@ async def generate_panel(
     section: SectionDef,
     articles: list[dict],
     exclude_urls: set[str],
+    title: str,
     call_llm: CallLLM | None = None,
     client: genai.Client | None = None,
 ) -> Panel:
-    system_prompt = _panel_system_prompt(section)
+    system_prompt = _panel_system_prompt(section, title)
     if call_llm is None:
         client = _ensure_client(client)
         async def call_llm_wrapper(cl: object, prompt: str) -> str:
@@ -373,15 +376,15 @@ async def generate_briefs(
     *,
     articles: list[dict],
     exclude_urls: set[str],
+    title: str,
     call_llm: CallLLM | None = None,
     client: genai.Client | None = None,
 ) -> list[Brief]:
+    system_prompt = _briefs_system_prompt(title)
     if call_llm is None:
         client = _ensure_client(client)
         async def call_llm_wrapper(cl: object, prompt: str) -> str:
-            return await _real_call_llm(
-                cl, prompt, system=BRIEFS_SYSTEM_PROMPT,
-            )
+            return await _real_call_llm(cl, prompt, system=system_prompt)
         call_llm = call_llm_wrapper
 
     filtered = _filter_excluded(articles, exclude_urls)

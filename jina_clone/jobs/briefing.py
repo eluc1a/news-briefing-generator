@@ -126,6 +126,7 @@ async def assemble_briefing(
         weather=weather,
         today=today_label,
         volume=volume_label,
+        title="The Morning Fox",  # parametrized in Task 6
     )
     exclude = {front.lead_source_url}
 
@@ -135,10 +136,15 @@ async def assemble_briefing(
             section=s,
             articles=section_pools[s.key],
             exclude_urls=exclude,
+            title="The Morning Fox",  # parametrized in Task 6
         )
         for s in config.sections
     ]
-    briefs_coro = generate_briefs(articles=briefs_pool, exclude_urls=exclude)
+    briefs_coro = generate_briefs(
+        articles=briefs_pool,
+        exclude_urls=exclude,
+        title="The Morning Fox",  # parametrized in Task 6
+    )
 
     panels_and_briefs = await asyncio.gather(*panel_coros, briefs_coro)
     panels: list[Panel] = list(panels_and_briefs[:-1])

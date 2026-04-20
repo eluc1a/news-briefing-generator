@@ -15,10 +15,14 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      # Talk to host CUPS over TCP (network_mode: host). Avoids bind-mounting
+      # /run/cups/cups.sock, whose inode rotates when cups.socket restarts
+      # and leaves the container holding a dead socket.
+      CUPS_SERVER: localhost:631
     volumes:
       - ./.env:/app/.env:ro
       - ./config:/app/config:ro
       - ./summaries:/app/summaries
       - ./briefings:/app/briefings
       - ./logs:/var/log/jina-clone
-      - /var/run/cups/cups.sock:/var/run/cups/cups.sock

@@ -95,7 +95,7 @@ def _stub_weather() -> dict:
         "temp_high": 68, "temp_low": 48,
         "conditions": "partly cloudy",
         "sunrise": "6:24", "sunset": "7:48",
-        "pollen": "moderate",
+        "daylight": "13h 24m",
     }
 
 

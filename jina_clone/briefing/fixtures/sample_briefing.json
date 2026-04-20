@@ -9,7 +9,15 @@
     "conditions": "partly cloudy, light wind",
     "sunrise": "6:24",
     "sunset": "7:48",
-    "pollen": "high — oak, birch"
+    "daylight": "13h 24m"
+  },
+  "hourly": {
+    "slots": [
+      {"time_label": "11am", "temp_f": 62, "precip_pct": 10, "code": 800},
+      {"time_label": "2pm",  "temp_f": 68, "precip_pct": 20, "code": 801},
+      {"time_label": "5pm",  "temp_f": 71, "precip_pct": 40, "code": 802},
+      {"time_label": "8pm",  "temp_f": 60, "precip_pct": 20, "code": 803}
+    ]
   },
   "lead": {
     "headline": "EU artificial-intelligence pact moves to enforcement phase",

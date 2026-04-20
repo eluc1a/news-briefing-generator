@@ -8,7 +8,8 @@ from jina_clone.briefing.config import BriefingConfig, SectionDef
 from jina_clone.briefing.generator import GeneratorFailure
 from jina_clone.briefing.markdown import briefing_to_markdown
 from jina_clone.briefing.schema import (
-    Brief, Briefing, FrontMatter, Panel, WeatherStrip,
+    Brief, Briefing, FrontMatter, HourlyForecast, HourlySlot, Panel,
+    WeatherStrip,
 )
 
 
@@ -154,11 +155,23 @@ async def assemble_briefing(
     panels: list[Panel] = list(panels_and_briefs[:-1])
     briefs: list[Brief] = panels_and_briefs[-1]
 
+    # `hourly` arrives from weather_provider once Task 5 lands; until then
+    # fall back to a four-slot placeholder so the schema validates.
+    hourly_raw = weather.get("hourly")
+    if hourly_raw is not None:
+        hourly = HourlyForecast.model_validate(hourly_raw)
+    else:
+        hourly = HourlyForecast(slots=[
+            HourlySlot(time_label="—", temp_f=0, precip_pct=0, code=800)
+            for _ in range(4)
+        ])
+
     briefing = Briefing(
         title=title,
         date=iso_date,
         volume=volume_label,
-        weather=WeatherStrip(**weather),
+        weather=WeatherStrip(**{k: v for k, v in weather.items() if k != "hourly"}),
+        hourly=hourly,
         lead=front.lead,
         panels=panels,
         pull_quote=front.pull_quote,

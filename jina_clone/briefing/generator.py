@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, FrontMatter, Panel,
+    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel,
 )
 
 
@@ -281,7 +281,9 @@ def _build_panel_user_msg(
 
 
 class _BriefsResponse(BaseModel):
-    briefs: list[Brief] = Field(min_length=5, max_length=6)
+    briefs: list[Brief] = Field(
+        min_length=BRIEFS_COUNT_MIN, max_length=BRIEFS_COUNT_MAX,
+    )
 
 
 def _build_briefs_user_msg(*, articles: list[dict]) -> str:

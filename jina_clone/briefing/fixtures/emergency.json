@@ -9,7 +9,15 @@
     "conditions": "(weather unavailable)",
     "sunrise": "—",
     "sunset": "—",
-    "pollen": "—"
+    "daylight": "—"
+  },
+  "hourly": {
+    "slots": [
+      {"time_label": "—", "temp_f": 0, "precip_pct": 0, "code": 800},
+      {"time_label": "—", "temp_f": 0, "precip_pct": 0, "code": 800},
+      {"time_label": "—", "temp_f": 0, "precip_pct": 0, "code": 800},
+      {"time_label": "—", "temp_f": 0, "precip_pct": 0, "code": 800}
+    ]
   },
   "lead": {
     "headline": "Briefing generation failed — check the journal",

@@ -102,3 +102,42 @@ def test_briefing_title_round_trips():
     data["title"] = "The Evening Fox"
     b = Briefing.model_validate(data)
     assert b.title == "The Evening Fox"
+
+
+def test_weather_requires_daylight_not_pollen():
+    """Weather strip gained `daylight`; `pollen` is no longer a field."""
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    # Fixture should already have daylight (added in this task).
+    assert "daylight" in data["weather"]
+    assert "pollen" not in data["weather"]
+    b = Briefing.model_validate(data)
+    assert b.weather.daylight
+    # Adding pollen back should not break (Pydantic ignores unknown by default),
+    # but removing daylight must fail:
+    data_bad = json.loads(raw)
+    del data_bad["weather"]["daylight"]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad)
+
+
+def test_briefing_requires_hourly_forecast():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    assert "hourly" in data
+    assert len(data["hourly"]["slots"]) == 4
+    b = Briefing.model_validate(data)
+    assert len(b.hourly.slots) == 4
+    assert b.hourly.slots[0].time_label  # e.g. "8am"
+
+    # Exactly 4 slots — not 3, not 5.
+    data_bad = json.loads(raw)
+    data_bad["hourly"]["slots"] = data_bad["hourly"]["slots"][:3]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad)
+
+    data_bad2 = json.loads(raw)
+    extra_slot = data_bad2["hourly"]["slots"][0]
+    data_bad2["hourly"]["slots"] = data_bad2["hourly"]["slots"] + [extra_slot]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad2)

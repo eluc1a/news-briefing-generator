@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>The Morning Fox — {{ date }}</title>
+<title>{{ title }} — {{ date }}</title>
 <style>
   @font-face {
     font-family: 'Bodoni Moda';
@@ -30,7 +30,7 @@
       vertical-align: top;
     }
     @bottom-right {
-      content: "The Morning Fox · Page " counter(page);
+      content: "{{ title }} · Page " counter(page);
       font-size: 8pt;
       color: #777;
       text-transform: uppercase;
@@ -223,7 +223,7 @@
 <body>
 
 <div class="masthead">
-  <h1 class="masthead-title">The Morning Fox</h1>
+  <h1 class="masthead-title">{{ title }}</h1>
   <div class="masthead-meta">
     <span>{{ volume }}</span>
     <span>{{ date }}</span>

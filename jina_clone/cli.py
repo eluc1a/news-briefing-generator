@@ -114,6 +114,8 @@ async def _briefing_generate(settings, out_path: Path):
         briefing, _count = await assemble_briefing(
             pool=pool,
             config=cfg,
+            window_hours=12,
+            title="The Morning Fox",
             weather_provider=_stub_weather,
             today_label=_today_label(),
             volume_label=_volume_label(date.today()),

@@ -127,8 +127,9 @@ def test_rendered_html_respects_include_extras_flag():
     assert "On this day" not in html_without
 
 
-def test_render_drops_extras_on_overflow(tmp_path):
+def test_render_drops_extras_on_overflow(tmp_path, caplog):
     """If content overflows to a 3rd page, re-render without data_point/on_this_day."""
+    import logging
     import pypdf
 
     briefing = Briefing.model_validate_json(FIXTURE.read_text())
@@ -145,7 +146,13 @@ def test_render_drops_extras_on_overflow(tmp_path):
     })
 
     out = tmp_path / "overflow.pdf"
-    render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-18")
+    with caplog.at_level(logging.WARNING, logger="jina_clone.briefing.renderer"):
+        render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-18")
+
+    # The safety-net warning must fire — this pins the contract so the test
+    # can't silently degrade if WeasyPrint's layout tightens in a future
+    # version and the overflow branch stops being reachable.
+    assert any("re-rendering" in r.message for r in caplog.records)
 
     reader = pypdf.PdfReader(str(out))
     assert len(reader.pages) == 2

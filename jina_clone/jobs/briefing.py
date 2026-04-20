@@ -8,8 +8,8 @@ from jina_clone.briefing.config import BriefingConfig, SectionDef
 from jina_clone.briefing.generator import GeneratorFailure
 from jina_clone.briefing.markdown import briefing_to_markdown
 from jina_clone.briefing.schema import (
-    Brief, Briefing, FrontMatter, HourlyForecast, Panel,
-    WeatherStrip,
+    Brief, Briefing, FrontMatter, HourlyForecast, MarketItem, MarketsBlock,
+    Panel, WeatherStrip,
 )
 
 
@@ -158,12 +158,18 @@ async def assemble_briefing(
 
     hourly = HourlyForecast.model_validate(weather.pop("hourly"))
 
+    _MARKET_SYMBOLS = ("SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI")
+    markets_placeholder = MarketsBlock(items=[
+        MarketItem(symbol=s, value="—", change=None) for s in _MARKET_SYMBOLS
+    ])
+
     briefing = Briefing(
         title=title,
         date=iso_date,
         volume=volume_label,
         weather=WeatherStrip(**weather),
         hourly=hourly,
+        markets=markets_placeholder,
         lead=front.lead,
         panels=panels,
         pull_quote=front.pull_quote,

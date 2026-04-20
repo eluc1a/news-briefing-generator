@@ -141,3 +141,19 @@ def test_briefing_requires_hourly_forecast():
     data_bad2["hourly"]["slots"] = data_bad2["hourly"]["slots"] + [extra_slot]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data_bad2)
+
+
+def test_briefing_requires_markets_block_of_six():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    assert "markets" in data
+    assert len(data["markets"]["items"]) == 6
+    b = Briefing.model_validate(data)
+    assert len(b.markets.items) == 6
+    symbols = {item.symbol for item in b.markets.items}
+    assert symbols == {"SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI"}
+
+    data_bad = json.loads(raw)
+    data_bad["markets"]["items"] = data_bad["markets"]["items"][:5]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data_bad)

@@ -19,6 +19,16 @@
       {"time_label": "—", "temp_f": 0, "precip_pct": 0, "code": 800}
     ]
   },
+  "markets": {
+    "items": [
+      {"symbol": "SPY",  "value": "—", "change": null},
+      {"symbol": "QQQ",  "value": "—", "change": null},
+      {"symbol": "TQQQ", "value": "—", "change": null},
+      {"symbol": "BTC",  "value": "—", "change": null},
+      {"symbol": "10Y",  "value": "—", "change": null},
+      {"symbol": "CPI",  "value": "—", "change": null}
+    ]
+  },
   "lead": {
     "headline": "Briefing generation failed — check the journal",
     "deck": "Claude returned invalid output twice in a row. This is the emergency placeholder.",

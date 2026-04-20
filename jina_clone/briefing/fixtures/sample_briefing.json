@@ -19,6 +19,16 @@
       {"time_label": "8pm",  "temp_f": 60, "precip_pct": 20, "code": 803}
     ]
   },
+  "markets": {
+    "items": [
+      {"symbol": "SPY",  "value": "583.12",  "change": "▲0.42%"},
+      {"symbol": "QQQ",  "value": "498.77",  "change": "▲0.31%"},
+      {"symbol": "TQQQ", "value": "82.14",   "change": "▲0.94%"},
+      {"symbol": "BTC",  "value": "68,241",  "change": "▼1.20%"},
+      {"symbol": "10Y",  "value": "4.38%",   "change": "▲3bp"},
+      {"symbol": "CPI",  "value": "2.9%",    "change": "YoY"}
+    ]
+  },
   "lead": {
     "headline": "EU artificial-intelligence pact moves to enforcement phase",
     "deck": "Brussels publishes the first compliance deadlines for general-purpose model providers; US firms face a 90-day window to register.",

@@ -4,9 +4,10 @@ from pydantic import BaseModel, Field
 
 # Shared with generator.py — keep both files in sync by importing
 # these constants rather than duplicating the bounds.
-PANEL_ALSO_COUNT = 3   # will bump to 4 in the density phase (Task 9)
-BRIEFS_COUNT_MIN = 5   # will tighten to 6-exact in Task 9
 BRIEFS_COUNT_MAX = 6
+BRIEFS_COUNT_MIN = 5   # will tighten to 6-exact in Task 9
+MARKETS_COUNT = 6
+PANEL_ALSO_COUNT = 3   # will bump to 4 in the density phase (Task 9)
 
 
 class WeatherStrip(BaseModel):
@@ -27,6 +28,16 @@ class HourlySlot(BaseModel):
 
 class HourlyForecast(BaseModel):
     slots: list[HourlySlot] = Field(min_length=4, max_length=4)
+
+
+class MarketItem(BaseModel):
+    symbol: str       # "SPY", "QQQ", "TQQQ", "BTC", "10Y", "CPI"
+    value: str        # pre-formatted: "583.12", "68,241", "4.38%", "2.9%"
+    change: str | None  # pre-formatted: "▲0.42%", "▼1.20%", "▲3bp", "YoY", None
+
+
+class MarketsBlock(BaseModel):
+    items: list[MarketItem] = Field(min_length=MARKETS_COUNT, max_length=MARKETS_COUNT)
 
 
 class LeadStory(BaseModel):
@@ -75,6 +86,7 @@ class Briefing(BaseModel):
     location: str = "Arlington, VA"
     weather: WeatherStrip
     hourly: HourlyForecast
+    markets: MarketsBlock
     lead: LeadStory
     panels: list[Panel] = Field(min_length=4, max_length=4)
     pull_quote: str

@@ -201,12 +201,13 @@ async def run_briefing(
         )
     except NotEnoughArticles as e:
         log.warning(str(e))
-        notify_failure(topic=ntfy_topic, reason=str(e))
+        notify_failure(topic=ntfy_topic, title="The Morning Fox", reason=str(e))
         raise
     except GeneratorFailure as e:
         log.error("generator failed — using emergency edition: %s", e)
         notify_failure(
             topic=ntfy_topic,
+            title="The Morning Fox",
             reason=f"Generator failed; emergency edition printed. {e}",
         )
         briefing = Briefing.model_validate_json(emergency_path.read_text())
@@ -223,11 +224,11 @@ async def run_briefing(
         msg = print_pdf(pdf_path, queue=print_queue)
         log.info("print: %s", msg)
     except Exception as e:
-        notify_failure(topic=ntfy_topic, reason=str(e))
+        notify_failure(topic=ntfy_topic, title="The Morning Fox", reason=str(e))
         raise
 
     if not emergency_used:
-        notify_printed(topic=ntfy_topic, pages=2)
+        notify_printed(topic=ntfy_topic, title="The Morning Fox", pages=2)
         try:
             facts_md = briefing_to_markdown(briefing)
             row_id = await insert_summary(

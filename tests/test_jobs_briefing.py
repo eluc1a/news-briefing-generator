@@ -97,9 +97,9 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
         return "ok"
 
     notified_ok = []
-    def notify_ok(*, topic, pages):
+    def notify_ok(*, topic, pages, **_kw):
         notified_ok.append((topic, pages))
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         raise AssertionError("should not notify failure on happy path")
 
     inserted = []
@@ -170,7 +170,7 @@ async def test_aborts_when_zero_articles(tmp_path):
         return []
 
     notified = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified.append(reason)
 
     async def noop(*a, **kw):
@@ -233,7 +233,7 @@ async def test_any_generator_failure_triggers_emergency(tmp_path):
         return out_path
 
     notified_fail = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified_fail.append(reason)
 
     inserted = []
@@ -291,7 +291,7 @@ async def test_front_matter_failure_also_triggers_emergency(tmp_path):
         return out_path
 
     notified_fail = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified_fail.append(reason)
 
     result = await run_briefing(
@@ -349,7 +349,7 @@ async def test_print_failure_still_raises(tmp_path):
         raise PrintError("queue not found")
 
     notified_fail = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified_fail.append(reason)
 
     with pytest.raises(PrintError):

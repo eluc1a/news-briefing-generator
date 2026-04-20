@@ -143,7 +143,7 @@ def _briefing_render(input_path: Path, out_path: Path):
 def _briefing_print(settings, pdf_path: Path):
     msg = briefing_printer.print_pdf(pdf_path, queue=settings.print_queue)
     logging.info("print: %s", msg)
-    briefing_notify.notify_printed(topic=settings.ntfy_topic, pages=2)
+    briefing_notify.notify_printed(topic=settings.ntfy_topic, title="The Morning Fox", pages=2)
 
 
 async def _briefing_run(settings):

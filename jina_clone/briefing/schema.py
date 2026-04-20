@@ -52,6 +52,7 @@ class OnThisDay(BaseModel):
 
 
 class Briefing(BaseModel):
+    title: str
     date: str
     volume: str
     location: str = "Arlington, VA"

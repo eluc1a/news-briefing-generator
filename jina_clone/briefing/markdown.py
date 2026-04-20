@@ -5,7 +5,7 @@ from jina_clone.briefing.schema import Briefing
 
 def briefing_to_markdown(b: Briefing) -> str:
     out = StringIO()
-    out.write(f"# {b.date} — Morning Fox · {b.volume}\n\n")
+    out.write(f"# {b.date} — {b.title} · {b.volume}\n\n")
     out.write(f"## Lead: {b.lead.headline}\n")
     out.write(f"*{b.lead.deck}*\n\n")
     out.write(f"{b.lead.body}\n\n")

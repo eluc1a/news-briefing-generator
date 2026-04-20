@@ -54,6 +54,28 @@ def test_rendered_html_contains_panel_item():
     assert "#fcfaf4" not in html_str
 
 
+def test_rendered_html_uses_briefing_title():
+    import json
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+    data = json.loads(FIXTURE.read_text())
+    data["title"] = "The Evening Fox"
+    briefing = Briefing.model_validate(data)
+    tmpl_dir = Path("jina_clone/briefing/templates")
+    env = Environment(
+        loader=FileSystemLoader(str(tmpl_dir)),
+        autoescape=select_autoescape(["html", "j2"]),
+    )
+    tmpl = env.get_template("briefing.html.j2")
+    html_str = tmpl.render(
+        **briefing.model_dump(),
+        generated_at="20:11 ET",
+        iso_date="2026-04-18",
+    )
+    assert html_str.count("The Evening Fox") >= 3
+    assert "The Morning Fox" not in html_str
+
+
 def test_rendered_html_has_no_forced_page_break():
     """The template must not force a page break between main content and briefs."""
     from jinja2 import Environment, FileSystemLoader, select_autoescape

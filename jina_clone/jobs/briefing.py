@@ -48,6 +48,8 @@ async def assemble_briefing(
     *,
     pool: Any,
     config: BriefingConfig,
+    window_hours: float,
+    title: str,
     weather_provider: Callable[[], dict],
     today_label: str,
     volume_label: str,
@@ -82,6 +84,7 @@ async def assemble_briefing(
             categories=list(section.categories),
             per_source_cap=config.per_source_cap,
             limit=section.limit,
+            since_hours=window_hours,
         )
         return section.key, [dict(r) for r in rows]
 
@@ -91,6 +94,7 @@ async def assemble_briefing(
             categories=list(config.briefs.categories),
             per_source_cap=config.per_source_cap,
             limit=config.briefs.limit,
+            since_hours=window_hours,
         )
         return [dict(r) for r in rows]
 
@@ -126,6 +130,7 @@ async def assemble_briefing(
         weather=weather,
         today=today_label,
         volume=volume_label,
+        title=title,
     )
     exclude = {front.lead_source_url}
 
@@ -135,16 +140,22 @@ async def assemble_briefing(
             section=s,
             articles=section_pools[s.key],
             exclude_urls=exclude,
+            title=title,
         )
         for s in config.sections
     ]
-    briefs_coro = generate_briefs(articles=briefs_pool, exclude_urls=exclude)
+    briefs_coro = generate_briefs(
+        articles=briefs_pool,
+        exclude_urls=exclude,
+        title=title,
+    )
 
     panels_and_briefs = await asyncio.gather(*panel_coros, briefs_coro)
     panels: list[Panel] = list(panels_and_briefs[:-1])
     briefs: list[Brief] = panels_and_briefs[-1]
 
     briefing = Briefing(
+        title=title,
         date=iso_date,
         volume=volume_label,
         weather=WeatherStrip(**weather),
@@ -162,7 +173,9 @@ async def run_briefing(
     *,
     pool: Any,
     config: BriefingConfig,
-    briefings_dir: Path,
+    window_hours: float,
+    title: str,
+    pdf_path: Path,
     print_queue: str,
     ntfy_topic: str | None,
     weather_provider: Callable[[], dict],
@@ -189,6 +202,8 @@ async def run_briefing(
         briefing, total = await assemble_briefing(
             pool=pool,
             config=config,
+            window_hours=window_hours,
+            title=title,
             weather_provider=weather_provider,
             today_label=today_label,
             volume_label=volume_label,
@@ -200,21 +215,22 @@ async def run_briefing(
         )
     except NotEnoughArticles as e:
         log.warning(str(e))
-        notify_failure(topic=ntfy_topic, reason=str(e))
+        notify_failure(topic=ntfy_topic, title=title, reason=str(e))
         raise
     except GeneratorFailure as e:
         log.error("generator failed — using emergency edition: %s", e)
         notify_failure(
             topic=ntfy_topic,
+            title=title,
             reason=f"Generator failed; emergency edition printed. {e}",
         )
         briefing = Briefing.model_validate_json(emergency_path.read_text())
+        briefing = briefing.model_copy(update={"title": title})
         emergency_used = True
         total = 0
 
     # --- Step 4: render + print ---
-    briefings_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = briefings_dir / f"{iso_date}.pdf"
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
     render(briefing, pdf_path, generated_at=generated_at_label, iso_date=iso_date)
     log.info("rendered %s (%d bytes)", pdf_path, pdf_path.stat().st_size)
 
@@ -222,11 +238,11 @@ async def run_briefing(
         msg = print_pdf(pdf_path, queue=print_queue)
         log.info("print: %s", msg)
     except Exception as e:
-        notify_failure(topic=ntfy_topic, reason=str(e))
+        notify_failure(topic=ntfy_topic, title=title, reason=str(e))
         raise
 
     if not emergency_used:
-        notify_printed(topic=ntfy_topic, pages=2)
+        notify_printed(topic=ntfy_topic, title=title, pages=2)
         try:
             facts_md = briefing_to_markdown(briefing)
             row_id = await insert_summary(

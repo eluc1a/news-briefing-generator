@@ -6,6 +6,9 @@ import pytest
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.generator import (
     GeneratorFailure,
+    _briefs_system_prompt,
+    _front_matter_system_prompt,
+    _panel_system_prompt,
     generate_briefs,
     generate_front_matter,
     generate_panel,
@@ -61,7 +64,7 @@ async def test_front_matter_happy_path():
 
     fm = await generate_front_matter(
         articles=_articles(), weather=WEATHER,
-        today="Sat", volume="Vol",
+        today="Sat", volume="Vol", title="The Morning Fox",
         call_llm=fake, client=None,
     )
     assert isinstance(fm, FrontMatter)
@@ -75,7 +78,7 @@ async def test_front_matter_retries_once_on_bad_json():
 
     fm = await generate_front_matter(
         articles=_articles(), weather=WEATHER,
-        today="Sat", volume="Vol",
+        today="Sat", volume="Vol", title="The Morning Fox",
         call_llm=fake, client=None,
     )
     assert isinstance(fm, FrontMatter)
@@ -89,7 +92,7 @@ async def test_front_matter_rejects_unknown_lead_url():
     with pytest.raises(GeneratorFailure):
         await generate_front_matter(
             articles=_articles(), weather=WEATHER,
-            today="Sat", volume="Vol",
+            today="Sat", volume="Vol", title="The Morning Fox",
             call_llm=fake, client=None,
         )
 
@@ -101,7 +104,7 @@ async def test_front_matter_double_failure_raises():
     with pytest.raises(GeneratorFailure):
         await generate_front_matter(
             articles=_articles(), weather=WEATHER,
-            today="Sat", volume="Vol",
+            today="Sat", volume="Vol", title="The Morning Fox",
             call_llm=fake, client=None,
         )
 
@@ -121,7 +124,7 @@ async def test_generate_panel_happy_path():
 
     panel = await generate_panel(
         section=NATIONAL_SECTION, articles=_articles(),
-        exclude_urls=set(),
+        exclude_urls=set(), title="The Morning Fox",
         call_llm=fake, client=None,
     )
     assert isinstance(panel, Panel)
@@ -137,7 +140,7 @@ async def test_generate_panel_filters_exclude_urls():
 
     await generate_panel(
         section=NATIONAL_SECTION, articles=_articles(),
-        exclude_urls={"https://a"},
+        exclude_urls={"https://a"}, title="The Morning Fox",
         call_llm=fake, client=None,
     )
     assert "https://a" not in seen_prompts[0]
@@ -151,7 +154,7 @@ async def test_generate_panel_double_failure_raises():
     with pytest.raises(GeneratorFailure):
         await generate_panel(
             section=NATIONAL_SECTION, articles=_articles(),
-            exclude_urls=set(),
+            exclude_urls=set(), title="The Morning Fox",
             call_llm=fake, client=None,
         )
 
@@ -163,7 +166,7 @@ async def test_generate_briefs_happy_path():
         return _briefs_payload()
 
     briefs = await generate_briefs(
-        articles=_articles(), exclude_urls=set(),
+        articles=_articles(), exclude_urls=set(), title="The Morning Fox",
         call_llm=fake, client=None,
     )
     assert isinstance(briefs, list)
@@ -177,6 +180,32 @@ async def test_generate_briefs_double_failure_raises():
 
     with pytest.raises(GeneratorFailure):
         await generate_briefs(
-            articles=_articles(), exclude_urls=set(),
+            articles=_articles(), exclude_urls=set(), title="The Morning Fox",
             call_llm=fake, client=None,
         )
+
+
+# ------------- prompt builders carry title -------------
+
+def test_front_matter_prompt_builder_carries_title():
+    morning = _front_matter_system_prompt("The Morning Fox")
+    evening = _front_matter_system_prompt("The Evening Fox")
+    assert "The Morning Fox" in morning
+    assert "The Evening Fox" in evening
+    assert "The Morning Fox" not in evening
+
+
+def test_panel_prompt_builder_carries_title():
+    morning = _panel_system_prompt(NATIONAL_SECTION, "The Morning Fox")
+    evening = _panel_system_prompt(NATIONAL_SECTION, "The Evening Fox")
+    assert "The Morning Fox" in morning
+    assert "The Evening Fox" in evening
+    assert "The Morning Fox" not in evening
+
+
+def test_briefs_prompt_builder_carries_title():
+    morning = _briefs_system_prompt("The Morning Fox")
+    evening = _briefs_system_prompt("The Evening Fox")
+    assert "The Morning Fox" in morning
+    assert "The Evening Fox" in evening
+    assert "The Morning Fox" not in evening

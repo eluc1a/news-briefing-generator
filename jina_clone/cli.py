@@ -114,6 +114,8 @@ async def _briefing_generate(settings, out_path: Path):
         briefing, _count = await assemble_briefing(
             pool=pool,
             config=cfg,
+            window_hours=12,
+            title="The Morning Fox",
             weather_provider=_stub_weather,
             today_label=_today_label(),
             volume_label=_volume_label(date.today()),
@@ -143,24 +145,38 @@ def _briefing_render(input_path: Path, out_path: Path):
 def _briefing_print(settings, pdf_path: Path):
     msg = briefing_printer.print_pdf(pdf_path, queue=settings.print_queue)
     logging.info("print: %s", msg)
-    briefing_notify.notify_printed(topic=settings.ntfy_topic, pages=2)
+    briefing_notify.notify_printed(topic=settings.ntfy_topic, title="The Morning Fox", pages=2)
 
 
-async def _briefing_run(settings):
+EDITION_TITLES = {
+    "morning": "The Morning Fox",
+    "evening": "The Evening Fox",
+}
+
+
+async def _briefing_run(settings, *, edition: str):
     cfg = load_briefing_config(settings.briefing_categories_file)
+    title = EDITION_TITLES[edition]
+    today = date.today()
+    iso_date = today.isoformat()
+    pdf_path = settings.briefings_dir / f"{iso_date}-{edition}.pdf"
+    volume_label = f"{_volume_label(today)} · {edition.title()}"
+
     pool = await create_pool(settings.database_url)
     try:
         await run_briefing(
             pool=pool,
             config=cfg,
-            briefings_dir=settings.briefings_dir,
+            window_hours=12,
+            title=title,
+            pdf_path=pdf_path,
             print_queue=settings.print_queue,
             ntfy_topic=settings.ntfy_topic,
             weather_provider=_stub_weather,
             today_label=_today_label(),
-            volume_label=_volume_label(date.today()),
+            volume_label=volume_label,
             generated_at_label=datetime.now().strftime("%H:%M ET"),
-            iso_date=date.today().isoformat(),
+            iso_date=iso_date,
             fetch_articles=fetch_section_articles,
             generate_front_matter=briefing_generator.generate_front_matter,
             generate_panel=briefing_generator.generate_panel,
@@ -199,7 +215,13 @@ def main():
     print_p = briefing_sub.add_parser("print")
     print_p.add_argument("pdf", type=Path)
 
-    briefing_sub.add_parser("run")
+    run_p = briefing_sub.add_parser("run")
+    run_p.add_argument(
+        "--edition",
+        required=True,
+        choices=["morning", "evening"],
+        help="Which edition to produce: morning (08:10 ET) or evening (20:10 ET).",
+    )
 
     args = parser.parse_args()
     settings = Settings.from_env()
@@ -216,7 +238,7 @@ def main():
         elif args.action == "print":
             _briefing_print(settings, args.pdf)
         elif args.action == "run":
-            asyncio.run(_briefing_run(settings))
+            asyncio.run(_briefing_run(settings, edition=args.edition))
 
 
 if __name__ == "__main__":

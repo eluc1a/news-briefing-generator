@@ -54,13 +54,17 @@ def _row(link, category, source="s", content="ok"):
 async def test_happy_path_fans_out_six_calls(tmp_path):
     fetched_args: list[dict] = []
     async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
-        fetched_args.append({"categories": list(categories), "limit": limit})
+        fetched_args.append({
+            "categories": list(categories),
+            "limit": limit,
+            "since_hours": since_hours,
+        })
         # Five articles per section + briefs
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
     fm_calls: list[dict] = []
-    async def gen_fm(*, articles, weather, today, volume, **kw):
-        fm_calls.append({"n_articles": len(articles)})
+    async def gen_fm(*, articles, weather, today, volume, title, **kw):
+        fm_calls.append({"n_articles": len(articles), "title": title})
         return FrontMatter(
             lead=GOOD.lead,
             lead_source_url=articles[0]["link"],
@@ -70,19 +74,21 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
         )
 
     panel_calls: list[dict] = []
-    async def gen_panel(*, section, articles, exclude_urls, **kw):
+    async def gen_panel(*, section, articles, exclude_urls, title, **kw):
         panel_calls.append({
             "section": section.key,
             "n_articles": len(articles),
             "excluded": set(exclude_urls),
+            "title": title,
         })
         good_panel = next(p for p in GOOD.panels if p.section == section.title)
         return good_panel
 
     briefs_calls: list[dict] = []
-    async def gen_briefs(*, articles, exclude_urls, **kw):
+    async def gen_briefs(*, articles, exclude_urls, title, **kw):
         briefs_calls.append({"n_articles": len(articles),
-                             "excluded": set(exclude_urls)})
+                             "excluded": set(exclude_urls),
+                             "title": title})
         return list(GOOD.briefs)
 
     rendered = []
@@ -97,9 +103,9 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
         return "ok"
 
     notified_ok = []
-    def notify_ok(*, topic, pages):
+    def notify_ok(*, topic, pages, **_kw):
         notified_ok.append((topic, pages))
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         raise AssertionError("should not notify failure on happy path")
 
     inserted = []
@@ -110,7 +116,9 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
     result = await run_briefing(
         pool=MagicMock(),
         config=CFG,
-        briefings_dir=tmp_path,
+        window_hours=12,
+        title="The Morning Fox",
+        pdf_path=tmp_path / "2026-04-19-morning.pdf",
         print_queue="brother",
         ntfy_topic="fox",
         weather_provider=lambda: WeatherStrip(
@@ -136,6 +144,9 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
     assert result.printed
     assert not result.emergency_used
 
+    # Window passed through to every fetch
+    assert all(a["since_hours"] == 12 for a in fetched_args)
+
     # Five fetch calls — one per section + briefs
     assert len(fetched_args) == 5
     fetched_cat_sets = {frozenset(a["categories"]) for a in fetched_args}
@@ -157,10 +168,141 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
     assert len(briefs_calls) == 1
     assert len(briefs_calls[0]["excluded"]) == 1
 
+    # Every generator received the morning title
+    assert all(c["title"] == "The Morning Fox" for c in fm_calls)
+    assert all(c["title"] == "The Morning Fox" for c in panel_calls)
+    assert all(c["title"] == "The Morning Fox" for c in briefs_calls)
+
     # Print + DB write happened
     assert printed and printed[0][1] == "brother"
     assert notified_ok == [("fox", 2)]
     assert inserted and inserted[0][0] == "briefing"
+
+
+# ------------- evening edition -------------
+
+async def test_run_briefing_evening_edition_threads_title_and_window(tmp_path):
+    """--edition=evening flips title and filename; 12h window flows to DB."""
+    fetched_args: list[dict] = []
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+        fetched_args.append({"since_hours": since_hours})
+        return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
+
+    captured_titles: list[str] = []
+    async def gen_fm(*, articles, weather, today, volume, title, **kw):
+        captured_titles.append(title)
+        return FrontMatter(
+            lead=GOOD.lead, lead_source_url=articles[0]["link"],
+            pull_quote=GOOD.pull_quote,
+            data_point=GOOD.data_point, on_this_day=GOOD.on_this_day,
+        )
+
+    async def gen_panel(*, section, articles, exclude_urls, title, **kw):
+        captured_titles.append(title)
+        return next(p for p in GOOD.panels if p.section == section.title)
+
+    async def gen_briefs(*, articles, exclude_urls, title, **kw):
+        captured_titles.append(title)
+        return list(GOOD.briefs)
+
+    rendered: list = []
+    def render(briefing, out_path, *, generated_at, iso_date):
+        rendered.append(briefing)
+        out_path.write_bytes(b"%PDF-fake")
+        return out_path
+
+    notified_ok: list = []
+    def notify_ok(*, topic, title, pages):
+        notified_ok.append({"title": title, "pages": pages})
+
+    async def insert_summary(pool, **kw):
+        return 42
+
+    pdf_path = tmp_path / "2026-04-19-evening.pdf"
+    result = await run_briefing(
+        pool=MagicMock(),
+        config=CFG,
+        window_hours=12,
+        title="The Evening Fox",
+        pdf_path=pdf_path,
+        print_queue="brother",
+        ntfy_topic="fox",
+        weather_provider=lambda: {"temp_high": 60, "temp_low": 48,
+                                  "conditions": "clear", "sunrise": "6:24",
+                                  "sunset": "7:48", "pollen": "low"},
+        today_label="Sun",
+        volume_label="Vol. I · No. 109 · Evening",
+        generated_at_label="20:11 ET",
+        iso_date="2026-04-19",
+        fetch_articles=fetch,
+        generate_front_matter=gen_fm,
+        generate_panel=gen_panel,
+        generate_briefs=gen_briefs,
+        render=render,
+        print_pdf=lambda pdf, *, queue: "ok",
+        notify_printed=notify_ok,
+        notify_failure=lambda **kw: None,
+        insert_summary=insert_summary,
+        emergency_path=EMERGENCY,
+    )
+
+    assert result.printed
+    assert result.pdf_path == pdf_path
+    # All fetches used the 12-hour window
+    assert all(a["since_hours"] == 12 for a in fetched_args)
+    # All 6 generator calls (1 fm + 4 panels + 1 briefs) carried Evening Fox
+    assert captured_titles == ["The Evening Fox"] * 6
+    # Rendered briefing carries Evening Fox title
+    assert rendered[0].title == "The Evening Fox"
+    # ntfy push used the evening title
+    assert notified_ok == [{"title": "The Evening Fox", "pages": 2}]
+
+
+async def test_run_briefing_emergency_overwrites_title_from_param(tmp_path):
+    """When emergency fires, the fixture's title is replaced by the edition title."""
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+        return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
+
+    async def gen_fm(*, articles, weather, today, volume, title, **kw):
+        raise GeneratorFailure("boom")
+
+    async def noop(**kw):
+        raise AssertionError("should not run")
+
+    rendered: list = []
+    def render(briefing, out_path, *, generated_at, iso_date):
+        rendered.append(briefing.title)
+        out_path.write_bytes(b"%PDF-fake")
+        return out_path
+
+    result = await run_briefing(
+        pool=MagicMock(),
+        config=CFG,
+        window_hours=12,
+        title="The Evening Fox",
+        pdf_path=tmp_path / "emergency.pdf",
+        print_queue="brother",
+        ntfy_topic=None,
+        weather_provider=lambda: {"temp_high": 0, "temp_low": 0,
+                                  "conditions": "x", "sunrise": "-",
+                                  "sunset": "-", "pollen": "low"},
+        today_label="x", volume_label="y",
+        generated_at_label="z", iso_date="2026-04-19",
+        fetch_articles=fetch,
+        generate_front_matter=gen_fm,
+        generate_panel=noop,
+        generate_briefs=noop,
+        render=render,
+        print_pdf=lambda pdf, *, queue: "ok",
+        notify_printed=lambda **kw: None,
+        notify_failure=lambda **kw: None,
+        insert_summary=lambda *a, **kw: (_ for _ in ()).throw(
+            AssertionError("no insert on emergency")
+        ),
+        emergency_path=EMERGENCY,
+    )
+    assert result.emergency_used
+    assert rendered == ["The Evening Fox"]
 
 
 # ------------- not enough articles -------------
@@ -170,7 +312,7 @@ async def test_aborts_when_zero_articles(tmp_path):
         return []
 
     notified = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified.append(reason)
 
     async def noop(*a, **kw):
@@ -180,7 +322,9 @@ async def test_aborts_when_zero_articles(tmp_path):
         await run_briefing(
             pool=MagicMock(),
             config=CFG,
-            briefings_dir=tmp_path,
+            window_hours=12,
+            title="The Morning Fox",
+            pdf_path=tmp_path / "briefing.pdf",
             print_queue="brother",
             ntfy_topic="t",
             weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
@@ -233,7 +377,7 @@ async def test_any_generator_failure_triggers_emergency(tmp_path):
         return out_path
 
     notified_fail = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified_fail.append(reason)
 
     inserted = []
@@ -244,7 +388,9 @@ async def test_any_generator_failure_triggers_emergency(tmp_path):
     result = await run_briefing(
         pool=MagicMock(),
         config=CFG,
-        briefings_dir=tmp_path,
+        window_hours=12,
+        title="The Morning Fox",
+        pdf_path=tmp_path / "briefing.pdf",
         print_queue="brother",
         ntfy_topic="t",
         weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
@@ -291,13 +437,15 @@ async def test_front_matter_failure_also_triggers_emergency(tmp_path):
         return out_path
 
     notified_fail = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified_fail.append(reason)
 
     result = await run_briefing(
         pool=MagicMock(),
         config=CFG,
-        briefings_dir=tmp_path,
+        window_hours=12,
+        title="The Morning Fox",
+        pdf_path=tmp_path / "briefing.pdf",
         print_queue="brother",
         ntfy_topic="t",
         weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
@@ -349,14 +497,16 @@ async def test_print_failure_still_raises(tmp_path):
         raise PrintError("queue not found")
 
     notified_fail = []
-    def notify_fail(*, topic, reason):
+    def notify_fail(*, topic, reason, **_kw):
         notified_fail.append(reason)
 
     with pytest.raises(PrintError):
         await run_briefing(
             pool=MagicMock(),
             config=CFG,
-            briefings_dir=tmp_path,
+            window_hours=12,
+            title="The Morning Fox",
+            pdf_path=tmp_path / "briefing.pdf",
             print_queue="brother",
             ntfy_topic="t",
             weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
@@ -407,6 +557,8 @@ async def test_assemble_briefing_happy_path_returns_briefing_and_count():
     briefing, count = await assemble_briefing(
         pool=MagicMock(),
         config=CFG,
+        window_hours=12,
+        title="The Morning Fox",
         weather_provider=lambda: WeatherStrip(
             temp_high=70, temp_low=50, conditions="x",
             sunrise="6:00", sunset="8:00", pollen="low",
@@ -440,6 +592,8 @@ async def test_assemble_briefing_raises_not_enough_articles():
         await assemble_briefing(
             pool=MagicMock(),
             config=CFG,
+            window_hours=12,
+            title="The Morning Fox",
             weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
                                       "conditions": "x", "sunrise": "6:00",
                                       "sunset": "8:00", "pollen": "low"},
@@ -472,6 +626,8 @@ async def test_assemble_briefing_bubbles_generator_failure():
         await assemble_briefing(
             pool=MagicMock(),
             config=CFG,
+            window_hours=12,
+            title="The Morning Fox",
             weather_provider=lambda: {"temp_high": 70, "temp_low": 50,
                                       "conditions": "x", "sunrise": "6:00",
                                       "sunset": "8:00", "pollen": "low"},

@@ -77,3 +77,19 @@ def test_panel_also_too_few_rejected():
     data["panels"][0]["also"] = data["panels"][0]["also"][:2]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
+
+
+def test_briefing_requires_title():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    del data["title"]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data)
+
+
+def test_briefing_title_round_trips():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    data["title"] = "The Evening Fox"
+    b = Briefing.model_validate(data)
+    assert b.title == "The Evening Fox"

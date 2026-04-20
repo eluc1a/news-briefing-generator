@@ -73,6 +73,17 @@ gossip, and ceremonial events unless they carry demonstrable broader
 consequence."""
 
 
+LENGTH_RULE = """LENGTH RULE — STRICT:
+- Every word cap in the STRUCTURE section below is a HARD LIMIT, not a
+  suggestion. Stay within the range.
+- Prefer the LOW end of each range. A 22-word item that lands at 16
+  words is better than one that lands at 21.
+- If a sentence can be cut without losing a fact, cut it. Filler words
+  ("notably", "importantly", "reportedly") go first.
+- No hedges, no scene-setting, no restating context already in the
+  lede. One sentence per `also` item. Period."""
+
+
 # ==================================================================
 # Section-specific scope rules
 # ==================================================================
@@ -113,12 +124,13 @@ PANEL_STRUCTURE_RULES = """STRUCTURE — every field required:
 - section: exactly the section title passed in the prompt.
 - lede_headline: ≤ 14 words, factual, the strongest single story for this
   section.
-- lede_body: 60-90 words on that story. Facts only.
-- also: 3-4 PanelItem entries, each a distinct event from this section's
-  scope. Every item has:
+- lede_body: 45-60 words on that story. Facts only. NEVER exceed 60 words.
+- also: EXACTLY 3 PanelItem entries, each a distinct event from this
+  section's scope. Every item has:
     - headline: ≤ 8 words, concrete subject + action.
-    - body: 20-30 words, 1-2 sentences, facts only (date, numbers, named
-      actors, percentages). No filler.
+    - body: 15-22 words, EXACTLY ONE SENTENCE, facts only (date, numbers,
+      named actors, percentages). NEVER exceed 22 words. NEVER write two
+      sentences.
 Never fabricate. If fewer than 3 distinct stories exist in the input,
 repeat the strongest adjacent items but do NOT invent facts."""
 
@@ -127,28 +139,30 @@ FRONT_MATTER_STRUCTURE_RULES = """STRUCTURE — every field required:
 - lead: the single most consequential factual story of the day drawn from
   the input articles.
     - headline: ≤ 14 words, factual.
-    - deck: one sentence, ≤ 30 words, sets up the body.
-    - body: 150-250 words. Plain prose. Cover who/what/when/where/how-much.
-    - at_a_glance: 3-4 short factual bullets about the lead, each ≤ 12
-      words.
+    - deck: one sentence, ≤ 25 words, sets up the body.
+    - body: 110-160 words. Plain prose. Cover who/what/when/where/how-much.
+      NEVER exceed 160 words.
+    - at_a_glance: exactly 3 short factual bullets about the lead, each
+      ≤ 10 words.
 - lead_source_url: EXACTLY the `link` value of the input article the lead
   is based on. Must match one of the input URLs verbatim. This field is
   critical — if you hallucinate a URL the briefing will be rejected.
 - pull_quote: a verbatim sentence from one of the input articles, with
   attribution embedded ("..." — Name, Outlet). Never invent a quote.
+  ≤ 35 words total.
 - data_point: `value` is a real attributable figure with units (e.g.
-  "$220 million"); `context` is 35-55 words explaining what it counts and
-  where it comes from. Cite the source organisation.
+  "$220 million"); `context` is 25-35 words explaining what it counts and
+  where it comes from. Cite the source organisation. NEVER exceed 35 words.
 - on_this_day: a verifiable historical event on today's date. `body` is
-  50-70 words, facts only. If unsure of the exact date, pick a well-known
-  event from the week and say so in the title."""
+  35-50 words, facts only. NEVER exceed 50 words. If unsure of the exact
+  date, pick a well-known event from the week and say so in the title."""
 
 
 BRIEFS_STRUCTURE_RULES = """STRUCTURE:
-Output {"briefs": [...]} containing 5-7 Brief entries. Each entry:
+Output {"briefs": [...]} containing 5-6 Brief entries. Each entry:
   - topic: 1-3 word category label ("Cybersecurity", "Markets", "Linux",
     "Investigations").
-  - body: 30-45 words, facts only.
+  - body: 22-30 words, facts only. NEVER exceed 30 words.
 Each brief covers a distinct story. Consequence beats curiosity."""
 
 
@@ -162,6 +176,8 @@ Your task: produce the JSON for the "{section.title}" panel only.
 {VOICE_RULES}
 
 {CONSEQUENCE_RULE}
+
+{LENGTH_RULE}
 
 {PANEL_STRUCTURE_RULES}
 
@@ -179,6 +195,8 @@ data_point, on_this_day) given input articles across all sections.
 
 {CONSEQUENCE_RULE}
 
+{LENGTH_RULE}
+
 {FRONT_MATTER_STRUCTURE_RULES}
 
 Output: valid JSON matching the FrontMatter schema below. No preamble. No
@@ -194,6 +212,8 @@ factual items from the supplementary pool.
 {VOICE_RULES}
 
 {CONSEQUENCE_RULE}
+
+{LENGTH_RULE}
 
 {BRIEFS_STRUCTURE_RULES}
 
@@ -261,7 +281,7 @@ def _build_panel_user_msg(
 
 
 class _BriefsResponse(BaseModel):
-    briefs: list[Brief] = Field(min_length=5, max_length=7)
+    briefs: list[Brief] = Field(min_length=5, max_length=6)
 
 
 def _build_briefs_user_msg(*, articles: list[dict]) -> str:

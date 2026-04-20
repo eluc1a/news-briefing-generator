@@ -209,3 +209,21 @@ def test_briefs_prompt_builder_carries_title():
     assert "The Morning Fox" in morning
     assert "The Evening Fox" in evening
     assert "The Morning Fox" not in evening
+
+
+def test_front_matter_prompt_contains_length_rule():
+    prompt = _front_matter_system_prompt("The Morning Fox")
+    assert "LENGTH RULE" in prompt
+    assert "HARD LIMIT" in prompt
+
+
+def test_panel_prompt_contains_length_rule():
+    prompt = _panel_system_prompt(NATIONAL_SECTION, "The Morning Fox")
+    assert "LENGTH RULE" in prompt
+    assert "HARD LIMIT" in prompt
+
+
+def test_briefs_prompt_contains_length_rule():
+    prompt = _briefs_system_prompt("The Morning Fox")
+    assert "LENGTH RULE" in prompt
+    assert "HARD LIMIT" in prompt

@@ -18,10 +18,13 @@ def render_pdf(
     generated_at: str,
     iso_date: str,
 ) -> Path:
+    from jina_clone.briefing.live_data import weather_glyph
+
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATE_DIR)),
         autoescape=select_autoescape(["html", "j2"]),
     )
+    env.filters["weather_glyph"] = weather_glyph
     tmpl = env.get_template("briefing.html.j2")
     payload = briefing.model_dump()
 

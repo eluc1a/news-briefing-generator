@@ -218,6 +218,24 @@
     margin-bottom: 2px;
     color: #1a1a1a;
   }
+  .hourly-band {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 6px;
+    font-size: 8.5pt;
+    text-align: center;
+  }
+  .hourly-slot { line-height: 1.25; }
+  .hourly-time {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+  }
+  .hourly-icon { font-size: 14pt; margin: 1px 0; }
+  .hourly-temp { font-weight: 500; }
+  .hourly-precip { color: #555; font-size: 8pt; }
 </style>
 </head>
 <body>
@@ -235,6 +253,16 @@
     <span><strong>Sunrise</strong> {{ weather.sunrise }}</span>
     <span><strong>Sunset</strong> {{ weather.sunset }}</span>
     <span><strong>Daylight</strong> {{ weather.daylight }}</span>
+  </div>
+  <div class="hourly-band">
+    {% for slot in hourly.slots %}
+    <div class="hourly-slot">
+      <div class="hourly-time">{{ slot.time_label }}</div>
+      <div class="hourly-icon">{{ slot.code | weather_glyph }}</div>
+      <div class="hourly-temp">{{ slot.temp_f }}°</div>
+      <div class="hourly-precip">{{ slot.precip_pct }}%</div>
+    </div>
+    {% endfor %}
   </div>
 </div>
 

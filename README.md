@@ -93,6 +93,49 @@ ls summaries/
 cat summaries/$(ls -t summaries/ | head -1)
 ```
 
+## Running a briefing manually
+
+The briefing is a separate pipeline from `summarize`: it generates a
+2-page broadsheet-style PDF (4 panels + pull-quote + briefs), renders it
+with WeasyPrint, and sends it to the `brother` CUPS queue duplex
+long-edge. Cron fires it twice daily (08:10 ET morning, 20:10 ET
+evening). To kick one off by hand — for example, if you ask Claude to
+print "the latest news as of now":
+
+```bash
+./.venv/bin/python -m jina_clone briefing run --edition=evening
+# or --edition=morning
+```
+
+Pick the edition to match the time of day. Output: `briefings/YYYY-MM-DD-<edition>.pdf`, a `brother-N` print job, and a `news_summaries` row.
+
+Requires `GEMINI_API_KEY` in `.env` and that `lpstat -p brother` reports
+the printer idle + enabled. If a previous cron run left a root-owned
+PDF at the target path, `rm` it first.
+
+### Re-print the last rendered PDF
+
+If the print jams or you just want another copy, skip the LLM and reuse
+the existing PDF:
+
+```bash
+lp -d brother -o sides=two-sided-long-edge briefings/2026-04-19-evening.pdf
+```
+
+Same flag the job uses internally (`jina_clone/briefing/printer.py`).
+
+### Subcommands
+
+`briefing run` is the all-in-one. The individual stages are also
+exposed if you want to iterate on one without re-running the others:
+
+| Command                                    | What it does                                                |
+|--------------------------------------------|-------------------------------------------------------------|
+| `briefing generate [--out path.json]`      | Fetch + LLM only. Writes the briefing JSON.                 |
+| `briefing render <input.json> [--out …]`   | JSON → PDF via WeasyPrint. No network, no print.            |
+| `briefing print <file.pdf>`                | Submit an existing PDF to `brother` with the duplex flag.   |
+| `briefing run --edition=morning\|evening`  | All of the above, plus logs a `news_summaries` row.         |
+
 ## Adding new sources
 
 Every source is an entry in `sources.yaml` at the repo root. The file is

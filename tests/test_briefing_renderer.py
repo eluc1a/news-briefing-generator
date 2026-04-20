@@ -228,3 +228,22 @@ def test_renders_markets_block():
     assert "tabular-nums" in html_str
 
 
+def test_render_pdf_fits_two_pages_with_full_density(tmp_path):
+    """Regression guard for the live-data + density work: with 4 also
+    per panel, 6 briefs, hourly band, markets block, and extras (data
+    point + on this day) all included, the rendered PDF is exactly 2
+    pages. This is the load-bearing fit-test."""
+    import pypdf
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    # Sanity: fixture is at full density.
+    for panel in briefing.panels:
+        assert len(panel.also) == 4
+    assert len(briefing.briefs) == 6
+    assert len(briefing.hourly.slots) == 4
+    assert len(briefing.markets.items) == 6
+
+    out = tmp_path / "briefing.pdf"
+    render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-20")
+    reader = pypdf.PdfReader(str(out))
+    assert len(reader.pages) == 2
+

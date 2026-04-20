@@ -26,7 +26,6 @@ def test_sample_fixture_validates():
         for item in panel.also:
             assert item.headline
             assert item.body
-    # Briefs range tightened from 6-9 to 5-7.
     assert 5 <= len(briefing.briefs) <= 6
 
 

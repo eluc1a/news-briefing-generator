@@ -33,7 +33,7 @@ class Panel(BaseModel):
     ]
     lede_headline: str
     lede_body: str
-    also: list[PanelItem] = Field(min_length=3, max_length=4)
+    also: list[PanelItem] = Field(min_length=3, max_length=3)
 
 
 class Brief(BaseModel):
@@ -60,7 +60,7 @@ class Briefing(BaseModel):
     lead: LeadStory
     panels: list[Panel] = Field(min_length=4, max_length=4)
     pull_quote: str
-    briefs: list[Brief] = Field(min_length=5, max_length=7)
+    briefs: list[Brief] = Field(min_length=5, max_length=6)
     data_point: DataPoint
     on_this_day: OnThisDay
 

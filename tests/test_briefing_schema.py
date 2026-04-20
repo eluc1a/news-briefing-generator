@@ -22,12 +22,12 @@ def test_sample_fixture_validates():
     for panel in briefing.panels:
         assert panel.lede_headline
         assert panel.lede_body
-        assert 3 <= len(panel.also) <= 4
+        assert len(panel.also) == 3
         for item in panel.also:
             assert item.headline
             assert item.body
     # Briefs range tightened from 6-9 to 5-7.
-    assert 5 <= len(briefing.briefs) <= 7
+    assert 5 <= len(briefing.briefs) <= 6
 
 
 def test_three_panels_rejected():
@@ -50,7 +50,7 @@ def test_briefs_too_many_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
     # Double the briefs to push above the new ceiling of 7.
-    data["briefs"] = (data["briefs"] * 2)[:8]
+    data["briefs"] = (data["briefs"] * 2)[:7]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 
@@ -75,6 +75,16 @@ def test_panel_also_too_few_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
     data["panels"][0]["also"] = data["panels"][0]["also"][:2]
+    with pytest.raises(ValidationError):
+        Briefing.model_validate(data)
+
+
+def test_panel_also_too_many_rejected():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    # Push to 4 `also` items — must now fail (new ceiling is 3).
+    first_item = data["panels"][0]["also"][0]
+    data["panels"][0]["also"] = data["panels"][0]["also"] + [first_item]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
 

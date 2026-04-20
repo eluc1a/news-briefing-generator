@@ -125,3 +125,48 @@ def test_rendered_html_respects_include_extras_flag():
     )
     assert "Data point of the day" not in html_without
     assert "On this day" not in html_without
+
+
+def test_render_drops_extras_on_overflow(tmp_path):
+    """If content overflows to a 3rd page, re-render without data_point/on_this_day."""
+    import pypdf
+
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    # Inflate each brief so the first render with extras spills to 3 pages,
+    # but dropping extras brings it back under 2 pages. (Inflating the lead
+    # body instead doesn't exercise the safety net — lead-body overflow
+    # occupies its own page independent of whether extras are rendered.)
+    bloat = " ".join(["Additional filler content."] * 15)
+    briefing = briefing.model_copy(update={
+        "briefs": [
+            br.model_copy(update={"body": br.body + " " + bloat})
+            for br in briefing.briefs
+        ],
+    })
+
+    out = tmp_path / "overflow.pdf"
+    render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-18")
+
+    reader = pypdf.PdfReader(str(out))
+    assert len(reader.pages) == 2
+    # Extras must be gone on the overflow path. We assert on the section
+    # headers rather than on data_point.value / on_this_day.year_and_title
+    # because those strings can appear organically in the lead body (e.g.
+    # the fixture's lead mentions "10^25 FLOPs" alongside the data point).
+    text = "".join(page.extract_text() for page in reader.pages)
+    assert "Data point of the day" not in text
+    assert "On this day" not in text
+
+
+def test_render_keeps_extras_when_fits(tmp_path):
+    """Happy path: fixture fits on 2 pages, extras are present."""
+    import pypdf
+
+    briefing = Briefing.model_validate_json(FIXTURE.read_text())
+    out = tmp_path / "normal.pdf"
+    render_pdf(briefing, out, generated_at="08:11 ET", iso_date="2026-04-18")
+
+    reader = pypdf.PdfReader(str(out))
+    assert len(reader.pages) == 2
+    text = "".join(page.extract_text() for page in reader.pages)
+    assert briefing.data_point.value in text

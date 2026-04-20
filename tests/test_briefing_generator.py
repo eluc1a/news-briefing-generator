@@ -215,15 +215,18 @@ def test_front_matter_prompt_contains_length_rule():
     prompt = _front_matter_system_prompt("The Morning Fox")
     assert "LENGTH RULE" in prompt
     assert "HARD LIMIT" in prompt
+    assert prompt.index("CONSEQUENCE RULE") < prompt.index("LENGTH RULE") < prompt.index("STRUCTURE")
 
 
 def test_panel_prompt_contains_length_rule():
     prompt = _panel_system_prompt(NATIONAL_SECTION, "The Morning Fox")
     assert "LENGTH RULE" in prompt
     assert "HARD LIMIT" in prompt
+    assert prompt.index("CONSEQUENCE RULE") < prompt.index("LENGTH RULE") < prompt.index("STRUCTURE")
 
 
 def test_briefs_prompt_contains_length_rule():
     prompt = _briefs_system_prompt("The Morning Fox")
     assert "LENGTH RULE" in prompt
     assert "HARD LIMIT" in prompt
+    assert prompt.index("CONSEQUENCE RULE") < prompt.index("LENGTH RULE") < prompt.index("STRUCTURE")

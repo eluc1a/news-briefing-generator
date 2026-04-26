@@ -8,6 +8,7 @@ _PROVIDER_KEY = {
     "claude": "ANTHROPIC_API_KEY",
     "openai": "OPENAI_API_KEY",
     "gemini": "GEMINI_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
 }
 
 
@@ -42,6 +43,10 @@ class Settings:
     stock_api_key: str = ""
     fred_api_key: str = ""
     api_keys: dict[str, str] = field(default_factory=dict)
+    openrouter_provider_order: list[str] = field(default_factory=list)
+    openrouter_allow_fallbacks: bool = False
+    openrouter_app_url: str = ""
+    openrouter_app_title: str = ""
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -55,6 +60,15 @@ class Settings:
         weather_api_key = os.getenv("WEATHER_API_KEY", "")
         stock_api_key = os.getenv("STOCK_API_KEY", "")
         fred_api_key = os.getenv("FRED_API_KEY", "")
+        order_raw = os.getenv("OPENROUTER_PROVIDER_ORDER", "")
+        openrouter_provider_order = [p.strip() for p in order_raw.split(",") if p.strip()]
+        openrouter_allow_fallbacks = os.getenv("OPENROUTER_ALLOW_FALLBACKS", "false").lower() in (
+            "true",
+            "1",
+            "yes",
+        )
+        openrouter_app_url = os.getenv("OPENROUTER_APP_URL", "")
+        openrouter_app_title = os.getenv("OPENROUTER_APP_TITLE", "")
         return cls(
             database_url=database_url,
             sources_file=Path(os.getenv("SOURCES_FILE", "sources.yaml")),
@@ -78,6 +92,10 @@ class Settings:
             stock_api_key=stock_api_key,
             fred_api_key=fred_api_key,
             api_keys=api_keys,
+            openrouter_provider_order=openrouter_provider_order,
+            openrouter_allow_fallbacks=openrouter_allow_fallbacks,
+            openrouter_app_url=openrouter_app_url,
+            openrouter_app_title=openrouter_app_title,
         )
 
 

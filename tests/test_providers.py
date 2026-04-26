@@ -36,6 +36,40 @@ def test_build_provider_rejects_unknown_provider():
         build_provider(_settings("banana", {}))
 
 
+def test_build_provider_openrouter_requires_api_key():
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+        build_provider(_settings("openrouter", {}))
+
+
+def test_build_provider_openrouter_without_routing_omits_provider_field():
+    p = build_provider(_settings("openrouter", {"OPENROUTER_API_KEY": "k"}))
+    assert p.name == "openrouter"
+    assert p.model == "deepseek/deepseek-v4-pro"
+    assert p._provider_routing is None
+    assert p._extra_headers == {}
+
+
+def test_build_provider_openrouter_pins_to_configured_upstream():
+    settings = _settings("openrouter", {"OPENROUTER_API_KEY": "k"})
+    settings.openrouter_provider_order = ["deepseek"]
+    settings.openrouter_allow_fallbacks = False
+    settings.openrouter_app_url = "https://example.com"
+    settings.openrouter_app_title = "MyApp"
+    p = build_provider(settings)
+    assert p._provider_routing == {"order": ["deepseek"], "allow_fallbacks": False}
+    assert p._extra_headers == {
+        "HTTP-Referer": "https://example.com",
+        "X-OpenRouter-Title": "MyApp",
+    }
+
+
+def test_build_provider_openrouter_respects_model_override():
+    settings = _settings("openrouter", {"OPENROUTER_API_KEY": "k"})
+    settings.llm_model = "anthropic/claude-sonnet-4-5"
+    p = build_provider(settings)
+    assert p.model == "anthropic/claude-sonnet-4-5"
+
+
 def test_parse_json_response_happy_path():
     raw = '{"headline": "H", "body": "B"}'
     assert parse_json_response(raw) == {"headline": "H", "body": "B"}

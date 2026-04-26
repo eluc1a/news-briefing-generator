@@ -49,6 +49,7 @@ def test_settings_from_env_does_not_require_api_key(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.setenv("DATABASE_URL", "postgresql://dummy")
     settings = Settings.from_env()
     assert settings.llm_provider == "gemini"
@@ -78,6 +79,36 @@ def test_settings_briefing_defaults(monkeypatch):
     assert s.ntfy_topic is None
     assert str(s.briefing_categories_file).endswith("briefing_categories.yaml")
     assert str(s.briefings_dir).endswith("briefings")
+
+
+def test_settings_from_env_parses_openrouter_routing(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://dummy")
+    monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "k")
+    monkeypatch.setenv("OPENROUTER_PROVIDER_ORDER", "deepseek, fireworks ")
+    monkeypatch.setenv("OPENROUTER_ALLOW_FALLBACKS", "true")
+    monkeypatch.setenv("OPENROUTER_APP_URL", "https://example.com")
+    monkeypatch.setenv("OPENROUTER_APP_TITLE", "MyApp")
+
+    s = Settings.from_env()
+
+    assert s.openrouter_provider_order == ["deepseek", "fireworks"]
+    assert s.openrouter_allow_fallbacks is True
+    assert s.openrouter_app_url == "https://example.com"
+    assert s.openrouter_app_title == "MyApp"
+
+
+def test_settings_openrouter_routing_defaults(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://dummy")
+    monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "k")
+    monkeypatch.delenv("OPENROUTER_PROVIDER_ORDER", raising=False)
+    monkeypatch.delenv("OPENROUTER_ALLOW_FALLBACKS", raising=False)
+
+    s = Settings.from_env()
+
+    assert s.openrouter_provider_order == []
+    assert s.openrouter_allow_fallbacks is False
 
 
 def test_settings_briefing_overrides(monkeypatch, tmp_path):

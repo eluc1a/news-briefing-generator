@@ -31,7 +31,6 @@ def build_provider(settings) -> "LLMProvider":
     from jina_clone.summarizer.claude import ClaudeProvider
     from jina_clone.summarizer.openai import OpenAIProvider
     from jina_clone.summarizer.gemini import GeminiProvider
-    from jina_clone.summarizer.openrouter import OpenRouterProvider
 
     key_name = _PROVIDER_KEY.get(settings.llm_provider)
     if key_name is None:
@@ -46,18 +45,4 @@ def build_provider(settings) -> "LLMProvider":
         return OpenAIProvider(api_key, settings.llm_model)
     if settings.llm_provider == "gemini":
         return GeminiProvider(api_key, settings.llm_model)
-    if settings.llm_provider == "openrouter":
-        provider_routing: dict | None = None
-        if settings.openrouter_provider_order:
-            provider_routing = {
-                "order": list(settings.openrouter_provider_order),
-                "allow_fallbacks": settings.openrouter_allow_fallbacks,
-            }
-        return OpenRouterProvider(
-            api_key,
-            settings.llm_model,
-            provider_routing=provider_routing,
-            app_url=settings.openrouter_app_url or None,
-            app_title=settings.openrouter_app_title or None,
-        )
     raise ValueError(f"Unknown provider: {settings.llm_provider}")

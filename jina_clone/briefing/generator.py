@@ -1,18 +1,23 @@
 import json
 import logging
+import os
+import re
 from typing import Awaitable, Callable, TypeVar
 
+from anthropic import AsyncAnthropic
 from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
-from jina_clone.briefing.llm import BriefingLLM, build_briefing_llm_from_env
 from jina_clone.briefing.schema import (
     Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel,
 )
 
 
+MODEL = os.environ.get("LLM_MODEL", "claude-sonnet-4-6")
+MAX_TOKENS = 4096
 PER_ARTICLE_BODY_CAP = 3000
 
+_FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
 _log = logging.getLogger(__name__)
 
 # Per-run usage accumulator. Not thread-safe — relies on briefing runs being
@@ -295,23 +300,46 @@ def _build_briefs_user_msg(*, articles: list[dict]) -> str:
 
 
 # ==================================================================
-# Provider plumbing
+# Real Anthropic call
 # ==================================================================
 
-def _make_default_call_llm(system_prompt: str) -> tuple[CallLLM, object]:
-    """Build the default `call_llm` for production use.
+async def _real_call_llm(
+    client: AsyncAnthropic, prompt: str, *, system: str,
+) -> str:
+    response = await client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_TOKENS,
+        system=[
+            {
+                "type": "text",
+                "text": system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+        messages=[{"role": "user", "content": prompt}],
+    )
+    u = response.usage
+    entry = {
+        "input": u.input_tokens,
+        "output": u.output_tokens,
+        "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0,
+        "cache_creation": getattr(u, "cache_creation_input_tokens", 0) or 0,
+    }
+    _USAGE.append(entry)
+    _log.info(
+        "briefing claude call: input=%d output=%d cache_read=%d cache_creation=%d",
+        entry["input"], entry["output"], entry["cache_read"], entry["cache_creation"],
+    )
+    text = "".join(
+        block.text for block in response.content if block.type == "text"
+    )
+    return _FENCE.sub("", text).strip()
 
-    Pulls a `BriefingLLM` from env config. Returned tuple is
-    `(call_llm, sentinel_client)` to fit the existing
-    `(client, prompt) -> str` callable signature used by tests; the
-    sentinel is unused.
-    """
-    llm = build_briefing_llm_from_env()
 
-    async def call_llm(_client: object, prompt: str) -> str:
-        return await llm.call(system_prompt, prompt)
-
-    return call_llm, llm
+def _ensure_client(client: AsyncAnthropic | None) -> AsyncAnthropic:
+    if client is None:
+        return AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    return client
 
 
 # Two-try retry loop. The ``parse`` callable raises ValidationError
@@ -356,17 +384,14 @@ async def generate_front_matter(
     volume: str,
     title: str,
     call_llm: CallLLM | None = None,
-    llm: BriefingLLM | None = None,
+    client: AsyncAnthropic | None = None,
 ) -> FrontMatter:
     system_prompt = _front_matter_system_prompt(title)
-    client: object = llm
     if call_llm is None:
-        if llm is None:
-            call_llm, client = _make_default_call_llm(system_prompt)
-        else:
-            async def call_llm_wrapper(_cl: object, prompt: str) -> str:
-                return await llm.call(system_prompt, prompt)
-            call_llm = call_llm_wrapper
+        client = _ensure_client(client)
+        async def call_llm_wrapper(cl: object, prompt: str) -> str:
+            return await _real_call_llm(cl, prompt, system=system_prompt)
+        call_llm = call_llm_wrapper
 
     user_msg = _build_front_matter_user_msg(
         articles=articles, weather=weather, today=today, volume=volume,
@@ -395,17 +420,14 @@ async def generate_panel(
     exclude_urls: set[str],
     title: str,
     call_llm: CallLLM | None = None,
-    llm: BriefingLLM | None = None,
+    client: AsyncAnthropic | None = None,
 ) -> Panel:
     system_prompt = _panel_system_prompt(section, title)
-    client: object = llm
     if call_llm is None:
-        if llm is None:
-            call_llm, client = _make_default_call_llm(system_prompt)
-        else:
-            async def call_llm_wrapper(_cl: object, prompt: str) -> str:
-                return await llm.call(system_prompt, prompt)
-            call_llm = call_llm_wrapper
+        client = _ensure_client(client)
+        async def call_llm_wrapper(cl: object, prompt: str) -> str:
+            return await _real_call_llm(cl, prompt, system=system_prompt)
+        call_llm = call_llm_wrapper
 
     filtered = _filter_excluded(articles, exclude_urls)
     user_msg = _build_panel_user_msg(section=section, articles=filtered)
@@ -422,17 +444,14 @@ async def generate_briefs(
     exclude_urls: set[str],
     title: str,
     call_llm: CallLLM | None = None,
-    llm: BriefingLLM | None = None,
+    client: AsyncAnthropic | None = None,
 ) -> list[Brief]:
     system_prompt = _briefs_system_prompt(title)
-    client: object = llm
     if call_llm is None:
-        if llm is None:
-            call_llm, client = _make_default_call_llm(system_prompt)
-        else:
-            async def call_llm_wrapper(_cl: object, prompt: str) -> str:
-                return await llm.call(system_prompt, prompt)
-            call_llm = call_llm_wrapper
+        client = _ensure_client(client)
+        async def call_llm_wrapper(cl: object, prompt: str) -> str:
+            return await _real_call_llm(cl, prompt, system=system_prompt)
+        call_llm = call_llm_wrapper
 
     filtered = _filter_excluded(articles, exclude_urls)
     user_msg = _build_briefs_user_msg(articles=filtered)

@@ -65,7 +65,7 @@ async def test_front_matter_happy_path():
     fm = await generate_front_matter(
         articles=_articles(), weather=WEATHER,
         today="Sat", volume="Vol", title="The Morning Fox",
-        call_llm=fake, llm=None,
+        call_llm=fake, client=None,
     )
     assert isinstance(fm, FrontMatter)
     assert fm.lead_source_url == "https://a"
@@ -79,7 +79,7 @@ async def test_front_matter_retries_once_on_bad_json():
     fm = await generate_front_matter(
         articles=_articles(), weather=WEATHER,
         today="Sat", volume="Vol", title="The Morning Fox",
-        call_llm=fake, llm=None,
+        call_llm=fake, client=None,
     )
     assert isinstance(fm, FrontMatter)
 
@@ -93,7 +93,7 @@ async def test_front_matter_rejects_unknown_lead_url():
         await generate_front_matter(
             articles=_articles(), weather=WEATHER,
             today="Sat", volume="Vol", title="The Morning Fox",
-            call_llm=fake, llm=None,
+            call_llm=fake, client=None,
         )
 
 
@@ -105,7 +105,7 @@ async def test_front_matter_double_failure_raises():
         await generate_front_matter(
             articles=_articles(), weather=WEATHER,
             today="Sat", volume="Vol", title="The Morning Fox",
-            call_llm=fake, llm=None,
+            call_llm=fake, client=None,
         )
 
 
@@ -125,7 +125,7 @@ async def test_generate_panel_happy_path():
     panel = await generate_panel(
         section=NATIONAL_SECTION, articles=_articles(),
         exclude_urls=set(), title="The Morning Fox",
-        call_llm=fake, llm=None,
+        call_llm=fake, client=None,
     )
     assert isinstance(panel, Panel)
     assert panel.section == "National"
@@ -141,7 +141,7 @@ async def test_generate_panel_filters_exclude_urls():
     await generate_panel(
         section=NATIONAL_SECTION, articles=_articles(),
         exclude_urls={"https://a"}, title="The Morning Fox",
-        call_llm=fake, llm=None,
+        call_llm=fake, client=None,
     )
     assert "https://a" not in seen_prompts[0]
     assert "https://b" in seen_prompts[0]
@@ -155,7 +155,7 @@ async def test_generate_panel_double_failure_raises():
         await generate_panel(
             section=NATIONAL_SECTION, articles=_articles(),
             exclude_urls=set(), title="The Morning Fox",
-            call_llm=fake, llm=None,
+            call_llm=fake, client=None,
         )
 
 
@@ -167,7 +167,7 @@ async def test_generate_briefs_happy_path():
 
     briefs = await generate_briefs(
         articles=_articles(), exclude_urls=set(), title="The Morning Fox",
-        call_llm=fake, llm=None,
+        call_llm=fake, client=None,
     )
     assert isinstance(briefs, list)
     assert len(briefs) >= 5
@@ -181,7 +181,7 @@ async def test_generate_briefs_double_failure_raises():
     with pytest.raises(GeneratorFailure):
         await generate_briefs(
             articles=_articles(), exclude_urls=set(), title="The Morning Fox",
-            call_llm=fake, llm=None,
+            call_llm=fake, client=None,
         )
 
 

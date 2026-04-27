@@ -128,9 +128,12 @@ PANEL_STRUCTURE_RULES = """STRUCTURE — every field required:
 - also: EXACTLY 4 PanelItem entries, each a distinct event from this
   section's scope. Every item has:
     - headline: ≤ 8 words, concrete subject + action.
-    - body: 15-22 words, EXACTLY ONE SENTENCE, facts only (date, numbers,
-      named actors, percentages). NEVER exceed 22 words. NEVER write two
-      sentences.
+    - body: 15-22 words, facts only (date, numbers, named actors,
+      percentages). One or two short factual clauses. When the item
+      carries two distinct facts, separate them with " · " (one space,
+      a Unicode middle dot U+00B7, one space). NEVER glue two facts
+      together with no separator. NEVER exceed 22 words.
+      Example: "Cal Fire reports 78% containment of the Vista Lake fire · 12,400 acres burned, no fatalities."
 Never fabricate. If fewer than 4 distinct stories exist in the input,
 repeat the strongest adjacent items but do NOT invent facts."""
 

@@ -176,14 +176,20 @@
     margin-top: 6px;
     padding-top: 4px;
   }
-  .panel-item {
+  .panel-also-text {
     font-size: 8.5pt;
     line-height: 1.3;
-    margin-bottom: 3px;
     color: #1a1a1a;
+    text-align: justify;
+    hyphens: auto;
+    margin: 0;
   }
-  .panel-item strong {
+  .panel-also-text strong {
     font-weight: 500;
+  }
+  .panel-also-sep {
+    color: #888;
+    margin: 0 3px;
   }
 
   .pull-quote {
@@ -300,11 +306,12 @@
     <p class="panel-lede">{{ panel.lede_headline }}</p>
     <p class="panel-body">{{ panel.lede_body }}</p>
     <div class="panel-also">
-      {% for item in panel.also %}
-      <div class="panel-item">
-        <strong>{{ item.headline }}</strong> {{ item.body }}
-      </div>
-      {% endfor %}
+      <p class="panel-also-text">
+        {%- for item in panel.also -%}
+          {%- if not loop.first %} <span class="panel-also-sep">&bull;</span> {% endif -%}
+          <strong>{{ item.headline }}</strong> {{ item.body }}
+        {%- endfor -%}
+      </p>
     </div>
   </div>
   {% endfor %}
@@ -321,11 +328,12 @@
     <p class="panel-lede">{{ panel.lede_headline }}</p>
     <p class="panel-body">{{ panel.lede_body }}</p>
     <div class="panel-also">
-      {% for item in panel.also %}
-      <div class="panel-item">
-        <strong>{{ item.headline }}</strong> {{ item.body }}
-      </div>
-      {% endfor %}
+      <p class="panel-also-text">
+        {%- for item in panel.also -%}
+          {%- if not loop.first %} <span class="panel-also-sep">&bull;</span> {% endif -%}
+          <strong>{{ item.headline }}</strong> {{ item.body }}
+        {%- endfor -%}
+      </p>
     </div>
   </div>
   {% endfor %}

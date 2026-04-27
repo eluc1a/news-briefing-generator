@@ -605,7 +605,7 @@ async def test_assemble_briefing_happy_path_returns_briefing_and_count():
         generate_briefs=gen_briefs,
     )
     assert isinstance(briefing, Briefing)
-    assert briefing.date == "2026-04-19"
+    assert briefing.date == "Sat"
     assert briefing.volume == "Vol"
     assert len(briefing.panels) == 4
     # 5 articles per section (4 sections) + 5 briefs = 25 total

@@ -162,7 +162,7 @@ async def assemble_briefing(
 
     briefing = Briefing(
         title=title,
-        date=iso_date,
+        date=today_label,
         volume=volume_label,
         weather=WeatherStrip(**weather),
         hourly=hourly,

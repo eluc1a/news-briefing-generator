@@ -129,11 +129,33 @@ PANEL_STRUCTURE_RULES = """STRUCTURE — every field required:
   section's scope. Every item has:
     - headline: ≤ 8 words, concrete subject + action.
     - body: 15-22 words, facts only (date, numbers, named actors,
-      percentages). One or two short factual clauses. When the item
-      carries two distinct facts, separate them with " · " (one space,
-      a Unicode middle dot U+00B7, one space). NEVER glue two facts
-      together with no separator. NEVER exceed 22 words.
-      Example: "Cal Fire reports 78% containment of the Vista Lake fire · 12,400 acres burned, no fatalities."
+      percentages). Separate EVERY distinct fact with " · " (one space,
+      a Unicode middle dot U+00B7, one space) — no cap on how many
+      separators a body may have.
+
+      EACH ` · `-SEPARATED UNIT MUST BE A GRAMMATICALLY COMPLETE SENTENCE
+      OR A CLEAN STANDALONE PHRASE. Read each unit aloud in isolation —
+      if it reads as broken English, rewrite. Specifically:
+        * After a reporting verb (`said`, `reported`, `confirmed`,
+          `announced`, `noted`, `stated`) followed by a date/time, you
+          MUST insert ` · ` BEFORE the object clause. Never elide the
+          word "that" by gluing the object clause directly onto
+          "<verb> <date>".
+        * Never glue facts together with "and", "after", participial
+          phrases (e.g. ", determining X"), or relative clauses
+          (e.g. "...he argued would...").
+        * A noun phrase used as a standalone fact is fine
+          ("12,400 acres burned", "no fatalities") — but only if it
+          reads cleanly on its own.
+
+      NEVER exceed 22 words.
+
+      Examples:
+        GOOD (3 facts, each standalone): "Cal Fire reports 78% containment of the Vista Lake fire · 12,400 acres burned · no fatalities"
+        GOOD (3 facts, reporting verb correctly broken): "U.S. Southern Command reported Sunday · a strike on a drug vessel killed 3 · 186 dead since September"
+        BAD (`reported Sunday` glued to object clause): "U.S. Southern Command reported Sunday a strike on a drug vessel killed 3"
+        BAD (run-on via "after"): "Africa Corps withdrew from Kidal after Tuareg rebels attacked across Mali"
+        BAD (run-on via dropped "that" + relative clause): "AA closed the door on merger talks he argued would have created jobs"
 Never fabricate. If fewer than 4 distinct stories exist in the input,
 repeat the strongest adjacent items but do NOT invent facts."""
 

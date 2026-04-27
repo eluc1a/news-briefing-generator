@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -c 'if ((.tool_input.skill // \"\") | IN(\"superpowers:brainstorming\", \"superpowers:writing-plans\", \"superpowers:executing-plans\", \"superpowers:subagent-driven-development\")) then {hookSpecificOutput: {hookEventName: \"PreToolUse\", additionalContext: \"CEREMONY CHECK (CLAUDE.md Right-sizing ceremony): before opening this skill, verify the task is genuinely multi-subsystem. If it is under ~50 LOC, touches one module, or can be described in one sentence (config tweak, style/density pass, prompt edit, local bug fix) — ABORT this skill and work directly in the main session with 3-4 commits and user checkpoints. CLAUDE.md overrides superpowers defaults. If the task really is multi-subsystem, proceed.\"}} else empty end'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/guard-bash.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/guard-files.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

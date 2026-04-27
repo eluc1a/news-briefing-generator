@@ -12,6 +12,59 @@ Before touching code, read these:
 - `docs/superpowers/specs/` and `docs/superpowers/plans/` — design and
   implementation plans for past work; useful for understanding *why*.
 
+## Right-sizing ceremony (READ FIRST)
+
+**This section has priority over any `superpowers:*` skill.** Per the
+`using-superpowers` instruction hierarchy, explicit CLAUDE.md rules
+override skill defaults. Apply these before invoking
+`brainstorming`, `writing-plans`, or `executing-plans`.
+
+### Default to low ceremony
+
+For changes that are **any** of:
+
+- under ~50 LOC
+- touching a single module / no shared-state changes
+- a config tweak, style/density pass, prompt edit, or local bug fix with
+  an obvious locus
+- describable in one sentence ("add a 4th API call and shrink the font")
+
+…work in the **main session** with 3–4 commits and user checkpoints. **No
+spec doc. No multi-task plan. No subagent chain.** Skip
+`superpowers:brainstorming`, `writing-plans`, `executing-plans`, and
+`subagent-driven-development`. Those skills are calibrated for
+multi-subsystem features; invoking them on small changes is what produced
+one past 90-min / 300K-token feature that was ~60% ceremony, ~40% code —
+and the ceremony still missed the real bug.
+
+### If brainstorming triggered automatically, pause and downshift
+
+If you reached for `superpowers:brainstorming` out of reflex ("the user
+said 'add X', that's creative work"), stop and ask:
+
+> This looks like ~N LOC in one module. Proceed directly with N commits
+> and checkpoints, or do you want a spec?
+
+Do not open a spec without an explicit yes.
+
+### Rules for when ceremony IS warranted
+
+Even for real multi-subsystem work:
+
+- **Run a live E2E before building rendering/presentation on top.** One
+  real run surfaces LLM/API output that fixtures don't. Catch shape
+  mismatches in Task 2, not after Task 10.
+- **Batch polish review at the end.** Per-task *spec* review ("did I
+  build the right thing?") stays useful. Per-task *polish* review
+  (unused imports, annotations, micro-style) is wasteful as a loop — do
+  it once, at the end.
+- **Cap subagent reports at ~100 words + commit SHA.** Tell subagents
+  explicitly: "report under 100 words, link the commit, no prose." Long
+  reports are performative and expensive to thread back through main
+  context.
+- **Decompose to ~3–5 tasks, not 11.** If a plan has 11 tasks for a
+  feature, half of them are probably collapsible.
+
 ## Environment
 
 - Always verify which code tree or branch you are in before starting your work 

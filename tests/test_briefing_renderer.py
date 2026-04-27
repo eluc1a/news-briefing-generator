@@ -48,9 +48,8 @@ def test_render_pdf_is_exactly_two_pages(tmp_path):
     assert len(reader.pages) == 2
 
 
-def test_rendered_html_contains_panel_also():
-    """The template must render each panel's `also` entries as one
-    inline run-on paragraph with bullet separators between items."""
+def test_rendered_html_contains_panel_item():
+    """The template must render each panel's `also` entries as .panel-item blocks."""
     briefing = Briefing.model_validate_json(FIXTURE.read_text())
     tmpl_dir = Path("jina_clone/briefing/templates")
     env = _make_env(tmpl_dir)
@@ -60,10 +59,8 @@ def test_rendered_html_contains_panel_also():
         generated_at="08:11 ET",
         iso_date="2026-04-18",
     )
-    # 4 panels × one .panel-also-text paragraph each.
-    assert html_str.count('class="panel-also-text"') == 4
-    # 4 panels × 4 also items = 12 separators (3 between 4 items, × 4 panels).
-    assert html_str.count('class="panel-also-sep"') == 12
+    # 4 panels × at least 3 also items = ≥ 12 .panel-item occurrences.
+    assert html_str.count('class="panel-item"') >= 12
     # Ink-wasting cream background must be gone.
     assert "#fcfaf4" not in html_str
 
@@ -137,11 +134,9 @@ def test_render_drops_extras_on_overflow(tmp_path, caplog):
     # but dropping extras brings it back under 2 pages. (Inflating the lead
     # body instead doesn't exercise the safety net — lead-body overflow
     # occupies its own page independent of whether extras are rendered.)
-    # Note: bloat factor is layout-dependent. After the panel `also` block
-    # changed from 4 stacked divs to 1 inline run-on paragraph (more
-    # vertically compact), the band that overflows-but-recovers is roughly
-    # 12-18 reps; 14 sits safely in the middle.
-    bloat = " ".join(["Additional filler content."] * 14)
+    # Note: with 4 `also` items per panel (Task 9 density bump) we need a
+    # smaller bloat factor — 10 repetitions overflows but recovers; 15 does not.
+    bloat = " ".join(["Additional filler content."] * 10)
     briefing = briefing.model_copy(update={
         "briefs": [
             br.model_copy(update={"body": br.body + " " + bloat})

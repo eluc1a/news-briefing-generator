@@ -136,7 +136,7 @@ def _make_markets_provider(settings: Settings) -> MarketsFn:
 
 
 def _today_label() -> str:
-    return datetime.now().strftime("%A, %B %-d, %Y")
+    return datetime.now().strftime("%A, %B %-d, %Y · %-I:%M %p")
 
 
 def _volume_label(today: date) -> str:

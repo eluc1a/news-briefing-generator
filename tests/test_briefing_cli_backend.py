@@ -54,6 +54,7 @@ async def test_cli_call_llm_strips_api_key_and_parses(monkeypatch):
 
     assert out == '{"x": 1}'  # fences stripped
     assert "ANTHROPIC_API_KEY" not in captured["env"]
+    assert captured["env"]["MAX_THINKING_TOKENS"] == "0"  # thinking disabled
     assert "--system-prompt" in captured["argv"]
     assert "SYS" in captured["argv"]
     totals = generator.pop_usage_totals()

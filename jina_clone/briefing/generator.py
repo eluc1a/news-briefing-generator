@@ -374,6 +374,12 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
 
     Strips ANTHROPIC_API_KEY from the child env so `claude` uses the
     logged-in subscription rather than billing the API.
+
+    Disables extended thinking (MAX_THINKING_TOKENS=0): `claude -p` enables
+    it by default, which made each briefing call spend ~14k thinking tokens
+    and ~160s — over the timeout. These are mechanical JSON-extraction calls
+    (the old API path ran with no thinking and max_tokens=4096), so thinking
+    only adds latency, not quality.
     """
     argv = [
         CLAUDE_BIN, "-p",
@@ -386,6 +392,7 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
     ]
     env = {**os.environ}
     env.pop("ANTHROPIC_API_KEY", None)
+    env["MAX_THINKING_TOKENS"] = "0"
     npm_bin = os.path.expanduser("~/.npm-global/bin")
     if npm_bin not in env.get("PATH", "").split(":"):
         env["PATH"] = npm_bin + ":" + env.get("PATH", "")

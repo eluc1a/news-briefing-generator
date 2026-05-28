@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import os
@@ -24,6 +25,12 @@ _log = logging.getLogger(__name__)
 # serial, which they are (one cron firing at a time).
 _USAGE: list[dict] = []
 
+BRIEFING_LLM_BACKEND = os.environ.get("BRIEFING_LLM_BACKEND", "cli")
+CLI_TIMEOUT = float(os.environ.get("BRIEFING_CLI_TIMEOUT", "120"))
+CLI_CONCURRENCY = int(os.environ.get("BRIEFING_CLI_CONCURRENCY", "3"))
+CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
+_CLI_SEMAPHORE = asyncio.Semaphore(CLI_CONCURRENCY)
+
 
 def reset_usage() -> None:
     _USAGE.clear()
@@ -36,6 +43,7 @@ def pop_usage_totals() -> dict:
         "output": sum(u["output"] for u in _USAGE),
         "cache_read": sum(u["cache_read"] for u in _USAGE),
         "cache_creation": sum(u["cache_creation"] for u in _USAGE),
+        "cost": sum(u.get("cost", 0.0) for u in _USAGE),
     }
     _USAGE.clear()
     return totals
@@ -358,6 +366,78 @@ async def _real_call_llm(
     text = "".join(
         block.text for block in response.content if block.type == "text"
     )
+    return _FENCE.sub("", text).strip()
+
+
+async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
+    """Generate via the Claude Code CLI in print mode (subscription auth).
+
+    Strips ANTHROPIC_API_KEY from the child env so `claude` uses the
+    logged-in subscription rather than billing the API.
+    """
+    argv = [
+        CLAUDE_BIN, "-p",
+        "--output-format", "json",
+        "--model", model,
+        "--system-prompt", system,
+        "--tools", "",
+        "--permission-mode", "dontAsk",
+        "--no-session-persistence",
+    ]
+    env = {**os.environ}
+    env.pop("ANTHROPIC_API_KEY", None)
+    npm_bin = os.path.expanduser("~/.npm-global/bin")
+    if npm_bin not in env.get("PATH", "").split(":"):
+        env["PATH"] = npm_bin + ":" + env.get("PATH", "")
+
+    async with _CLI_SEMAPHORE:
+        proc = await asyncio.create_subprocess_exec(
+            *argv,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=env,
+        )
+        try:
+            stdout, stderr = await asyncio.wait_for(
+                proc.communicate(input=prompt.encode()), timeout=CLI_TIMEOUT
+            )
+        except asyncio.TimeoutError as e:
+            proc.kill()
+            raise GeneratorFailure(
+                f"claude -p timed out after {CLI_TIMEOUT}s"
+            ) from e
+
+    if proc.returncode != 0:
+        raise GeneratorFailure(
+            f"claude -p exited {proc.returncode}: "
+            f"{stderr.decode(errors='replace').strip()}"
+        )
+    try:
+        envelope = json.loads(stdout.decode())
+    except json.JSONDecodeError as e:
+        raise GeneratorFailure(
+            f"claude -p returned non-JSON: {stdout[:200]!r}"
+        ) from e
+    if envelope.get("is_error"):
+        raise GeneratorFailure(
+            f"claude -p error: {str(envelope.get('result', ''))[:300]}"
+        )
+
+    u = envelope.get("usage") or {}
+    entry = {
+        "input": u.get("input_tokens", 0) or 0,
+        "output": u.get("output_tokens", 0) or 0,
+        "cache_read": u.get("cache_read_input_tokens", 0) or 0,
+        "cache_creation": u.get("cache_creation_input_tokens", 0) or 0,
+        "cost": envelope.get("total_cost_usd", 0.0) or 0.0,
+    }
+    _USAGE.append(entry)
+    _log.info(
+        "briefing claude -p call: input=%d output=%d cost=%.4f",
+        entry["input"], entry["output"], entry["cost"],
+    )
+    text = envelope.get("result", "")
     return _FENCE.sub("", text).strip()
 
 

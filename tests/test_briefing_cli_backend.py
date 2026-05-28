@@ -56,7 +56,10 @@ async def test_cli_call_llm_strips_api_key_and_parses(monkeypatch):
     assert "ANTHROPIC_API_KEY" not in captured["env"]
     assert captured["env"]["MAX_THINKING_TOKENS"] == "0"  # thinking disabled
     assert "--system-prompt" in captured["argv"]
-    assert "SYS" in captured["argv"]
+    # system prompt carries the caller's text plus the anti-agentic CLI guard
+    sys_arg = captured["argv"][captured["argv"].index("--system-prompt") + 1]
+    assert sys_arg.startswith("SYS")
+    assert "NO tools" in sys_arg
     assert "--setting-sources" in captured["argv"]  # isolated from project context
     totals = generator.pop_usage_totals()
     assert totals["calls"] == 1

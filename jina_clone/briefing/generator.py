@@ -32,6 +32,17 @@ CLI_CONCURRENCY = int(os.environ.get("BRIEFING_CLI_CONCURRENCY", "3"))
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
 _CLI_SEMAPHORE = asyncio.Semaphore(CLI_CONCURRENCY)
 
+# Appended to the system prompt on the CLI path only. Counters `claude -p`'s
+# tool-using-agent persona, which otherwise occasionally tries to fetch or
+# authenticate instead of transforming the provided articles into JSON.
+_CLI_SYSTEM_GUARD = (
+    "\n\nOPERATING CONTEXT: You are running headless as a text-to-JSON "
+    "transformer. You have NO tools, NO internet access, and NO ability to "
+    "fetch, browse, or authenticate. The user message contains the ONLY input "
+    "available. Never ask to authenticate or fetch anything; never claim you "
+    "lack access. Produce the requested JSON from the provided input alone."
+)
+
 
 def reset_usage() -> None:
     _USAGE.clear()
@@ -387,12 +398,18 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
     (incl. the superpowers SessionStart context) and the briefing model
     intermittently echoes it ("I'm a subagent dispatched ...") instead of
     emitting JSON.
+
+    Appends an anti-agentic guard to the system prompt: `claude -p`'s base
+    persona is a tool-using coding agent, so on some calls it tried to
+    "authenticate"/"fetch current data" instead of transforming the provided
+    input. The guard states it is headless with no tools/network. (CLI-only;
+    the API backend has no such persona.)
     """
     argv = [
         CLAUDE_BIN, "-p",
         "--output-format", "json",
         "--model", model,
-        "--system-prompt", system,
+        "--system-prompt", system + _CLI_SYSTEM_GUARD,
         "--tools", "",
         "--permission-mode", "dontAsk",
         "--no-session-persistence",

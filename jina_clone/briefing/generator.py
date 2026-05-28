@@ -459,7 +459,7 @@ def _build_default_call_llm(system_prompt: str, client: object) -> CallLLM:
             return await _cli_call_llm(prompt, system=system_prompt, model=MODEL)
         return _cli_wrapper
 
-    api_client = _ensure_client(client)  # noqa: F841 (closed over below)
+    api_client = _ensure_client(client)
 
     async def _api_wrapper(cl: object, prompt: str) -> str:
         return await _real_call_llm(api_client, prompt, system=system_prompt)

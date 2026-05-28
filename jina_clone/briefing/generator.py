@@ -404,6 +404,7 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
             )
         except asyncio.TimeoutError as e:
             proc.kill()
+            await proc.wait()
             raise GeneratorFailure(
                 f"claude -p timed out after {CLI_TIMEOUT}s"
             ) from e

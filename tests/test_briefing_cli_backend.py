@@ -1,8 +1,6 @@
 import asyncio
 import json
 
-from unittest.mock import patch
-
 import pytest
 
 from jina_clone.briefing import generator
@@ -67,7 +65,7 @@ async def test_cli_call_llm_strips_api_key_and_parses(monkeypatch):
 
 async def test_cli_call_llm_raises_on_is_error(monkeypatch):
     async def fake_exec(*argv, **kwargs):
-        return _FakeProc(_envelope(is_error=True, result="rate limited"), returncode=1)
+        return _FakeProc(_envelope(is_error=True, result="rate limited"), returncode=0)
 
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_exec)
     with pytest.raises(generator.GeneratorFailure):
@@ -95,6 +93,9 @@ async def test_cli_call_llm_kills_and_raises_on_timeout(monkeypatch):
 
         def kill(self):
             self.killed = True
+
+        async def wait(self):
+            return self.returncode
 
     proc = _HangProc()
 

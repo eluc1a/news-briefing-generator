@@ -57,6 +57,7 @@ async def test_cli_call_llm_strips_api_key_and_parses(monkeypatch):
     assert captured["env"]["MAX_THINKING_TOKENS"] == "0"  # thinking disabled
     assert "--system-prompt" in captured["argv"]
     assert "SYS" in captured["argv"]
+    assert "--setting-sources" in captured["argv"]  # isolated from project context
     totals = generator.pop_usage_totals()
     assert totals["calls"] == 1
     assert totals["input"] == 10

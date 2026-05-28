@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import tempfile
 from typing import Awaitable, Callable, TypeVar
 
 from anthropic import AsyncAnthropic
@@ -380,6 +381,12 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
     and ~160s — over the timeout. These are mechanical JSON-extraction calls
     (the old API path ran with no thinking and max_tokens=4096), so thinking
     only adds latency, not quality.
+
+    Isolates from project context (``--setting-sources ""`` + a neutral cwd):
+    otherwise `claude` auto-discovers this repo's CLAUDE.md and .claude/ hooks
+    (incl. the superpowers SessionStart context) and the briefing model
+    intermittently echoes it ("I'm a subagent dispatched ...") instead of
+    emitting JSON.
     """
     argv = [
         CLAUDE_BIN, "-p",
@@ -389,6 +396,7 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
         "--tools", "",
         "--permission-mode", "dontAsk",
         "--no-session-persistence",
+        "--setting-sources", "",
     ]
     env = {**os.environ}
     env.pop("ANTHROPIC_API_KEY", None)
@@ -404,6 +412,7 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             env=env,
+            cwd=tempfile.gettempdir(),
         )
         try:
             stdout, stderr = await asyncio.wait_for(

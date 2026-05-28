@@ -107,3 +107,37 @@ async def test_cli_call_llm_kills_and_raises_on_timeout(monkeypatch):
     with pytest.raises(generator.GeneratorFailure):
         await generator._cli_call_llm("P", system="S", model="m")
     assert proc.killed
+
+
+async def test_default_backend_cli_routes_to_cli(monkeypatch):
+    monkeypatch.setattr(generator, "BRIEFING_LLM_BACKEND", "cli")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)  # cli must not need it
+    called = {}
+
+    async def fake_cli(prompt, *, system, model):
+        called["args"] = (prompt, system, model)
+        return "OK"
+
+    monkeypatch.setattr(generator, "_cli_call_llm", fake_cli)
+    wrapper = generator._build_default_call_llm("SYSPROMPT", None)
+    out = await wrapper(None, "USERMSG")
+
+    assert out == "OK"
+    assert called["args"] == ("USERMSG", "SYSPROMPT", generator.MODEL)
+
+
+async def test_backend_api_uses_real_call(monkeypatch):
+    monkeypatch.setattr(generator, "BRIEFING_LLM_BACKEND", "api")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    called = {}
+
+    async def fake_real(cl, prompt, *, system):
+        called["system"] = system
+        return "R"
+
+    monkeypatch.setattr(generator, "_real_call_llm", fake_real)
+    wrapper = generator._build_default_call_llm("SYS", None)
+    out = await wrapper(object(), "MSG")
+
+    assert out == "R"
+    assert called["system"] == "SYS"

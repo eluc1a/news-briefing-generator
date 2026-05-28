@@ -448,6 +448,24 @@ def _ensure_client(client: AsyncAnthropic | None) -> AsyncAnthropic:
     return client
 
 
+def _build_default_call_llm(system_prompt: str, client: object) -> CallLLM:
+    """Return the default call_llm for the configured backend.
+
+    cli  -> claude -p subprocess (subscription auth), no API client needed.
+    api  -> Anthropic API via _real_call_llm (fallback / tests).
+    """
+    if BRIEFING_LLM_BACKEND == "cli":
+        async def _cli_wrapper(cl: object, prompt: str) -> str:
+            return await _cli_call_llm(prompt, system=system_prompt, model=MODEL)
+        return _cli_wrapper
+
+    api_client = _ensure_client(client)  # noqa: F841 (closed over below)
+
+    async def _api_wrapper(cl: object, prompt: str) -> str:
+        return await _real_call_llm(api_client, prompt, system=system_prompt)
+    return _api_wrapper
+
+
 # Two-try retry loop. The ``parse`` callable raises ValidationError
 # (or GeneratorFailure with a string-able message) on failure; we append
 # the error text to the prompt and retry exactly once.
@@ -494,10 +512,7 @@ async def generate_front_matter(
 ) -> FrontMatter:
     system_prompt = _front_matter_system_prompt(title)
     if call_llm is None:
-        client = _ensure_client(client)
-        async def call_llm_wrapper(cl: object, prompt: str) -> str:
-            return await _real_call_llm(cl, prompt, system=system_prompt)
-        call_llm = call_llm_wrapper
+        call_llm = _build_default_call_llm(system_prompt, client)
 
     user_msg = _build_front_matter_user_msg(
         articles=articles, weather=weather, today=today, volume=volume,
@@ -530,10 +545,7 @@ async def generate_panel(
 ) -> Panel:
     system_prompt = _panel_system_prompt(section, title)
     if call_llm is None:
-        client = _ensure_client(client)
-        async def call_llm_wrapper(cl: object, prompt: str) -> str:
-            return await _real_call_llm(cl, prompt, system=system_prompt)
-        call_llm = call_llm_wrapper
+        call_llm = _build_default_call_llm(system_prompt, client)
 
     filtered = _filter_excluded(articles, exclude_urls)
     user_msg = _build_panel_user_msg(section=section, articles=filtered)
@@ -554,10 +566,7 @@ async def generate_briefs(
 ) -> list[Brief]:
     system_prompt = _briefs_system_prompt(title)
     if call_llm is None:
-        client = _ensure_client(client)
-        async def call_llm_wrapper(cl: object, prompt: str) -> str:
-            return await _real_call_llm(cl, prompt, system=system_prompt)
-        call_llm = call_llm_wrapper
+        call_llm = _build_default_call_llm(system_prompt, client)
 
     filtered = _filter_excluded(articles, exclude_urls)
     user_msg = _build_briefs_user_msg(articles=filtered)

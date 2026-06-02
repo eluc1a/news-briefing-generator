@@ -12,3 +12,10 @@ Bodoni_Moda/
 
 # Runtime cache for live-data (weather.json) — safe to delete, repopulates on next run.
 cache/
+
+# Internal planning/handoff notes — kept local, not published
+docs/
+
+# Sample/print-test images (regenerated artifacts, sometimes personal photos)
+briefings/*.jpg
+briefings/*.png

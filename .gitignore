@@ -19,3 +19,7 @@ docs/
 # Sample/print-test images (regenerated artifacts, sometimes personal photos)
 briefings/*.jpg
 briefings/*.png
+
+# Local planning notes and generated presentations — keep local
+implementation-plans/
+presentations/

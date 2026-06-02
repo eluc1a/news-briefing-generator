@@ -443,9 +443,14 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
             ) from e
 
     if proc.returncode != 0:
+        # claude -p writes its error payload to STDOUT (the JSON envelope) and
+        # commonly leaves STDERR empty, so surface both — otherwise the cause
+        # is lost (see the 2026-05-29 morning emergency-edition incident).
+        err_out = stderr.decode(errors="replace").strip()
+        std_out = stdout.decode(errors="replace").strip()
         raise GeneratorFailure(
             f"claude -p exited {proc.returncode}: "
-            f"{stderr.decode(errors='replace').strip()}"
+            f"stderr={err_out!r} stdout={std_out[:500]!r}"
         )
     try:
         envelope = json.loads(stdout.decode())
@@ -499,9 +504,12 @@ def _build_default_call_llm(system_prompt: str, client: object) -> CallLLM:
     return _api_wrapper
 
 
-# Two-try retry loop. The ``parse`` callable raises ValidationError
-# (or GeneratorFailure with a string-able message) on failure; we append
-# the error text to the prompt and retry exactly once.
+# Two-attempt retry loop. Both the *call* (e.g. a transient `claude -p exited
+# 1`) and the *parse* (ValidationError / bad JSON) are retried — the call must
+# be inside the loop, else a transient subprocess failure on the first attempt
+# escapes unretried and triggers the emergency edition (the 2026-05-29 morning
+# incident). The ``parse`` callable raises ValidationError (or GeneratorFailure
+# / ValueError) on failure; we append the error text to the prompt and retry.
 async def _call_with_retry(
     *,
     call_llm: CallLLM,
@@ -509,24 +517,23 @@ async def _call_with_retry(
     user_msg: str,
     parse: Callable[[str], T],
 ) -> T:
-    # Wrap call_llm to carry system_prompt if the caller wants it.
     # Fakes used in tests accept (client, prompt) and ignore system.
-    raw = await call_llm(client, user_msg)
-    try:
-        return parse(raw)
-    except (ValidationError, GeneratorFailure, ValueError) as first_err:
-        retry_msg = (
-            user_msg + f"\n\nPrevious attempt failed validation:\n{first_err}\n"
-            "Fix and re-emit valid JSON only."
-        )
-        raw2 = await call_llm(client, retry_msg)
+    attempts = 2
+    msg = user_msg
+    last_err: Exception | None = None
+    for _ in range(attempts):
         try:
-            return parse(raw2)
-        except (ValidationError, GeneratorFailure, ValueError) as second_err:
-            raise GeneratorFailure(
-                f"LLM returned invalid JSON twice. "
-                f"First: {first_err}; second: {second_err}"
-            ) from second_err
+            raw = await call_llm(client, msg)
+            return parse(raw)
+        except (ValidationError, GeneratorFailure, ValueError) as err:
+            last_err = err
+            msg = (
+                user_msg + f"\n\nPrevious attempt failed:\n{err}\n"
+                "Fix and re-emit valid JSON only."
+            )
+    raise GeneratorFailure(
+        f"LLM call failed after {attempts} attempts: {last_err}"
+    ) from last_err
 
 
 # ==================================================================

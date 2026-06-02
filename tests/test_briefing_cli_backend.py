@@ -86,6 +86,25 @@ async def test_cli_call_llm_raises_on_nonzero_exit(monkeypatch):
         await generator._cli_call_llm("P", system="S", model="m")
 
 
+async def test_cli_call_llm_nonzero_exit_includes_stdout(monkeypatch):
+    # claude -p writes its error payload to STDOUT (JSON envelope) and exits
+    # nonzero with EMPTY stderr. The failure message must surface stdout, or
+    # the cause is lost — the 2026-05-29 morning incident logged a bare
+    # `claude -p exited 1: ` with nothing actionable.
+    err_stdout = _envelope(
+        is_error=True, subtype="error_during_execution",
+        result="Usage limit reached",
+    )
+
+    async def fake_exec(*argv, **kwargs):
+        return _FakeProc(err_stdout, stderr=b"", returncode=1)
+
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_exec)
+    with pytest.raises(generator.GeneratorFailure) as ei:
+        await generator._cli_call_llm("P", system="S", model="m")
+    assert "Usage limit reached" in str(ei.value)
+
+
 async def test_cli_call_llm_kills_and_raises_on_timeout(monkeypatch):
     class _HangProc:
         returncode = None

@@ -32,10 +32,18 @@ _OWM_FORECAST = {
          "weather": [{"id": 800}]},  # 2026-04-20 12:00 EDT → "12pm"
         {"dt": 1745175600, "main": {"temp": 68.1}, "pop": 0.20,
          "weather": [{"id": 801}]},  # 15:00 EDT → "3pm"
-        {"dt": 1745186400, "main": {"temp": 71.0}, "pop": 0.40,
-         "weather": [{"id": 500}]},  # 18:00 EDT → "6pm"
+        {"dt": 1745186400, "main": {"temp": 85.6}, "pop": 0.40,
+         "weather": [{"id": 500}]},  # 18:00 EDT → "6pm" (day's high)
         {"dt": 1745197200, "main": {"temp": 60.3}, "pop": 0.20,
          "weather": [{"id": 802}]},  # 21:00 EDT → "9pm"
+        {"dt": 1745208000, "main": {"temp": 55.4}, "pop": 0.10,
+         "weather": [{"id": 803}]},  # next day 00:00 EDT
+        {"dt": 1745218800, "main": {"temp": 49.2}, "pop": 0.00,
+         "weather": [{"id": 804}]},  # next day 03:00 EDT (window's low)
+        {"dt": 1745229600, "main": {"temp": 52.1}, "pop": 0.00,
+         "weather": [{"id": 800}]},  # next day 06:00 EDT
+        {"dt": 1745240400, "main": {"temp": 64.0}, "pop": 0.10,
+         "weather": [{"id": 800}]},  # next day 09:00 EDT
     ],
 }
 
@@ -82,7 +90,11 @@ async def test_fetch_weather_parses_owm(tmp_path):
             cache_path=cache, owm_api_key="test", stub=_stub,
         )
 
-    assert result["temp_high"] == 71
+    # High/low are derived from the 8 forecast slots, not from
+    # current.main.temp_max/min (which only spans currently observed
+    # temps and misses the day's peak when the briefing runs in the
+    # cool morning hours).
+    assert result["temp_high"] == 86
     assert result["temp_low"] == 49
     assert result["conditions"] == "partly cloudy"
     assert result["sunrise"] == "6:24"
@@ -96,7 +108,7 @@ async def test_fetch_weather_parses_owm(tmp_path):
     assert result["hourly"]["slots"][0]["code"] == 800
     # Cache was written.
     assert cache.exists()
-    assert json.loads(cache.read_text())["temp_high"] == 71
+    assert json.loads(cache.read_text())["temp_high"] == 86
 
 
 # -------- cache fallback --------

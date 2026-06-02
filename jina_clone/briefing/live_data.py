@@ -105,17 +105,25 @@ def _round(v: float) -> int:
 
 
 def _parse_owm(current: dict, forecast: dict) -> dict:
+    # OWM /weather's main.temp_max / main.temp_min are the *currently
+    # observed* temperature spread across the area at call time — for a
+    # single-point query they collapse to ~ main.temp, so they do NOT
+    # give the day's high/low. Derive those from the 8 next 3-hour
+    # forecast slots (≈ next 24 h) instead. The first 4 slots also
+    # drive the hourly strip below.
+    forecast_slots = forecast["list"][:8]
     slots = []
-    for entry in forecast["list"][:4]:
+    for entry in forecast_slots[:4]:
         slots.append({
             "time_label": _fmt_hour_label(entry["dt"]),
             "temp_f": _round(entry["main"]["temp"]),
             "precip_pct": _round(entry.get("pop", 0) * 100),
             "code": entry["weather"][0]["id"],
         })
+    temps = [e["main"]["temp"] for e in forecast_slots]
     return {
-        "temp_high": _round(current["main"]["temp_max"]),
-        "temp_low": _round(current["main"]["temp_min"]),
+        "temp_high": _round(max(temps)),
+        "temp_low": _round(min(temps)),
         "conditions": current["weather"][0]["description"],
         "sunrise": _fmt_clock(current["sys"]["sunrise"]),
         "sunset": _fmt_clock(current["sys"]["sunset"]),
@@ -132,7 +140,10 @@ async def fetch_weather(
     owm_api_key: str,
     stub: Callable[[], dict],
 ) -> dict:
-    """Fetch current weather + 4 × 3h forecast slots for Arlington, VA.
+    """Fetch current weather + 8 × 3h forecast slots for Arlington, VA.
+
+    The 8 forecast slots cover the next ~24 h and drive both the day's
+    high/low and the first-4 hourly strip displayed in the briefing.
 
     On HTTP failure, fall back to the on-disk cache at `cache_path` if it
     exists and is < 36 h old. If the cache is missing or stale, fall
@@ -159,7 +170,7 @@ async def fetch_weather(
             if cur_resp.status_code >= 400:
                 cur_resp.raise_for_status()
             fcst_resp = await _http_get_json(
-                client, _OWM_FORECAST, {**params_common, "cnt": 4},
+                client, _OWM_FORECAST, {**params_common, "cnt": 8},
             )
             if fcst_resp.status_code >= 400:
                 fcst_resp.raise_for_status()

@@ -84,6 +84,47 @@ async def test_front_matter_retries_once_on_bad_json():
     assert isinstance(fm, FrontMatter)
 
 
+async def test_front_matter_retries_on_first_call_failure():
+    # A transient call failure (e.g. `claude -p exited 1`) on the FIRST
+    # attempt must be retried, not propagated. Reproduces the 2026-05-29
+    # morning emergency-edition incident: a concurrent claude -p call exited 1
+    # and _call_with_retry let it through because the first call_llm sat
+    # outside the try block.
+    calls = {"n": 0}
+
+    async def fake(client, prompt: str) -> str:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise GeneratorFailure("claude -p exited 1: ")
+        return _front_matter_payload("https://a")
+
+    fm = await generate_front_matter(
+        articles=_articles(), weather=WEATHER,
+        today="Sat", volume="Vol", title="The Morning Fox",
+        call_llm=fake, client=None,
+    )
+    assert isinstance(fm, FrontMatter)
+    assert calls["n"] == 2
+
+
+async def test_front_matter_double_call_failure_raises():
+    # Both attempts failing at the call layer must still surface a failure
+    # (and not loop forever).
+    calls = {"n": 0}
+
+    async def fake(client, prompt: str) -> str:
+        calls["n"] += 1
+        raise GeneratorFailure("claude -p exited 1: ")
+
+    with pytest.raises(GeneratorFailure):
+        await generate_front_matter(
+            articles=_articles(), weather=WEATHER,
+            today="Sat", volume="Vol", title="The Morning Fox",
+            call_llm=fake, client=None,
+        )
+    assert calls["n"] == 2
+
+
 async def test_front_matter_rejects_unknown_lead_url():
     # lead_source_url must match one of the input article links
     async def fake(client, prompt: str) -> str:

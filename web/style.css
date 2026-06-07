@@ -1,0 +1,63 @@
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('fonts/BodoniModa-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('fonts/BodoniModa-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+:root { --ink: #1a1a1a; --muted: #777; --rule: #1a1a1a; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; color: var(--ink); background: #f7f5f0;
+  font-family: Georgia, 'Times New Roman', serif; line-height: 1.5; }
+
+#paper { max-width: 760px; margin: 0 auto; padding: 24px 18px 64px; background: #fffdf8; }
+
+.status { text-align: center; color: var(--muted); padding: 48px 0; font-style: italic; }
+
+section { margin: 0 0 22px; }
+
+[data-section="masthead"] { border-bottom: 3px double var(--rule); padding-bottom: 10px; text-align: center; }
+.masthead-title { font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500;
+  font-size: clamp(34px, 9vw, 56px); margin: 4px 0; letter-spacing: 0.5px; }
+.masthead-sub { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  text-transform: uppercase; letter-spacing: 1px; font-size: 12px; color: var(--muted); }
+
+[data-section="weather"] { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+  font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
+.wx-temp { font-weight: bold; }
+
+[data-section="markets"] { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  font-size: 13px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
+.market { display: flex; gap: 5px; align-items: baseline; }
+.mkt-sym { font-weight: bold; } .mkt-chg { color: var(--muted); }
+
+.lead-headline { font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500;
+  font-size: clamp(24px, 6vw, 34px); margin: 0 0 6px; line-height: 1.15; }
+.lead-deck { font-style: italic; color: #333; margin: 0 0 10px; }
+.at-a-glance { margin: 12px 0; padding-left: 20px; font-size: 14px; }
+
+[data-section="panels"] { display: grid; gap: 20px; }
+@media (min-width: 620px) { [data-section="panels"] { grid-template-columns: 1fr 1fr; } }
+.panel { border-top: 2px solid var(--rule); padding-top: 8px; }
+.panel-section { text-transform: uppercase; letter-spacing: 1px; font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+.panel-lede-headline { font-size: 18px; margin: 0 0 4px; }
+.panel-also { font-size: 14px; margin: 6px 0; }
+
+blockquote { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(20px, 5vw, 26px);
+  font-style: italic; text-align: center; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc;
+  padding: 16px 0; margin: 0; }
+
+.briefs-title, .panel-section { font-weight: bold; }
+.brief { font-size: 14px; margin: 6px 0; }
+
+[data-section="extras"] { display: grid; gap: 12px; font-size: 13px; color: #333;
+  border-top: 1px solid #ccc; padding-top: 12px; }
+.dp-value { font-weight: bold; margin-right: 6px; }
+
+.pdf-link { display: inline-block; margin-top: 8px; font-size: 14px; }
+[data-section="download"] { text-align: center; border-top: 3px double var(--rule); padding-top: 14px; }

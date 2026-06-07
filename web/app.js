@@ -122,20 +122,22 @@ function render(b, entry) {
 }
 
 function showStatus(msg) {
-  document.getElementById("paper").replaceChildren(
-    Object.assign(el("p", "status", msg))
-  );
+  document.getElementById("paper").replaceChildren(el("p", "status", msg));
 }
 
 async function main() {
   try {
-    const index = await (await fetch(EDITIONS + "index.json", { cache: "no-store" })).json();
+    const indexRes = await fetch(EDITIONS + "index.json", { cache: "no-store" });
+    if (!indexRes.ok) throw new Error(`index.json: HTTP ${indexRes.status}`);
+    const index = await indexRes.json();
     if (!Array.isArray(index) || index.length === 0) {
       showStatus("No briefing published yet. Check back after the next edition.");
       return;
     }
     const entry = index[0];
-    const briefing = await (await fetch(EDITIONS + entry.json, { cache: "no-store" })).json();
+    const editionRes = await fetch(EDITIONS + entry.json, { cache: "no-store" });
+    if (!editionRes.ok) throw new Error(`${entry.json}: HTTP ${editionRes.status}`);
+    const briefing = await editionRes.json();
     render(briefing, entry);
   } catch (e) {
     showStatus("Could not load the latest edition. Please try again shortly.");

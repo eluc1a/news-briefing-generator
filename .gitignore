@@ -13,8 +13,11 @@ Bodoni_Moda/
 # Runtime cache for live-data (weather.json) — safe to delete, repopulates on next run.
 cache/
 
-# Internal planning/handoff notes — kept local, not published
-docs/
+# Internal planning/handoff notes — kept local, not published,
+# except docs/superpowers/ (specs/plans/handoffs are committed).
+# `docs/*` not `docs/` — git can't re-include inside a fully ignored dir.
+docs/*
+!docs/superpowers/
 
 # Sample/print-test images (regenerated artifacts, sometimes personal photos)
 briefings/*.jpg

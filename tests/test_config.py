@@ -98,3 +98,19 @@ def test_settings_briefing_overrides(monkeypatch, tmp_path):
     assert s.print_queue == "brother-back"
     assert s.briefing_categories_file == cats
     assert s.briefings_dir == tmp_path / "briefings"
+
+
+def test_settings_slack_webhook_url(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://x")
+    monkeypatch.setenv("LLM_PROVIDER", "claude")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    from jina_clone.config import Settings
+
+    assert Settings.from_env().slack_webhook_url is None
+
+    monkeypatch.setenv("SLACK_WEBHOOK_URL", "https://hooks.slack.com/services/X")
+    assert (
+        Settings.from_env().slack_webhook_url
+        == "https://hooks.slack.com/services/X"
+    )

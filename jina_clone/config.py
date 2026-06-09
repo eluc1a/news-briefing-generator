@@ -41,6 +41,7 @@ class Settings:
     weather_api_key: str = ""
     stock_api_key: str = ""
     fred_api_key: str = ""
+    slack_webhook_url: str | None = None
     api_keys: dict[str, str] = field(default_factory=dict)
 
     @classmethod
@@ -77,6 +78,7 @@ class Settings:
             weather_api_key=weather_api_key,
             stock_api_key=stock_api_key,
             fred_api_key=fred_api_key,
+            slack_webhook_url=os.getenv("SLACK_WEBHOOK_URL") or None,
             api_keys=api_keys,
         )
 

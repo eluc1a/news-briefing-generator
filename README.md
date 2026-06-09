@@ -136,6 +136,22 @@ exposed if you want to iterate on one without re-running the others:
 | `briefing print <file.pdf>`                | Submit an existing PDF to `brother` with the duplex flag.   |
 | `briefing run --edition=morning\|evening`  | All of the above, plus logs a `news_summaries` row.         |
 
+## Slack AI/ML digest
+
+Twice-daily digest of `category: ai` articles posted to a work Slack
+channel via incoming webhook (`SLACK_WEBHOOK_URL` in `.env`).
+
+```bash
+./.venv/bin/python -m jina_clone slack-digest --edition=morning    # 9:00 ET
+./.venv/bin/python -m jina_clone slack-digest --edition=afternoon  # 16:45 ET
+./.venv/bin/python -m jina_clone slack-digest --edition=afternoon --dry-run  # print, don't post
+```
+
+Editions use non-overlapping windows (morning 16.25h, afternoon 7.75h),
+so no article appears twice. On LLM failure the digest degrades to
+headlines-only and sends an ntfy alert. Design:
+`docs/superpowers/specs/2026-06-09-slack-ai-digest-design.md`.
+
 ## Adding new sources
 
 Every source is an entry in `sources.yaml` at the repo root. The file is

@@ -24,7 +24,7 @@ async def run_slack_digest(
     title: str,
     ntfy_topic: str | None,
     source_caps: dict[str, int] | None,
-    fetch_articles: Callable[..., Awaitable[list]],
+    fetch_articles: Callable[..., Awaitable[list[dict]]],
     generate_digest: Callable[..., Awaitable[Any]],
     format_digest: Callable[..., dict],
     format_fallback: Callable[..., dict],

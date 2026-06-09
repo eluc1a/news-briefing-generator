@@ -116,3 +116,12 @@ async def test_webhook_failure_notifies_and_raises():
         await h.run()
     assert len(h.notified) == 1
     assert "webhook" in h.notified[0]["reason"].lower()
+
+
+async def test_degraded_plus_webhook_failure_notifies_webhook_only():
+    h = Harness(gen_fails=True, post_fails=True)
+    with pytest.raises(RuntimeError):
+        await h.run()
+    assert len(h.notified) == 1
+    assert "webhook" in h.notified[0]["reason"].lower()
+    assert "fallback" not in h.notified[0]["reason"].lower()

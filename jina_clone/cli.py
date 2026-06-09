@@ -22,9 +22,9 @@ from jina_clone.briefing import printer as briefing_printer
 from jina_clone.briefing import renderer as briefing_renderer
 from jina_clone.briefing import slack as briefing_slack
 from jina_clone.briefing.config import load_briefing_config
-from jina_clone.jobs.slack_digest import run_slack_digest
 from jina_clone.briefing.schema import Briefing, WeatherStrip
 from jina_clone.jobs.briefing import WeatherFn, MarketsFn, assemble_briefing, run_briefing
+from jina_clone.jobs.slack_digest import run_slack_digest
 from jina_clone.storage.db import (
     fetch_section_articles,
     insert_summary,
@@ -285,8 +285,11 @@ async def _run_slack_digest(settings: Settings, *, edition: str, dry_run: bool):
         totals = briefing_generator.pop_usage_totals()
         if totals["calls"]:
             logging.info(
-                "slack digest llm totals (%s): calls=%d input=%d output=%d",
-                edition, totals["calls"], totals["input"], totals["output"],
+                "slack digest llm totals (%s): calls=%d input=%d output=%d "
+                "cache_read=%d cache_creation=%d",
+                edition,
+                totals["calls"], totals["input"], totals["output"],
+                totals["cache_read"], totals["cache_creation"],
             )
 
 

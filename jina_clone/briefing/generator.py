@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel,
+    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel, SlackDigest,
 )
 
 
@@ -267,6 +267,43 @@ fence.
 """
 
 
+SLACK_DIGEST_SCOPE = """SCOPE: a twice-daily AI/ML digest posted to a work
+Slack channel of software engineers. Prefer: model releases and benchmark
+results, agent techniques and harnesses, notable open-source repos and
+tools, applied LLM engineering, consequential industry news. Deprioritize:
+incremental arXiv papers without code or results, funding gossip, opinion
+pieces."""
+
+
+SLACK_DIGEST_STRUCTURE_RULES = """STRUCTURE — every field required:
+- lead: 2-3 sentences, 30-60 words, on the most consequential story or
+  theme across the input articles. Facts only. NEVER exceed 60 words.
+- items: 6-10 entries, most consequential first. If fewer than 6 input
+  articles are provided, emit one entry per article instead. Each entry:
+    - url: EXACTLY the `Link` value of the source article, verbatim. If
+      you alter or invent a URL the digest will be rejected.
+    - title: ≤ 12 words, concrete subject + action. Rewrite vague or
+      clickbait headlines factually.
+    - blurb: 10-20 words, facts only — what it is and why a working
+      AI/ML engineer would care. NEVER exceed 20 words.
+- Never emit two items with the same url. Never fabricate items."""
+
+
+def _slack_digest_system_prompt(edition_label: str) -> str:
+    return f"""You are the editor of the {edition_label} edition of an
+AI/ML digest posted to a work Slack channel.
+
+{SLACK_DIGEST_SCOPE}
+
+{VOICE_RULES}
+
+{SLACK_DIGEST_STRUCTURE_RULES}
+
+Output: valid JSON matching the SlackDigest schema below. No preamble. No
+markdown fence.
+"""
+
+
 # ==================================================================
 # User-message builders
 # ==================================================================
@@ -341,6 +378,19 @@ def _build_briefs_user_msg(*, articles: list[dict]) -> str:
     parts.append(json.dumps(_BriefsResponse.model_json_schema(), indent=2))
     parts.append("")
     parts.append("Emit the JSON now.")
+    return "\n".join(parts)
+
+
+def _build_slack_digest_user_msg(*, articles: list[dict]) -> str:
+    parts = [f"Candidate articles ({len(articles)})"]
+    for art in articles:
+        parts.append("")
+        parts.append(_format_article(art, body_cap=1500))
+    parts.append("")
+    parts.append("--- Schema ---")
+    parts.append(json.dumps(SlackDigest.model_json_schema(), indent=2))
+    parts.append("")
+    parts.append("Emit the SlackDigest JSON now.")
     return "\n".join(parts)
 
 
@@ -613,6 +663,40 @@ async def generate_briefs(
 
     def parse(raw: str) -> list[Brief]:
         return _BriefsResponse.model_validate_json(raw).briefs
+
+    return await _call_with_retry(
+        call_llm=call_llm, client=client,
+        user_msg=user_msg,
+        parse=parse,
+    )
+
+
+async def generate_slack_digest(
+    *,
+    articles: list[dict],
+    edition_label: str,
+    call_llm: CallLLM | None = None,
+    client: AsyncAnthropic | None = None,
+) -> SlackDigest:
+    system_prompt = _slack_digest_system_prompt(edition_label)
+    if call_llm is None:
+        call_llm = _build_default_call_llm(system_prompt, client)
+
+    user_msg = _build_slack_digest_user_msg(articles=articles)
+    valid_urls = {a.get("link") for a in articles}
+
+    def parse(raw: str) -> SlackDigest:
+        digest = SlackDigest.model_validate_json(raw)
+        seen: set[str] = set()
+        for item in digest.items:
+            if item.url not in valid_urls:
+                raise ValueError(
+                    f"item url {item.url!r} not in input article links"
+                )
+            if item.url in seen:
+                raise ValueError(f"duplicate item url {item.url!r}")
+            seen.add(item.url)
+        return digest
 
     return await _call_with_retry(
         call_llm=call_llm, client=client,

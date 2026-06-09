@@ -69,6 +69,22 @@ class Brief(BaseModel):
     body: str
 
 
+DIGEST_ITEMS_MAX = 10
+
+
+class DigestItem(BaseModel):
+    url: str
+    title: str
+    blurb: str
+
+
+class SlackDigest(BaseModel):
+    """Output of the slack-digest LLM call. Standalone — not part of
+    Briefing. min 1 (a thin window may have <6 articles), max 10."""
+    lead: str
+    items: list[DigestItem] = Field(min_length=1, max_length=DIGEST_ITEMS_MAX)
+
+
 class DataPoint(BaseModel):
     value: str
     context: str

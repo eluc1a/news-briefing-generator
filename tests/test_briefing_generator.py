@@ -9,12 +9,14 @@ from jina_clone.briefing.generator import (
     _briefs_system_prompt,
     _front_matter_system_prompt,
     _panel_system_prompt,
+    _slack_digest_system_prompt,
     generate_briefs,
     generate_front_matter,
     generate_panel,
+    generate_slack_digest,
 )
 from jina_clone.briefing.schema import (
-    Brief, DataPoint, FrontMatter, LeadStory, OnThisDay, Panel,
+    Brief, DataPoint, FrontMatter, LeadStory, OnThisDay, Panel, SlackDigest,
 )
 
 
@@ -271,3 +273,71 @@ def test_briefs_prompt_contains_length_rule():
     assert "LENGTH RULE" in prompt
     assert "HARD LIMIT" in prompt
     assert prompt.index("CONSEQUENCE RULE") < prompt.index("LENGTH RULE") < prompt.index("STRUCTURE")
+
+
+# ------------- slack digest -------------
+
+def _digest_payload(urls=("https://a", "https://b")) -> str:
+    return json.dumps({
+        "lead": "Two stories matter today.",
+        "items": [
+            {"url": u, "title": f"Title {i}", "blurb": "One line."}
+            for i, u in enumerate(urls)
+        ],
+    })
+
+
+async def test_slack_digest_happy_path():
+    async def fake(client, prompt: str) -> str:
+        return _digest_payload()
+
+    digest = await generate_slack_digest(
+        articles=_articles(), edition_label="Morning",
+        call_llm=fake, client=None,
+    )
+    assert isinstance(digest, SlackDigest)
+    assert [i.url for i in digest.items] == ["https://a", "https://b"]
+
+
+async def test_slack_digest_retries_once_on_bad_json():
+    attempts = [json.dumps({"lead": "no items"}), _digest_payload()]
+
+    async def fake(client, prompt: str) -> str:
+        return attempts.pop(0)
+
+    digest = await generate_slack_digest(
+        articles=_articles(), edition_label="Morning",
+        call_llm=fake, client=None,
+    )
+    assert isinstance(digest, SlackDigest)
+
+
+async def test_slack_digest_rejects_hallucinated_url():
+    async def fake(client, prompt: str) -> str:
+        return _digest_payload(urls=("https://a", "https://hallucinated"))
+
+    with pytest.raises(GeneratorFailure):
+        await generate_slack_digest(
+            articles=_articles(), edition_label="Morning",
+            call_llm=fake, client=None,
+        )
+
+
+async def test_slack_digest_rejects_duplicate_urls():
+    async def fake(client, prompt: str) -> str:
+        return _digest_payload(urls=("https://a", "https://a"))
+
+    with pytest.raises(GeneratorFailure):
+        await generate_slack_digest(
+            articles=_articles(), edition_label="Morning",
+            call_llm=fake, client=None,
+        )
+
+
+def test_slack_digest_prompt_carries_edition():
+    morning = _slack_digest_system_prompt("Morning")
+    afternoon = _slack_digest_system_prompt("Afternoon")
+    assert "Morning" in morning
+    assert "Afternoon" in afternoon
+    assert "Morning" not in afternoon
+    assert "VOICE RULES" in morning

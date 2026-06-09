@@ -157,3 +157,20 @@ def test_briefing_requires_markets_block_of_six():
     data_bad["markets"]["items"] = data_bad["markets"]["items"][:5]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data_bad)
+
+
+# ------------- slack digest -------------
+
+def test_slack_digest_bounds():
+    from pydantic import ValidationError as VErr
+
+    from jina_clone.briefing.schema import DigestItem, SlackDigest
+
+    item = DigestItem(url="https://a", title="T", blurb="B")
+    digest = SlackDigest(lead="L", items=[item])
+    assert digest.items[0].url == "https://a"
+
+    with pytest.raises(VErr):
+        SlackDigest(lead="L", items=[])          # min 1
+    with pytest.raises(VErr):
+        SlackDigest(lead="L", items=[item] * 11)  # max 10

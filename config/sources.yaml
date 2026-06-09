@@ -114,3 +114,26 @@ sources:
     type: rss
     url: https://techcrunch.com/category/artificial-intelligence/feed/
     category: ai
+
+  # --- Builder / agent ecosystem: new harnesses, trending repos, skills,
+  # agent techniques. Community-curated and high-freshness, so they also help
+  # fill the morning news-drought (US news publishes 12-24 UTC). ---
+
+  - name: GitHub Trending
+    type: scrape
+    url: https://github.com/trending
+    link_selector: "article.Box-row h2 a"
+    category: ai
+
+  - name: HN Show HN
+    type: rss
+    url: https://hnrss.org/show
+    category: ai
+
+  # NOTE: several requested builder-ecosystem feeds are intentionally omitted —
+  # they don't fetch cleanly from this host:
+  #   - r/LocalLLaMA, r/ClaudeAI, r/MachineLearning: RSS carries the post body,
+  #     but the pipeline re-extracts the link URL and hits Reddit's bot wall
+  #     (empty content). Needs feed-content passthrough in the fetch job.
+  #   - The Sequence (thesequence.substack.com): Cloudflare "Just a moment"
+  #     challenge 403s httpx (even with a browser UA). Needs a fetch workaround.

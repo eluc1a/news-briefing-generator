@@ -43,6 +43,17 @@ def test_format_digest_escapes_mrkdwn_specials():
     assert "<tag>" not in text
 
 
+def test_format_digest_escapes_url():
+    digest = SlackDigest(
+        lead="lead",
+        items=[DigestItem(url="https://x?a=1&b=2", title="t", blurb="b")],
+    )
+    text = format_digest(
+        digest, edition_label="Morning", date_label="Tue Jun 9",
+    )["text"]
+    assert "<https://x?a=1&amp;b=2|t>" in text
+
+
 def test_fallback_caps_items_and_notes_degraded():
     articles = [
         {"link": f"https://x/{i}", "title": f"t{i}"} for i in range(15)
@@ -64,6 +75,16 @@ def test_fallback_handles_missing_title():
         edition_label="Morning", date_label="Tue Jun 9",
     )
     assert "<https://x|https://x>" in payload["text"]
+
+
+def test_fallback_skips_article_without_link():
+    payload = format_headlines_fallback(
+        [{"title": "t"}, {"link": "https://x", "title": "kept"}],
+        edition_label="Morning", date_label="Tue Jun 9",
+    )
+    text = payload["text"]
+    assert "<https://x|kept>" in text
+    assert "• <|" not in text
 
 
 def test_post_webhook_posts_json():

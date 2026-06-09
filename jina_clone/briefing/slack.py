@@ -31,7 +31,8 @@ def format_digest(
     lines = [_header(edition_label, date_label), "", _escape(digest.lead), ""]
     for item in digest.items:
         lines.append(
-            f"• <{item.url}|{_escape(item.title)}> — {_escape(item.blurb)}"
+            f"• <{_escape(item.url)}|{_escape(item.title)}>"
+            f" — {_escape(item.blurb)}"
         )
     return {
         "text": "\n".join(lines),
@@ -52,8 +53,11 @@ def format_headlines_fallback(
         "",
     ]
     for art in articles[:FALLBACK_MAX_ITEMS]:
-        title = art.get("title") or art["link"]
-        lines.append(f"• <{art['link']}|{_escape(title)}>")
+        link = art.get("link")
+        if not link:
+            continue
+        title = art.get("title") or link
+        lines.append(f"• <{_escape(link)}|{_escape(title)}>")
     return {
         "text": "\n".join(lines),
         "unfurl_links": False,

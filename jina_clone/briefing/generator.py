@@ -297,6 +297,8 @@ AI/ML digest posted to a work Slack channel.
 
 {VOICE_RULES}
 
+{LENGTH_RULE}
+
 {SLACK_DIGEST_STRUCTURE_RULES}
 
 Output: valid JSON matching the SlackDigest schema below. No preamble. No
@@ -696,6 +698,11 @@ async def generate_slack_digest(
             if item.url in seen:
                 raise ValueError(f"duplicate item url {item.url!r}")
             seen.add(item.url)
+        floor = min(6, len(articles))
+        if len(digest.items) < floor:
+            raise ValueError(
+                f"only {len(digest.items)} items; expected at least {floor}"
+            )
         return digest
 
     return await _call_with_retry(

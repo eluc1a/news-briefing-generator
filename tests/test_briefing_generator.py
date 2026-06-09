@@ -341,3 +341,17 @@ def test_slack_digest_prompt_carries_edition():
     assert "Afternoon" in afternoon
     assert "Morning" not in afternoon
     assert "VOICE RULES" in morning
+
+
+async def test_slack_digest_enforces_item_count_floor():
+    # Floor is min(6, len(articles)). With 2 articles a 2-item payload
+    # passes (covered by the happy path), but fewer items than articles
+    # must be rejected: 1 item against 2 articles fails.
+    async def fake(client, prompt: str) -> str:
+        return _digest_payload(urls=("https://a",))
+
+    with pytest.raises(GeneratorFailure):
+        await generate_slack_digest(
+            articles=_articles(), edition_label="Morning",
+            call_llm=fake, client=None,
+        )

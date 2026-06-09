@@ -89,6 +89,7 @@ async def assemble_briefing(
             per_source_cap=config.per_source_cap,
             limit=section.limit,
             since_hours=window_hours,
+            source_caps=dict(config.source_caps),
         )
         return section.key, [dict(r) for r in rows]
 
@@ -99,6 +100,7 @@ async def assemble_briefing(
             per_source_cap=config.per_source_cap,
             limit=config.briefs.limit,
             since_hours=window_hours,
+            source_caps=dict(config.source_caps),
         )
         return [dict(r) for r in rows]
 

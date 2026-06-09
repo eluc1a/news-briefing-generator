@@ -31,9 +31,10 @@ section { margin: 0 0 22px; }
   font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
 .wx-temp { font-weight: bold; }
 
-[data-section="markets"] { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+[data-section="markets"] { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px;
   font-size: 13px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
-.market { display: flex; gap: 5px; align-items: baseline; }
+@media (min-width: 620px) { [data-section="markets"] { grid-template-columns: repeat(3, 1fr); } }
+.market { display: flex; gap: 5px; align-items: baseline; justify-content: center; }
 .mkt-sym { font-weight: bold; } .mkt-chg { color: var(--muted); }
 
 .lead-headline { font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500;

@@ -48,6 +48,30 @@ def test_top_level_knobs():
     assert cfg.min_articles_total == 8
 
 
+def test_source_caps_loaded():
+    cfg = load_briefing_config(CONFIG)
+    assert cfg.source_caps["arXiv cs.AI"] == 2
+
+
+def test_source_caps_optional(tmp_path):
+    cfg_file = tmp_path / "nocaps.yaml"
+    cfg_file.write_text(
+        "sections:\n"
+        "  - key: ai\n"
+        "    title: AI\n"
+        "    categories: [ai]\n"
+        "    limit: 40\n"
+        "briefs:\n"
+        "  categories: [tech]\n"
+        "  limit: 50\n"
+        "per_source_cap: 5\n"
+        "front_matter_top_per_section: 5\n"
+        "min_articles_total: 8\n"
+    )
+    cfg = load_briefing_config(cfg_file)
+    assert dict(cfg.source_caps) == {}
+
+
 def test_categories_are_unique_across_sections_and_briefs():
     cfg = load_briefing_config(CONFIG)
     seen: set[str] = set()

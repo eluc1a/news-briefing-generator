@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from types import MappingProxyType
+from typing import Mapping
 
 import yaml
 
@@ -25,6 +27,9 @@ class BriefingConfig:
     per_source_cap: int
     front_matter_top_per_section: int
     min_articles_total: int
+    # Optional per-source cap overrides (e.g. {"arXiv cs.AI": 2}) to clamp a
+    # high-volume firehose harder than `per_source_cap`. Empty by default.
+    source_caps: Mapping[str, int] = field(default_factory=dict)
 
     def section_for_category(self, category: str) -> str | None:
         for s in self.sections:
@@ -71,6 +76,11 @@ def load_briefing_config(path: Path) -> BriefingConfig:
     except KeyError as e:
         raise ValueError(f"{path}: briefs missing required key {e}")
 
+    raw_caps = data.get("source_caps") or {}
+    if not isinstance(raw_caps, dict):
+        raise ValueError(f"{path}: 'source_caps' must be a mapping")
+    source_caps = MappingProxyType({str(k): int(v) for k, v in raw_caps.items()})
+
     return BriefingConfig(
         sections=tuple(sections),
         briefs=briefs,
@@ -79,4 +89,5 @@ def load_briefing_config(path: Path) -> BriefingConfig:
             _require(data, "front_matter_top_per_section", path)
         ),
         min_articles_total=int(_require(data, "min_articles_total", path)),
+        source_caps=source_caps,
     )

@@ -38,3 +38,10 @@ briefs:
 per_source_cap: 5
 front_matter_top_per_section: 5
 min_articles_total: 8
+
+# Per-source cap overrides. arXiv cs.AI dumps its ~140-paper daily batch at
+# ~04:00 UTC, which the morning briefing window (≈00-12 UTC) catches in full
+# while it misses the US-daytime news cycle. Clamp it hard so academic papers
+# can't crowd out curated AI news in the panel.
+source_caps:
+  "arXiv cs.AI": 2

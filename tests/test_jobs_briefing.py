@@ -78,7 +78,7 @@ def _row(link, category, source="s", content="ok"):
 
 async def test_happy_path_fans_out_six_calls(tmp_path):
     fetched_args: list[dict] = []
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         fetched_args.append({
             "categories": list(categories),
             "limit": limit,
@@ -210,7 +210,7 @@ async def test_happy_path_fans_out_six_calls(tmp_path):
 async def test_run_briefing_evening_edition_threads_title_and_window(tmp_path):
     """--edition=evening flips title and filename; 12h window flows to DB."""
     fetched_args: list[dict] = []
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         fetched_args.append({"since_hours": since_hours})
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
@@ -287,7 +287,7 @@ async def test_run_briefing_evening_edition_threads_title_and_window(tmp_path):
 
 async def test_run_briefing_emergency_overwrites_title_from_param(tmp_path):
     """When emergency fires, the fixture's title is replaced by the edition title."""
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
     async def gen_fm(*, articles, weather, today, volume, title, **kw):
@@ -336,7 +336,7 @@ async def test_run_briefing_emergency_overwrites_title_from_param(tmp_path):
 # ------------- not enough articles -------------
 
 async def test_aborts_when_zero_articles(tmp_path):
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return []
 
     notified = []
@@ -378,7 +378,7 @@ async def test_aborts_when_zero_articles(tmp_path):
 # ------------- emergency fallback -------------
 
 async def test_any_generator_failure_triggers_emergency(tmp_path):
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
     async def gen_fm(*, articles, weather, today, volume, **kw):
@@ -448,7 +448,7 @@ async def test_any_generator_failure_triggers_emergency(tmp_path):
 
 
 async def test_front_matter_failure_also_triggers_emergency(tmp_path):
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
     async def gen_fm(*, articles, weather, today, volume, **kw):
@@ -504,7 +504,7 @@ async def test_front_matter_failure_also_triggers_emergency(tmp_path):
 # ------------- print failure still propagates -------------
 
 async def test_print_failure_still_raises(tmp_path):
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
     async def gen_fm(*, articles, weather, today, volume, **kw):
@@ -567,7 +567,7 @@ async def test_print_failure_still_raises(tmp_path):
 async def test_assemble_briefing_happy_path_returns_briefing_and_count():
     from jina_clone.jobs.briefing import assemble_briefing
 
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         # Return 5 rows per call; 4 sections + 1 briefs call = 25 total
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
@@ -615,7 +615,7 @@ async def test_assemble_briefing_happy_path_returns_briefing_and_count():
 async def test_assemble_briefing_raises_not_enough_articles():
     from jina_clone.jobs.briefing import assemble_briefing, NotEnoughArticles
 
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return []  # Zero articles total
 
     async def noop(*a, **kw):
@@ -644,7 +644,7 @@ async def test_assemble_briefing_raises_not_enough_articles():
 async def test_assemble_briefing_bubbles_generator_failure():
     from jina_clone.jobs.briefing import assemble_briefing
 
-    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24):
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
         return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
 
     async def gen_fm(*, articles, weather, today, volume, **kw):

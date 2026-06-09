@@ -134,6 +134,32 @@ async def test_fetch_section_articles_per_source_cap(db):
     assert kept == {f"https://s1.example/{i}" for i in range(5)}
 
 
+async def test_fetch_section_articles_per_source_cap_override(db):
+    # arXiv is a high-volume firehose; a source_caps override should clamp it
+    # harder than the default cap while other sources keep the default.
+    now = datetime.now(timezone.utc)
+    for i in range(7):
+        await insert_entry(
+            db, url=f"https://arxiv.example/{i}", title=f"paper{i}",
+            source="arXiv cs.AI", category="ai", content="body",
+            published=now - timedelta(hours=i),
+        )
+    for i in range(7):
+        await insert_entry(
+            db, url=f"https://news.example/{i}", title=f"story{i}",
+            source="TechCrunch AI", category="ai", content="body",
+            published=now - timedelta(hours=i),
+        )
+    rows = await fetch_section_articles(
+        db, categories=["ai"], per_source_cap=5, limit=40,
+        source_caps={"arXiv cs.AI": 2},
+    )
+    by_source: dict[str, int] = {}
+    for r in rows:
+        by_source[r["source"]] = by_source.get(r["source"], 0) + 1
+    assert by_source == {"arXiv cs.AI": 2, "TechCrunch AI": 5}
+
+
 async def test_fetch_section_articles_respects_limit(db):
     # 10 articles across 2 sources, cap=5 each; limit=6 should clip to 6.
     now = datetime.now(timezone.utc)

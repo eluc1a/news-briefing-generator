@@ -105,14 +105,22 @@ async def fetch_section_articles(
     per_source_cap: int = 5,
     limit: int = 40,
     since_hours: float = 24,
+    source_caps: dict[str, int] | None = None,
 ) -> list[asyncpg.Record]:
     """Articles for a single briefing section, capped per source.
 
     `per_source_cap` keeps one high-volume outlet from dominating the
     pool (e.g., stops The Hindu from owning the International panel).
+
+    `source_caps` overrides the cap for named sources — used to clamp a
+    high-volume firehose (e.g. arXiv's ~140-paper daily batch) harder than
+    the default so it can't crowd out sparser, curated news in the same
+    category. Sources absent from the map fall back to `per_source_cap`.
     """
     if not categories:
         return []
+    cap_names = list(source_caps) if source_caps else []
+    cap_values = [source_caps[n] for n in cap_names]
     async with pool.acquire() as conn:
         return await conn.fetch(
             """
@@ -130,7 +138,11 @@ async def fetch_section_articles(
             )
             SELECT id, title, link, published, source, category, content, uploaded_at
             FROM ranked
-            WHERE src_rank <= $3
+            WHERE src_rank <= COALESCE(
+              (SELECT o.cap FROM unnest($5::text[], $6::int[]) AS o(name, cap)
+               WHERE o.name = ranked.source LIMIT 1),
+              $3
+            )
             ORDER BY published DESC NULLS LAST, uploaded_at DESC
             LIMIT $4
             """,
@@ -138,4 +150,6 @@ async def fetch_section_articles(
             str(since_hours),
             per_source_cap,
             limit,
+            cap_names,
+            cap_values,
         )

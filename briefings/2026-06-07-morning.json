@@ -1,0 +1,215 @@
+{
+  "title": "The Morning Fox",
+  "date": "Sunday, June 7, 2026 · 6:55 PM",
+  "volume": "Vol. I · No. 158 · Morning",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 87,
+    "temp_low": 68,
+    "conditions": "clear sky",
+    "sunrise": "5:43",
+    "sunset": "8:31",
+    "daylight": "14h 48m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "8pm",
+        "temp_f": 87,
+        "precip_pct": 0,
+        "code": 800
+      },
+      {
+        "time_label": "11pm",
+        "temp_f": 84,
+        "precip_pct": 0,
+        "code": 800
+      },
+      {
+        "time_label": "2am",
+        "temp_f": 77,
+        "precip_pct": 0,
+        "code": 800
+      },
+      {
+        "time_label": "5am",
+        "temp_f": 68,
+        "precip_pct": 0,
+        "code": 800
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "737.55",
+        "change": "▼2.58%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "705.06",
+        "change": "▼4.80%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "73.05",
+        "change": "▼14.28%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "62,949",
+        "change": "▲3.68%"
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.47%",
+        "change": "▼2bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "3.8%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "Iran Fires Missiles at Israel, Breaking April Ceasefire",
+    "deck": "Iran's Revolutionary Guards launched a ballistic missile barrage at Israel on June 7, the first such attack since an April 8 ceasefire halted major hostilities.",
+    "body": "Air raid sirens sounded across Israel on June 7 as its military worked to intercept incoming Iranian missiles, the first Iranian strikes since an April 8 ceasefire took effect. Iran's Revolutionary Guards described the attack as a \"warning\" following an Israeli strike on Beirut's southern suburbs earlier that day. Tehran had previously warned that any new Israeli attacks on Beirut would trigger a \"full-scale resumption\" of hostilities. The launches came on the 100th day of the broader Middle East conflict. Iran has conditioned any permanent settlement on a halt to Israeli operations in Lebanon, where Israel is pursuing a campaign against Hezbollah. Israeli military chief Eyal Zamir said the military \"will attack the enemy with force as soon as a green light is given,\" according to a statement. The same day, Ukrainian President Volodymyr Zelensky met UK Prime Minister Keir Starmer, French President Emmanuel Macron, and German Chancellor Friedrich Merz in London, hours after Russian strikes killed five people and hit a nuclear site in Ukraine.",
+    "at_a_glance": [
+      "First Iranian missile strike since April 8 ceasefire",
+      "Attack followed Israeli strike on Beirut suburbs",
+      "Israeli military chief vowed retaliatory strike on order"
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "Federal Lawsuit Seeks to Block UFC Fight on White House South Lawn",
+      "lede_body": "The Public Integrity Project filed a federal lawsuit Saturday on behalf of two Virginia residents seeking to halt a June 14 UFC fight card on the White House South Lawn, timed to President Trump's 80th birthday. The filing argues the event violates National Park Service regulations barring sporting events on federal parklands, that Congress did not authorize a large arch erected over the venue, and that no environmental review was conducted. The White House called the lawsuit \"obstructionist\" and \"baseless.\"",
+      "also": [
+        {
+          "headline": "Trump Denies 'No New Wars' Pledge in NBC Interview",
+          "body": "Trump told NBC's Kristen Welker Friday · \"I didn't guarantee no war\" · he ended the interview after calling the network \"a one-sided crooked network.\""
+        },
+        {
+          "headline": "Scott Pelley Accuses CBS Managers of Bias Insertion",
+          "body": "Fired correspondent Scott Pelley told the New York Times Sunday · CBS managers directed him to inject falsehoods into a February report on Operation Metro Surge protests in Minnesota."
+        },
+        {
+          "headline": "Grand Canyon Teen Dies of Heat-Related Illness",
+          "body": "An 18-year-old male died Wednesday on the Bright Angel Trail · rangers found him 30 feet below the trail · Coconino County Medical Examiner is investigating."
+        },
+        {
+          "headline": "OPEC Raises Output 188,000 Barrels Despite Hormuz Closure",
+          "body": "OPEC agreed Sunday to increase July production by 188,000 barrels per day · the Strait of Hormuz, carrying 20% of world oil, remains closed · U.S. negotiations to reopen it continue."
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "Airlines Face $100 Billion Jet Fuel Hit From Iran Conflict",
+      "lede_body": "The Iran conflict has triggered a projected $100 billion increase in jet fuel costs for global airlines. American Airlines is suspending six domestic routes — including four from LAX and two from Charlotte — from August 5 through October 5. United Airlines cut roughly 5% of capacity and raised fares up to 20% since last year. American also raised checked baggage fees by at least $10 in April.",
+      "also": [
+        {
+          "headline": "Trump Presses Fed Chair Warsh for Rate Cut",
+          "body": "President Trump publicly called on Federal Reserve Chair Kevin Warsh to cut interest rates · no specific target rate was cited."
+        },
+        {
+          "headline": "BPM Proposes €50bn Merger With Monte dei Paschi",
+          "body": "Italian bank BPM proposed a €50 billion merger with Monte dei Paschi di Siena · the deal would create one of Italy's largest lenders."
+        },
+        {
+          "headline": "Vornado Recalls 255,000 Tower Heaters Over Fire Risk",
+          "body": "The CPSC announced a recall of 255,000 Vornado tower heaters · 32 overheating reports filed, including 8 fires · units sold August 2013 through May 2026."
+        },
+        {
+          "headline": "Iran Launches Ballistic Missiles at Israel",
+          "body": "Iran launched ballistic missiles at Israel · the strike escalated the Middle East conflict driving the ongoing surge in global energy prices."
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "OpenAI Revamps ChatGPT Into Coding-Focused Super App",
+      "lede_body": "OpenAI plans to launch a redesigned ChatGPT within weeks, repositioning it as a super app centered on coding tools and AI agents, the Financial Times reported June 7. The goal is to compete with Anthropic for business customers and approach profitability before an IPO. One senior OpenAI employee said, \"Chat is dead.\" Product lead Thibault Sottiaux described the target as a personal agent capable of assisting users across work and personal tasks.",
+      "also": [
+        {
+          "headline": "Microsoft Shifts GitHub Copilot to Per-Token Pricing",
+          "body": "Microsoft announced GitHub Copilot will charge per token rather than a flat rate · Uber separately reported exceeding its internal AI budget and capping employee usage."
+        },
+        {
+          "headline": "AI Data Centers Consumed 264 Billion Gallons in 2025",
+          "body": "Mordor Intelligence reported · AI data centers consumed nearly 1 trillion liters of water in 2025 · current daily consumption is 550 million gallons · 63% of the U.S. is under drought conditions."
+        },
+        {
+          "headline": "Anthropic IPO Filing to Include Token Cost Risks",
+          "body": "Anthropic is preparing an S-1 filing · token pricing volatility and cost pass-through to customers are expected to appear as disclosed risk factors."
+        },
+        {
+          "headline": "OpenAI Deprioritizes Sora and Standalone Products",
+          "body": "OpenAI executives said the company is abandoning standalone products including video generator Sora · the Wall Street Journal reported the strategy shift in March 2026."
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "Iran fires missiles at Israel, breaking April ceasefire",
+      "lede_body": "Iran launched a missile salvo at Israel on June 7, the first direct Iranian strikes since an April 8 ceasefire took effect. Iran's Revolutionary Guard said it targeted the Ramat David air base southeast of Haifa, citing Israeli and U.S. violations of ceasefire terms. Israeli defenses intercepted the missiles. Israeli military chief Eyal Zamir said the IDF would strike back \"with force\" once authorized.",
+      "also": [
+        {
+          "headline": "UK, France, Germany back Ukraine-Russia direct talks",
+          "body": "Starmer, Macron, and Merz met Zelenskyy in London on June 7 · they endorsed direct Ukraine-Russia dialogue with U.S. and European participation · Russia's Putin called the offer insincere."
+        },
+        {
+          "headline": "Migrant boat capsizes off Malta, 10 dead",
+          "body": "A vessel from Libya carrying about 60 people capsized 45 nautical miles east-southeast of Malta · Italian coastguard recovered 10 bodies · roughly 48 survivors rescued · IOM counts at least 827 Mediterranean deaths in 2026."
+        },
+        {
+          "headline": "SIPRI: all nine nuclear states expanded arsenals in 2025",
+          "body": "SIPRI's 2026 report found approximately 12,200 nuclear warheads worldwide · Russia and the U.S. hold about 83% of deployable warheads · New START expired February 2026."
+        },
+        {
+          "headline": "White House weighs buying Chagos Islands from Mauritius",
+          "body": "The Telegraph reported June 7 · U.S. officials drafted a proposal to bypass the UK and acquire Diego Garcia directly · Britain paused its sovereignty-transfer deal in April 2026."
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"The Israeli military will attack the enemy with force as soon as a green light is given.\" — Eyal Zamir, Israeli Military Chief, Svenska Dagbladet",
+  "briefs": [
+    {
+      "topic": "Middle East",
+      "body": "Iran launched missiles at Israel on June 7, the first such strike since a ceasefire took effect in April. Israel had struck Beirut's Dahieh district hours earlier, killing two and wounding 20."
+    },
+    {
+      "topic": "Diplomacy",
+      "body": "UK Deputy Prime Minister David Lammy told U.S. Vice President JD Vance in a phone call Saturday that Vance was wrong to blame immigration for the December stabbing death of 18-year-old Henry Nowak in Southampton."
+    },
+    {
+      "topic": "Public Safety",
+      "body": "A Nashville high school shooting survivor sued AI gun-detection firm Omnilert in Davidson County court last month, alleging the system failed to detect the handgun used in a January 2025 attack that killed two people."
+    },
+    {
+      "topic": "Energy",
+      "body": "A UN report estimates AI energy consumption could double by 2030, reaching 3% of global electricity use and producing emissions equivalent to the UK's annual output."
+    },
+    {
+      "topic": "Markets",
+      "body": "Amazon topped the 2026 Fortune 500 with $716.9 billion in 2025 revenue, ending Walmart's 13-year run at number one. Texas surpassed California in company count on the list."
+    },
+    {
+      "topic": "Open Source",
+      "body": "Firefox 153, due July 21, will include Vulkan Video decoding support, developed by NVIDIA engineer Tymur Boiko and Red Hat's Martin Stransky, expanding GPU-accelerated playback beyond VA-API."
+    }
+  ],
+  "data_point": {
+    "value": "43.4 million passengers",
+    "context": "Total passengers through Munich Airport in 2025, per the Munich Airport Statistical Yearbook. The airport ranks eighth in Europe by flight movements, serving 232 destinations across 72 countries."
+  },
+  "on_this_day": {
+    "year_and_title": "1967 — Israel Captures Jerusalem's Old City in Six-Day War",
+    "body": "On June 7, 1967, Israeli paratroopers entered and secured the Old City of Jerusalem during the Six-Day War, reaching the Western Wall. Israel announced the reunification of Jerusalem under its control. The war had begun June 5; fighting ended June 10 with Israel holding the Sinai, West Bank, Gaza, and Golan Heights."
+  }
+}

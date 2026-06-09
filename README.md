@@ -333,11 +333,6 @@ parser.
   key — errors include `401` or `PERMISSION_DENIED`. Update `.env` and
   `docker compose restart extractor`.
 
-## Implementation docs
-
-- Design spec: `docs/superpowers/specs/2026-04-18-native-python-news-pipeline-design.md`
-- Implementation plan: `docs/superpowers/plans/2026-04-18-native-python-news-pipeline.md`
-
 ## Wiring into n8n (unchanged)
 
 n8n can still call `GET /extract?url=...` on the extractor service as

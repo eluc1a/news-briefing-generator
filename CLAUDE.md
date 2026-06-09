@@ -167,8 +167,9 @@ not SQLite, not mocked). `tests/conftest.py` provides a `db` fixture that
 truncates both tables before each test. `TEST_DATABASE_URL` env var
 overrides the default.
 
-If you ever recreate the test DB, re-run the DDL in
-`docs/superpowers/plans/2026-04-18-native-python-news-pipeline.md` Task 2.
+If you ever recreate the test DB, derive the DDL from production:
+`pg_dump --schema-only -t entries -t news_summaries` against `mcp_news`
+(the original plan doc with the DDL was lost).
 
 Pytest uses `asyncio_default_fixture_loop_scope = "session"` *and*
 `asyncio_default_test_loop_scope = "session"` — both are required for the

@@ -80,7 +80,7 @@ class Settings:
             stock_api_key=stock_api_key,
             fred_api_key=fred_api_key,
             feed_base_url=os.getenv("FEED_BASE_URL") or None,
-            feed_output_dir=Path(os.getenv("FEED_OUTPUT_DIR", "feeds/ai-digest")),
+            feed_output_dir=Path(os.getenv("FEED_OUTPUT_DIR") or "feeds/ai-digest"),
             api_keys=api_keys,
         )
 

@@ -200,6 +200,7 @@ EDITION_TITLES = {
 SLACK_DIGEST_WINDOWS = {"morning": 16.25, "afternoon": 7.75}
 SLACK_DIGEST_EDITION_LABELS = {"morning": "Morning", "afternoon": "Afternoon"}
 SLACK_DIGEST_TITLE = "AI/ML Slack Digest"
+SLACK_DIGEST_DRY_RUN_BASE_URL = "https://example.invalid/ai-digest"
 
 
 async def _briefing_run(settings, *, edition: str):
@@ -263,12 +264,13 @@ async def _run_slack_digest(settings: Settings, *, edition: str, dry_run: bool):
     if dry_run:
         tmp = tempfile.TemporaryDirectory(prefix="ai-digest-dryrun-")
         out_dir = Path(tmp.name)
-    base_url = (settings.feed_base_url or "https://example.invalid/ai-digest").rstrip("/")
+    base_url = (settings.feed_base_url or SLACK_DIGEST_DRY_RUN_BASE_URL).rstrip("/")
 
-    iso_date = date.today().isoformat()
+    now = datetime.now().astimezone()
+    iso_date = now.date().isoformat()
     edition_label = SLACK_DIGEST_EDITION_LABELS[edition]
-    date_label = datetime.now().strftime("%a %b %-d")
-    generated_at = datetime.now().astimezone()
+    date_label = now.strftime("%a %b %-d")
+    generated_at = now
 
     def publish(digest):
         return briefing_feed.publish_digest(

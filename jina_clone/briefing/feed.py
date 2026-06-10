@@ -145,7 +145,7 @@ def rebuild_feed(out_dir: Path, *, base_url: str) -> Path:
     feed.xml, HTML pages, and anything else are ignored."""
     out_dir = Path(out_dir)
     records = []
-    for p in sorted(out_dir.glob("*.json")):
+    for p in out_dir.glob("*.json"):
         if not _NAME_RE.match(p.name):
             continue
         records.append(json.loads(p.read_text()))

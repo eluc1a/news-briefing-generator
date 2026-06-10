@@ -112,6 +112,9 @@ def test_settings_feed_delivery(monkeypatch):
     assert s.feed_base_url is None
     assert s.feed_output_dir == Path("feeds/ai-digest")
 
+    monkeypatch.setenv("FEED_OUTPUT_DIR", "")
+    assert Settings.from_env().feed_output_dir == Path("feeds/ai-digest")
+
     monkeypatch.setenv("FEED_BASE_URL", "https://feeds.elucia.com/ai-digest")
     monkeypatch.setenv("FEED_OUTPUT_DIR", "/tmp/feeds")
     s = Settings.from_env()

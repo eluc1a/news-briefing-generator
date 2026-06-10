@@ -8,6 +8,7 @@ logs/
 .env
 briefings/*.pdf
 briefings/tests/
+feeds/
 Bodoni_Moda/
 
 # Runtime cache for live-data (weather.json) — safe to delete, repopulates on next run.

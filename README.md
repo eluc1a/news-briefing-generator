@@ -138,19 +138,24 @@ exposed if you want to iterate on one without re-running the others:
 
 ## Slack AI/ML digest
 
-Twice-daily digest of `category: ai` articles posted to a work Slack
-channel via incoming webhook (`SLACK_WEBHOOK_URL` in `.env`).
+Twice-daily digest of `category: ai` articles, published as a public
+RSS 2.0 feed + per-edition HTML pages (the work Slack workspace allows
+no app installs, so the channel subscribes with
+`/feed subscribe <FEED_BASE_URL>/feed.xml` instead of a webhook).
+`FEED_BASE_URL` and `FEED_OUTPUT_DIR` live in `.env`; nginx serves the
+output dir at the base URL. Each run writes a JSON record + HTML page
+and rebuilds `feed.xml` (newest 20 entries, rebuild-by-scan).
 
 ```bash
-./.venv/bin/python -m jina_clone slack-digest --edition=morning    # 9:00 ET
-./.venv/bin/python -m jina_clone slack-digest --edition=afternoon  # 16:45 ET
-./.venv/bin/python -m jina_clone slack-digest --edition=afternoon --dry-run  # print, don't post
+./.venv/bin/python -m jina_clone slack-digest --edition=morning    # 8:45 ET cron
+./.venv/bin/python -m jina_clone slack-digest --edition=afternoon  # 16:30 ET cron
+./.venv/bin/python -m jina_clone slack-digest --edition=afternoon --dry-run  # print, don't write
 ```
 
 Editions use non-overlapping windows (morning 16.25h, afternoon 7.75h),
-so no article appears twice. On LLM failure the digest degrades to
+so no article appears twice. On LLM failure the feed entry degrades to
 headlines-only and sends an ntfy alert. Design:
-`docs/superpowers/specs/2026-06-09-slack-ai-digest-design.md`.
+`docs/superpowers/specs/2026-06-09-ai-digest-rss-feed-design.md`.
 
 ## Adding new sources
 

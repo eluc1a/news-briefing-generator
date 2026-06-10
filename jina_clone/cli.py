@@ -1,8 +1,8 @@
 import argparse
 import asyncio
-import json
 import logging
 import os
+import tempfile
 from datetime import date, datetime
 from pathlib import Path
 
@@ -20,7 +20,7 @@ from jina_clone.briefing import generator as briefing_generator
 from jina_clone.briefing import notify as briefing_notify
 from jina_clone.briefing import printer as briefing_printer
 from jina_clone.briefing import renderer as briefing_renderer
-from jina_clone.briefing import slack as briefing_slack
+from jina_clone.briefing import feed as briefing_feed
 from jina_clone.briefing.config import load_briefing_config
 from jina_clone.briefing.schema import Briefing, WeatherStrip
 from jina_clone.jobs.briefing import WeatherFn, MarketsFn, assemble_briefing, run_briefing
@@ -193,8 +193,10 @@ EDITION_TITLES = {
     "evening": "The Evening Fox",
 }
 
-# Non-overlapping windows matching the cron cadence (9:00 / 16:45 ET):
-# morning covers since yesterday 16:45, afternoon covers since 9:00.
+# Non-overlapping windows matching the cron cadence (8:45 / 16:30 ET —
+# 15 min before the 9:00/16:45 channel targets, absorbing Slack's
+# feed-poll lag): morning covers since yesterday 16:30, afternoon
+# covers since 8:45.
 SLACK_DIGEST_WINDOWS = {"morning": 16.25, "afternoon": 7.75}
 SLACK_DIGEST_EDITION_LABELS = {"morning": "Morning", "afternoon": "Afternoon"}
 SLACK_DIGEST_TITLE = "AI/ML Slack Digest"
@@ -250,37 +252,64 @@ async def _briefing_run(settings, *, edition: str):
 
 
 async def _run_slack_digest(settings: Settings, *, edition: str, dry_run: bool):
-    if not settings.slack_webhook_url and not dry_run:
+    if not settings.feed_base_url and not dry_run:
         raise SystemExit(
-            "SLACK_WEBHOOK_URL is required for slack-digest (set it in .env)"
+            "FEED_BASE_URL is required for slack-digest (set it in .env)"
         )
     cfg = load_briefing_config(settings.briefing_categories_file)
 
-    post = briefing_slack.post_webhook
+    tmp = None
+    out_dir = settings.feed_output_dir
     if dry_run:
-        def post(url: str, payload: dict) -> None:
-            print(json.dumps(payload, indent=2, ensure_ascii=False))
+        tmp = tempfile.TemporaryDirectory(prefix="ai-digest-dryrun-")
+        out_dir = Path(tmp.name)
+    base_url = (settings.feed_base_url or "https://example.invalid/ai-digest").rstrip("/")
+
+    iso_date = date.today().isoformat()
+    edition_label = SLACK_DIGEST_EDITION_LABELS[edition]
+    date_label = datetime.now().strftime("%a %b %-d")
+    generated_at = datetime.now().astimezone()
+
+    def publish(digest):
+        return briefing_feed.publish_digest(
+            digest, out_dir=out_dir, base_url=base_url, iso_date=iso_date,
+            edition=edition, edition_label=edition_label,
+            date_label=date_label, generated_at=generated_at,
+        )
+
+    def publish_fallback(articles):
+        return briefing_feed.publish_fallback(
+            articles, out_dir=out_dir, base_url=base_url, iso_date=iso_date,
+            edition=edition, edition_label=edition_label,
+            date_label=date_label, generated_at=generated_at,
+        )
 
     briefing_generator.reset_usage()
     pool = await create_pool(settings.database_url)
     try:
         await run_slack_digest(
             pool,
-            webhook_url=settings.slack_webhook_url or "dry-run",
             window_hours=SLACK_DIGEST_WINDOWS[edition],
-            edition_label=SLACK_DIGEST_EDITION_LABELS[edition],
-            date_label=datetime.now().strftime("%a %b %-d"),
+            edition_label=edition_label,
             title=SLACK_DIGEST_TITLE,
             ntfy_topic=settings.ntfy_topic,
             source_caps=dict(cfg.source_caps),
             fetch_articles=fetch_section_articles,
             generate_digest=briefing_generator.generate_slack_digest,
-            format_digest=briefing_slack.format_digest,
-            format_fallback=briefing_slack.format_headlines_fallback,
-            post=post,
+            publish=publish,
+            publish_fallback=publish_fallback,
             notify_failure=briefing_notify.notify_failure,
         )
+        if dry_run:
+            page = out_dir / f"{iso_date}-{edition}.html"
+            if page.exists():
+                print(page.read_text())
+                print((out_dir / "feed.xml").read_text())
+            else:
+                print("(no articles in window — nothing rendered)")
     finally:
+        if tmp is not None:
+            tmp.cleanup()
         await pool.close()
         totals = briefing_generator.pop_usage_totals()
         if totals["calls"]:
@@ -327,11 +356,11 @@ def main():
     slack_p = sub.add_parser("slack-digest")
     slack_p.add_argument(
         "--edition", required=True, choices=["morning", "afternoon"],
-        help="morning (9:00 ET, 16.25h window) or afternoon (16:45 ET, 7.75h window)",
+        help="morning (8:45 ET, 16.25h window) or afternoon (16:30 ET, 7.75h window)",
     )
     slack_p.add_argument(
         "--dry-run", action="store_true",
-        help="Print the Slack payload to stdout instead of posting",
+        help="Print the rendered page HTML + feed XML to stdout; write nothing",
     )
 
     args = parser.parse_args()

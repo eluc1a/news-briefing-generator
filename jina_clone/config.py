@@ -41,7 +41,8 @@ class Settings:
     weather_api_key: str = ""
     stock_api_key: str = ""
     fred_api_key: str = ""
-    slack_webhook_url: str | None = None
+    feed_base_url: str | None = None
+    feed_output_dir: Path = Path("feeds/ai-digest")
     api_keys: dict[str, str] = field(default_factory=dict)
 
     @classmethod
@@ -78,7 +79,8 @@ class Settings:
             weather_api_key=weather_api_key,
             stock_api_key=stock_api_key,
             fred_api_key=fred_api_key,
-            slack_webhook_url=os.getenv("SLACK_WEBHOOK_URL") or None,
+            feed_base_url=os.getenv("FEED_BASE_URL") or None,
+            feed_output_dir=Path(os.getenv("FEED_OUTPUT_DIR", "feeds/ai-digest")),
             api_keys=api_keys,
         )
 

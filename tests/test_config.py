@@ -100,17 +100,20 @@ def test_settings_briefing_overrides(monkeypatch, tmp_path):
     assert s.briefings_dir == tmp_path / "briefings"
 
 
-def test_settings_slack_webhook_url(monkeypatch):
+def test_settings_feed_delivery(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://x")
     monkeypatch.setenv("LLM_PROVIDER", "claude")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
-    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    monkeypatch.delenv("FEED_BASE_URL", raising=False)
+    monkeypatch.delenv("FEED_OUTPUT_DIR", raising=False)
     from jina_clone.config import Settings
 
-    assert Settings.from_env().slack_webhook_url is None
+    s = Settings.from_env()
+    assert s.feed_base_url is None
+    assert s.feed_output_dir == Path("feeds/ai-digest")
 
-    monkeypatch.setenv("SLACK_WEBHOOK_URL", "https://hooks.slack.com/services/X")
-    assert (
-        Settings.from_env().slack_webhook_url
-        == "https://hooks.slack.com/services/X"
-    )
+    monkeypatch.setenv("FEED_BASE_URL", "https://feeds.elucia.com/ai-digest")
+    monkeypatch.setenv("FEED_OUTPUT_DIR", "/tmp/feeds")
+    s = Settings.from_env()
+    assert s.feed_base_url == "https://feeds.elucia.com/ai-digest"
+    assert s.feed_output_dir == Path("/tmp/feeds")

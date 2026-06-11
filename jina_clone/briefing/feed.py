@@ -69,6 +69,43 @@ def _record_body_html(record: dict) -> str:
     return _digest_body_html(SlackDigest.model_validate(record["digest"]))
 
 
+# --- Feed-description rendering (Slack-friendly) -------------------------
+# Slack's /feed unfurl strips <ul>/<li> and <a> from the description, so
+# the rich list above never reaches the channel. The feed body below
+# flattens to <p> blocks and prints each source URL as bare text — Slack
+# auto-links bare URLs, so the source links survive the strip. The HTML
+# page keeps the rich list (render_page_html still uses _record_body_html).
+
+
+def _digest_feed_html(digest: SlackDigest) -> str:
+    parts = [f"<p>{escape(digest.lead)}</p>"]
+    for item in digest.items:
+        parts.append(
+            f'<p><a href="{_attr(item.url)}">{escape(item.title)}</a>'
+            f" — {escape(item.blurb)}<br>{escape(item.url)}</p>"
+        )
+    return "\n".join(parts)
+
+
+def _fallback_feed_html(headlines: list[dict]) -> str:
+    parts = ["<p>LLM digest unavailable — headlines only.</p>"]
+    for art in headlines[:FALLBACK_MAX_ITEMS]:
+        link = art.get("link")
+        if not link:
+            continue
+        title = art.get("title") or link
+        parts.append(
+            f'<p><a href="{_attr(link)}">{escape(title)}</a><br>{escape(link)}</p>'
+        )
+    return "\n".join(parts)
+
+
+def _record_feed_html(record: dict) -> str:
+    if record["degraded"]:
+        return _fallback_feed_html(record["headlines"])
+    return _digest_feed_html(SlackDigest.model_validate(record["digest"]))
+
+
 _PAGE_TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
@@ -122,7 +159,7 @@ def render_feed_xml(records: list[dict], *, base_url: str) -> str:
             f"<link>{escape(page_url)}</link>\n"
             f'<guid isPermaLink="true">{escape(page_url)}</guid>\n'
             f"<pubDate>{pub}</pubDate>\n"
-            f"<description>{_cdata(_record_body_html(rec))}</description>\n"
+            f"<description>{_cdata(_record_feed_html(rec))}</description>\n"
             "</item>"
         )
     joined = "\n".join(items)

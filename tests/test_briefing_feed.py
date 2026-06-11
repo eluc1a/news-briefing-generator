@@ -73,6 +73,34 @@ def test_feed_description_is_cdata_with_body(tmp_path):
     assert "Big day for agents &amp; &lt;tools&gt;." in feed
 
 
+def test_feed_description_flattens_with_bare_source_urls(tmp_path):
+    # Slack's /feed strips <ul>/<li> and <a>, so the feed description must
+    # expose each source URL as bare text (Slack auto-links those) and use
+    # no list markup. The rich <ul> stays on the HTML page only.
+    _publish(tmp_path)
+    feed = (tmp_path / "feed.xml").read_text()
+    assert "<ul>" not in feed and "<li>" not in feed
+    assert "https://a?x=1&amp;y=2" in feed          # bare source URL (XML-escaped)
+    assert "https://b" in feed
+    assert "T &amp; A &lt;tag&gt;" in feed          # title text survives
+    assert "b1" in feed and "b2" in feed            # blurbs survive
+
+
+def test_fallback_feed_description_has_bare_urls(tmp_path):
+    articles = [{"link": "https://x/1", "title": "t1"},
+                {"link": None, "title": "skip"}]
+    publish_fallback(
+        articles, out_dir=tmp_path, base_url=BASE,
+        iso_date="2026-06-09", edition="afternoon",
+        edition_label="Afternoon", date_label="Tue Jun 9",
+        generated_at=GEN_AT,
+    )
+    feed = (tmp_path / "feed.xml").read_text()
+    assert "<ul>" not in feed and "<li>" not in feed
+    assert "https://x/1" in feed
+    assert "skip" not in feed                        # linkless headline dropped
+
+
 def test_publish_fallback_degraded_caps_and_defaults(tmp_path):
     articles = [{"link": f"https://x/{i}", "title": f"t{i}"} for i in range(8)]
     articles.append({"link": None, "title": "no link"})

@@ -181,14 +181,14 @@ body {{ font-family: Georgia, 'Times New Roman', serif; max-width: 40rem;
 .story-blurb {{ font-size: .95rem; color: #333; margin: 0; }}
 .story-source {{ font-style: italic; font-size: .85rem; color: #777; }}
 .label {{ font-size: .6rem; font-weight: 400; text-transform: uppercase;
-         letter-spacing: 1.2px; border: 1px solid currentColor;
-         border-radius: 2px; padding: .08rem .4rem; margin-right: .55rem;
+         letter-spacing: 1.2px; color: #faf8f3; border-radius: 2px;
+         padding: .12rem .45rem; margin-right: .55rem;
          vertical-align: .2rem; white-space: nowrap; }}
-.label-news {{ color: #8b2e2e; }}
-.label-model {{ color: #2e4a8b; }}
-.label-tool {{ color: #2e6b3e; }}
-.label-paper {{ color: #8a6d3b; }}
-.label-technique {{ color: #6b3e8b; }}
+.label-news {{ background: #8b2e2e; }}
+.label-model {{ background: #2e4a8b; }}
+.label-tool {{ background: #2e6b3e; }}
+.label-paper {{ background: #8a6d3b; }}
+.label-technique {{ background: #6b3e8b; }}
 .degraded {{ color: #8a6d3b; font-style: italic; margin: 0 0 1rem; }}
 footer {{ margin-top: 2rem; font-size: .68rem; color: #777;
          text-transform: uppercase; letter-spacing: 1px;

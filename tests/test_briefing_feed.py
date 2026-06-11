@@ -82,7 +82,7 @@ def test_page_html_category_labels_and_sources(tmp_path):
     page = _publish(tmp_path).read_text()
     assert '<span class="label label-news">news</span>' in page
     assert '<span class="label label-tool">tool</span>' in page
-    assert ".label-news { color:" in page           # per-category colors
+    assert ".label-news { background:" in page      # per-category colors
     assert '<span class="story-source">— S&amp;P &lt;Wire&gt;</span>' in page
     assert '<span class="story-source">— S2</span>' in page
 

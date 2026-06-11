@@ -10,6 +10,7 @@ docs/superpowers/specs/2026-06-09-ai-digest-rss-feed-design.md.
 """
 import json
 import re
+import shutil
 from datetime import datetime
 from email.utils import format_datetime
 from pathlib import Path
@@ -36,30 +37,33 @@ def _entry_title(edition_label: str, date_label: str) -> str:
 
 
 def _digest_body_html(digest: SlackDigest) -> str:
-    lines = [f'<p class="lead">{escape(digest.lead)}</p>', "<ul>"]
+    lines = [f'<p class="lead">{escape(digest.lead)}</p>']
     for item in digest.items:
         lines.append(
-            f'<li><a href="{_attr(item.url)}">{escape(item.title)}</a>'
-            f" — {escape(item.blurb)}</li>"
+            '<article class="story">\n'
+            f'<h2 class="story-title"><a href="{_attr(item.url)}">'
+            f"{escape(item.title)}</a></h2>\n"
+            f'<p class="story-blurb">{escape(item.blurb)}</p>\n'
+            "</article>"
         )
-    lines.append("</ul>")
     return "\n".join(lines)
 
 
 def _fallback_body_html(headlines: list[dict]) -> str:
     """Degraded variant for LLM failure: linked headlines, newest-first
     (input order from fetch_section_articles), capped at 10."""
-    lines = [
-        '<p class="degraded">LLM digest unavailable — headlines only.</p>',
-        "<ul>",
-    ]
+    lines = ['<p class="degraded">LLM digest unavailable — headlines only.</p>']
     for art in headlines[:FALLBACK_MAX_ITEMS]:
         link = art.get("link")
         if not link:
             continue
         title = art.get("title") or link
-        lines.append(f'<li><a href="{_attr(link)}">{escape(title)}</a></li>')
-    lines.append("</ul>")
+        lines.append(
+            '<article class="story">\n'
+            f'<h2 class="story-title"><a href="{_attr(link)}">'
+            f"{escape(title)}</a></h2>\n"
+            "</article>"
+        )
     return "\n".join(lines)
 
 
@@ -70,11 +74,12 @@ def _record_body_html(record: dict) -> str:
 
 
 # --- Feed-description rendering (Slack-friendly) -------------------------
-# Slack's /feed unfurl strips <ul>/<li> and <a> from the description, so
-# the rich list above never reaches the channel. The feed body below
-# flattens to <p> blocks and prints each source URL as bare text — Slack
-# auto-links bare URLs, so the source links survive the strip. The HTML
-# page keeps the rich list (render_page_html still uses _record_body_html).
+# Slack's /feed unfurl strips list/heading markup and <a> from the
+# description, so the rich markup above never reaches the channel. The
+# feed body below flattens to <p> blocks and prints each source URL as
+# bare text — Slack auto-links bare URLs, so the source links survive
+# the strip. The HTML page keeps the rich linked markup
+# (render_page_html still uses _record_body_html).
 
 
 def _digest_feed_html(digest: SlackDigest) -> str:
@@ -106,6 +111,11 @@ def _record_feed_html(record: dict) -> str:
     return _digest_feed_html(SlackDigest.model_validate(record["digest"]))
 
 
+# House style mirrors the print broadsheet (templates/briefing.html.j2):
+# Bodoni Moda masthead over a double rule, uppercase letter-spaced
+# dateline, Georgia body, thin rules between stories. Fonts are served
+# from fonts/ next to the pages (copied at publish time); Georgia is the
+# fallback if they are missing.
 _PAGE_TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
@@ -113,18 +123,50 @@ _PAGE_TEMPLATE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <style>
-body {{ font-family: Georgia, serif; max-width: 42rem; margin: 2rem auto;
-       padding: 0 1rem; color: #1a1a1a; }}
-h1 {{ font-size: 1.4rem; border-bottom: 2px solid #1a1a1a;
-     padding-bottom: .4rem; }}
-.lead {{ font-size: 1.05rem; }}
-li {{ margin: .6rem 0; }}
-.degraded {{ color: #8a6d3b; font-style: italic; }}
-footer {{ margin-top: 2rem; font-size: .8rem; color: #777; }}
+@font-face {{
+  font-family: 'Bodoni Moda';
+  src: url('fonts/BodoniModa-Regular.ttf') format('truetype');
+  font-weight: 400;
+}}
+@font-face {{
+  font-family: 'Bodoni Moda';
+  src: url('fonts/BodoniModa-Medium.ttf') format('truetype');
+  font-weight: 500;
+}}
+body {{ font-family: Georgia, 'Times New Roman', serif; max-width: 40rem;
+       margin: 2rem auto 3rem; padding: 0 1.2rem; color: #1a1a1a;
+       background: #faf8f3; line-height: 1.45; }}
+.masthead {{ border-bottom: 3px double #1a1a1a; padding-bottom: .6rem;
+            margin-bottom: 1.1rem; }}
+.masthead-title {{ font-family: 'Bodoni Moda', Georgia, serif;
+                  font-size: 2.3rem; font-weight: 500; letter-spacing: 1px;
+                  text-align: center; margin: 0; line-height: 1.1; }}
+.masthead-meta {{ display: flex; justify-content: space-between;
+                 font-size: .72rem; text-transform: uppercase;
+                 letter-spacing: 1.2px; margin-top: .6rem; color: #555; }}
+.lead {{ font-size: 1.08rem; font-style: italic; color: #333;
+        margin: 0 0 1rem; }}
+.story {{ border-top: 1px solid #b5b0a4; padding-top: .75rem;
+         margin-top: .75rem; }}
+.story-title {{ font-size: 1.05rem; font-weight: 500; margin: 0 0 .25rem;
+               line-height: 1.3; }}
+.story-title a {{ color: inherit; text-decoration: underline;
+                 text-decoration-color: #b5b0a4;
+                 text-underline-offset: 3px; }}
+.story-title a:hover {{ text-decoration-color: #1a1a1a; }}
+.story-blurb {{ font-size: .95rem; color: #333; margin: 0; }}
+.degraded {{ color: #8a6d3b; font-style: italic; margin: 0 0 1rem; }}
+footer {{ margin-top: 2rem; font-size: .68rem; color: #777;
+         text-transform: uppercase; letter-spacing: 1px;
+         border-top: 1px solid #b5b0a4; padding-top: .5rem; }}
 </style>
 </head>
 <body>
-<h1>{title}</h1>
+<header class="masthead">
+<h1 class="masthead-title">{masthead}</h1>
+<div class="masthead-meta"><span>{edition_label} Edition</span>
+<span>{date_label}</span></div>
+</header>
 {body}
 <footer>Generated {generated_at}</footer>
 </body>
@@ -136,6 +178,9 @@ def render_page_html(record: dict) -> str:
     generated = datetime.fromisoformat(record["generated_at"])
     return _PAGE_TEMPLATE.format(
         title=escape(_entry_title(record["edition_label"], record["date_label"])),
+        masthead=escape(FEED_TITLE),
+        edition_label=escape(record["edition_label"]),
+        date_label=escape(record["date_label"]),
         body=_record_body_html(record),
         generated_at=generated.strftime("%Y-%m-%d %H:%M %Z"),
     )
@@ -212,9 +257,27 @@ def _make_record(
     }
 
 
+_FONT_SOURCE_DIR = Path(__file__).parent / "static" / "fonts"
+_FONT_FILES = ("BodoniModa-Regular.ttf", "BodoniModa-Medium.ttf")
+
+
+def _ensure_fonts(out_dir: Path) -> None:
+    """Copy the masthead fonts next to the pages if absent — self-healing
+    like rebuild_feed, so a fresh FEED_OUTPUT_DIR works without setup.
+    Missing source fonts are skipped; the page falls back to Georgia."""
+    font_dir = out_dir / "fonts"
+    for name in _FONT_FILES:
+        src = _FONT_SOURCE_DIR / name
+        dst = font_dir / name
+        if src.exists() and not dst.exists():
+            font_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy(src, dst)
+
+
 def _publish_record(record: dict, *, out_dir: Path, base_url: str) -> Path:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    _ensure_fonts(out_dir)
     stem = f"{record['date']}-{record['edition']}"
     (out_dir / f"{stem}.json").write_text(json.dumps(record, indent=2))
     page_path = out_dir / f"{stem}.html"

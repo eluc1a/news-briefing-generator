@@ -66,6 +66,22 @@ def test_page_html_escapes_and_links(tmp_path):
     assert "Generated 2026-06-09 08:45 UTC" in page
 
 
+def test_page_html_newspaper_chrome(tmp_path):
+    page = _publish(tmp_path).read_text()
+    assert 'class="masthead-title"' in page
+    assert "Bodoni Moda" in page
+    assert "Morning Edition" in page          # dateline left
+    assert "Tue Jun 9" in page                # dateline right
+    assert "<ul>" not in page                 # stories are article blocks now
+    assert page.count("<article") == 2
+
+
+def test_publish_copies_fonts_next_to_pages(tmp_path):
+    _publish(tmp_path)
+    assert (tmp_path / "fonts" / "BodoniModa-Regular.ttf").exists()
+    assert (tmp_path / "fonts" / "BodoniModa-Medium.ttf").exists()
+
+
 def test_feed_description_is_cdata_with_body(tmp_path):
     _publish(tmp_path)
     feed = (tmp_path / "feed.xml").read_text()

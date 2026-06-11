@@ -71,11 +71,20 @@ class Brief(BaseModel):
 
 DIGEST_ITEMS_MAX = 10
 
+DigestCategory = Literal["news", "model", "tool", "paper", "technique"]
+
 
 class DigestItem(BaseModel):
+    # category/source are optional with None defaults so feed records
+    # published before they existed still validate in rebuild_feed's
+    # rescan. New generations require category (enforced in
+    # generate_slack_digest.parse); source is derived from the input
+    # article, never from the LLM.
     url: str
     title: str
     blurb: str
+    category: DigestCategory | None = None
+    source: str | None = None
 
 
 class SlackDigest(BaseModel):

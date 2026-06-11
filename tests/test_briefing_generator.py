@@ -277,11 +277,12 @@ def test_briefs_prompt_contains_length_rule():
 
 # ------------- slack digest -------------
 
-def _digest_payload(urls=("https://a", "https://b")) -> str:
+def _digest_payload(urls=("https://a", "https://b"), category="news") -> str:
     return json.dumps({
         "lead": "Two stories matter today.",
         "items": [
-            {"url": u, "title": f"Title {i}", "blurb": "One line."}
+            {"url": u, "title": f"Title {i}", "blurb": "One line.",
+             "category": category}
             for i, u in enumerate(urls)
         ],
     })
@@ -297,6 +298,48 @@ async def test_slack_digest_happy_path():
     )
     assert isinstance(digest, SlackDigest)
     assert [i.url for i in digest.items] == ["https://a", "https://b"]
+    assert [i.category for i in digest.items] == ["news", "news"]
+    # Source is derived from the input article by url, not LLM output.
+    assert [i.source for i in digest.items] == ["S1", "S2"]
+
+
+async def test_slack_digest_rejects_missing_category():
+    async def fake(client, prompt: str) -> str:
+        payload = json.loads(_digest_payload())
+        for item in payload["items"]:
+            del item["category"]
+        return json.dumps(payload)
+
+    with pytest.raises(GeneratorFailure):
+        await generate_slack_digest(
+            articles=_articles(), edition_label="Morning",
+            call_llm=fake, client=None,
+        )
+
+
+async def test_slack_digest_rejects_unknown_category():
+    async def fake(client, prompt: str) -> str:
+        return _digest_payload(category="gossip")
+
+    with pytest.raises(GeneratorFailure):
+        await generate_slack_digest(
+            articles=_articles(), edition_label="Morning",
+            call_llm=fake, client=None,
+        )
+
+
+async def test_slack_digest_overrides_llm_source():
+    async def fake(client, prompt: str) -> str:
+        payload = json.loads(_digest_payload())
+        for item in payload["items"]:
+            item["source"] = "Hallucinated Times"
+        return json.dumps(payload)
+
+    digest = await generate_slack_digest(
+        articles=_articles(), edition_label="Morning",
+        call_llm=fake, client=None,
+    )
+    assert [i.source for i in digest.items] == ["S1", "S2"]
 
 
 async def test_slack_digest_retries_once_on_bad_json():

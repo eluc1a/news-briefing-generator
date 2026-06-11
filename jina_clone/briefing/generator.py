@@ -286,6 +286,11 @@ SLACK_DIGEST_STRUCTURE_RULES = """STRUCTURE — every field required:
       clickbait headlines factually.
     - blurb: 10-20 words, facts only — what it is and why a working
       AI/ML engineer would care. NEVER exceed 20 words.
+    - category: exactly one of "news" (industry/company news), "model"
+      (model release or benchmark result), "tool" (usable repo, library,
+      or product), "paper" (research paper), "technique" (applied
+      method, guide, or engineering write-up). Pick the closest fit.
+    - source: leave null — it is filled in from the input article.
 - Never emit two items with the same url. Never fabricate items."""
 
 
@@ -686,6 +691,7 @@ async def generate_slack_digest(
 
     user_msg = _build_slack_digest_user_msg(articles=articles)
     valid_urls = {a.get("link") for a in articles}
+    source_by_url = {a.get("link"): a.get("source") for a in articles}
 
     def parse(raw: str) -> SlackDigest:
         digest = SlackDigest.model_validate_json(raw)
@@ -698,6 +704,10 @@ async def generate_slack_digest(
             if item.url in seen:
                 raise ValueError(f"duplicate item url {item.url!r}")
             seen.add(item.url)
+            if item.category is None:
+                raise ValueError(f"item {item.url!r} missing category")
+            # Source comes from the input article, not the LLM.
+            item.source = source_by_url[item.url]
         floor = min(6, len(articles))
         if len(digest.items) < floor:
             raise ValueError(

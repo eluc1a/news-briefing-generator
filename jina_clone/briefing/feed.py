@@ -36,14 +36,31 @@ def _entry_title(edition_label: str, date_label: str) -> str:
     return f"AI/ML {edition_label} Digest — {date_label}"
 
 
+def _label_html(category: str | None) -> str:
+    """Colored category chip, or "" for records predating categories.
+    Category values are schema-constrained (DigestCategory), so they are
+    safe to embed in the class attribute."""
+    if not category:
+        return ""
+    return f'<span class="label label-{category}">{escape(category)}</span>'
+
+
+def _source_html(source: str | None) -> str:
+    if not source:
+        return ""
+    return f' <span class="story-source">— {escape(source)}</span>'
+
+
 def _digest_body_html(digest: SlackDigest) -> str:
     lines = [f'<p class="lead">{escape(digest.lead)}</p>']
     for item in digest.items:
         lines.append(
             '<article class="story">\n'
-            f'<h2 class="story-title"><a href="{_attr(item.url)}">'
+            f'<h2 class="story-title">{_label_html(item.category)}'
+            f'<a href="{_attr(item.url)}">'
             f"{escape(item.title)}</a></h2>\n"
-            f'<p class="story-blurb">{escape(item.blurb)}</p>\n'
+            f'<p class="story-blurb">{escape(item.blurb)}'
+            f"{_source_html(item.source)}</p>\n"
             "</article>"
         )
     return "\n".join(lines)
@@ -61,7 +78,7 @@ def _fallback_body_html(headlines: list[dict]) -> str:
         lines.append(
             '<article class="story">\n'
             f'<h2 class="story-title"><a href="{_attr(link)}">'
-            f"{escape(title)}</a></h2>\n"
+            f"{escape(title)}</a>{_source_html(art.get('source'))}</h2>\n"
             "</article>"
         )
     return "\n".join(lines)
@@ -85,9 +102,14 @@ def _record_body_html(record: dict) -> str:
 def _digest_feed_html(digest: SlackDigest) -> str:
     parts = [f"<p>{escape(digest.lead)}</p>"]
     for item in digest.items:
+        # Category and source ride along as plain text — Slack strips
+        # span/i markup, so [category] brackets and a plain em-dash
+        # source are all that survive the unfurl.
+        prefix = f"[{escape(item.category)}] " if item.category else ""
+        source = f" <i>({escape(item.source)})</i>" if item.source else ""
         parts.append(
-            f'<p><a href="{_attr(item.url)}">{escape(item.title)}</a>'
-            f" — {escape(item.blurb)}<br>{escape(item.url)}</p>"
+            f'<p>{prefix}<a href="{_attr(item.url)}">{escape(item.title)}</a>'
+            f" — {escape(item.blurb)}{source}<br>{escape(item.url)}</p>"
         )
     return "\n".join(parts)
 
@@ -99,8 +121,10 @@ def _fallback_feed_html(headlines: list[dict]) -> str:
         if not link:
             continue
         title = art.get("title") or link
+        source = f" <i>({escape(art['source'])})</i>" if art.get("source") else ""
         parts.append(
-            f'<p><a href="{_attr(link)}">{escape(title)}</a><br>{escape(link)}</p>'
+            f'<p><a href="{_attr(link)}">{escape(title)}</a>{source}'
+            f"<br>{escape(link)}</p>"
         )
     return "\n".join(parts)
 
@@ -155,6 +179,16 @@ body {{ font-family: Georgia, 'Times New Roman', serif; max-width: 40rem;
                  text-underline-offset: 3px; }}
 .story-title a:hover {{ text-decoration-color: #1a1a1a; }}
 .story-blurb {{ font-size: .95rem; color: #333; margin: 0; }}
+.story-source {{ font-style: italic; font-size: .85rem; color: #777; }}
+.label {{ font-size: .6rem; font-weight: 400; text-transform: uppercase;
+         letter-spacing: 1.2px; border: 1px solid currentColor;
+         border-radius: 2px; padding: .08rem .4rem; margin-right: .55rem;
+         vertical-align: .2rem; white-space: nowrap; }}
+.label-news {{ color: #8b2e2e; }}
+.label-model {{ color: #2e4a8b; }}
+.label-tool {{ color: #2e6b3e; }}
+.label-paper {{ color: #8a6d3b; }}
+.label-technique {{ color: #6b3e8b; }}
 .degraded {{ color: #8a6d3b; font-style: italic; margin: 0 0 1rem; }}
 footer {{ margin-top: 2rem; font-size: .68rem; color: #777;
          text-transform: uppercase; letter-spacing: 1px;
@@ -304,7 +338,9 @@ def publish_fallback(
     generated_at: datetime,
 ) -> Path:
     headlines = [
-        {"link": a.get("link"), "title": a.get("title")} for a in articles
+        {"link": a.get("link"), "title": a.get("title"),
+         "source": a.get("source")}
+        for a in articles
     ]
     record = _make_record(
         iso_date=iso_date, edition=edition, edition_label=edition_label,

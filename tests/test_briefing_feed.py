@@ -17,8 +17,10 @@ def _digest() -> SlackDigest:
     return SlackDigest(
         lead="Big day for agents & <tools>.",
         items=[
-            DigestItem(url="https://a?x=1&y=2", title="T & A <tag>", blurb="b1"),
-            DigestItem(url="https://b", title="Plain", blurb="b2"),
+            DigestItem(url="https://a?x=1&y=2", title="T & A <tag>", blurb="b1",
+                       category="news", source="S&P <Wire>"),
+            DigestItem(url="https://b", title="Plain", blurb="b2",
+                       category="tool", source="S2"),
         ],
     )
 
@@ -76,6 +78,28 @@ def test_page_html_newspaper_chrome(tmp_path):
     assert page.count("<article") == 2
 
 
+def test_page_html_category_labels_and_sources(tmp_path):
+    page = _publish(tmp_path).read_text()
+    assert '<span class="label label-news">news</span>' in page
+    assert '<span class="label label-tool">tool</span>' in page
+    assert ".label-news { color:" in page           # per-category colors
+    assert '<span class="story-source">— S&amp;P &lt;Wire&gt;</span>' in page
+    assert '<span class="story-source">— S2</span>' in page
+
+
+def test_page_html_renders_items_without_category_or_source(tmp_path):
+    # Records published before category/source existed must still render
+    # (rebuild_feed revalidates old JSON records).
+    digest = SlackDigest(
+        lead="Old record.",
+        items=[DigestItem(url="https://a", title="T", blurb="b")],
+    )
+    page = _publish(tmp_path, digest=digest).read_text()
+    assert 'class="label' not in page
+    assert 'class="story-source"' not in page
+    assert '<a href="https://a">T</a>' in page
+
+
 def test_publish_copies_fonts_next_to_pages(tmp_path):
     _publish(tmp_path)
     assert (tmp_path / "fonts" / "BodoniModa-Regular.ttf").exists()
@@ -102,19 +126,32 @@ def test_feed_description_flattens_with_bare_source_urls(tmp_path):
     assert "b1" in feed and "b2" in feed            # blurbs survive
 
 
+def test_feed_description_carries_category_and_source_as_text(tmp_path):
+    # Slack strips span/i markup, so the category must be plain [text]
+    # and the source plain text after the blurb.
+    _publish(tmp_path)
+    feed = (tmp_path / "feed.xml").read_text()
+    assert "[news] <a" in feed
+    assert "[tool] <a" in feed
+    assert "<i>(S&amp;P &lt;Wire&gt;)</i>" in feed
+    assert "<i>(S2)</i>" in feed
+
+
 def test_fallback_feed_description_has_bare_urls(tmp_path):
-    articles = [{"link": "https://x/1", "title": "t1"},
+    articles = [{"link": "https://x/1", "title": "t1", "source": "S1"},
                 {"link": None, "title": "skip"}]
-    publish_fallback(
+    page = publish_fallback(
         articles, out_dir=tmp_path, base_url=BASE,
         iso_date="2026-06-09", edition="afternoon",
         edition_label="Afternoon", date_label="Tue Jun 9",
         generated_at=GEN_AT,
-    )
+    ).read_text()
     feed = (tmp_path / "feed.xml").read_text()
     assert "<ul>" not in feed and "<li>" not in feed
     assert "https://x/1" in feed
     assert "skip" not in feed                        # linkless headline dropped
+    assert "<i>(S1)</i>" in feed                     # source survives degraded mode
+    assert '<span class="story-source">— S1</span>' in page
 
 
 def test_publish_fallback_degraded_caps_and_defaults(tmp_path):

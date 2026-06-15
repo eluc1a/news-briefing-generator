@@ -84,3 +84,32 @@ def make_render_and_publish(
         return result
 
     return render_and_publish
+
+
+def make_render_and_save_json(
+    render_pdf: Callable[..., Path],
+    *,
+    briefings_dir: Path,
+    edition: str,
+) -> Callable[..., Path]:
+    """Wrap render_pdf so the print run ALSO drops the edition JSON — the
+    exact Briefing that printed — to briefings_dir. Unlike
+    make_render_and_publish this does NOT rebuild index.json: making the
+    edition the site's "latest" is the separate `briefing publish-web`
+    step's job. The JSON write is logged-and-swallowed so it can never
+    block the printed paper.
+
+    Returned callable matches run_briefing's render signature:
+    (briefing, pdf_path, *, generated_at, iso_date).
+    """
+    def render_and_save(briefing, pdf_path, *, generated_at, iso_date):
+        result = render_pdf(briefing, pdf_path, generated_at=generated_at, iso_date=iso_date)
+        try:
+            write_edition_json(
+                briefing, briefings_dir=briefings_dir, iso_date=iso_date, edition=edition
+            )
+        except Exception as e:  # noqa: BLE001 — paper is primary; never abort on web write
+            log.warning("edition-json write failed (paper unaffected): %s", e)
+        return result
+
+    return render_and_save

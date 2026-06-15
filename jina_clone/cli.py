@@ -23,6 +23,7 @@ from jina_clone.briefing import renderer as briefing_renderer
 from jina_clone.briefing import feed as briefing_feed
 from jina_clone.briefing.config import load_briefing_config
 from jina_clone.briefing.schema import Briefing, WeatherStrip
+from jina_clone.briefing.web import make_render_and_save_json, rebuild_index
 from jina_clone.jobs.briefing import WeatherFn, MarketsFn, assemble_briefing, run_briefing
 from jina_clone.jobs.slack_digest import run_slack_digest
 from jina_clone.storage.db import (
@@ -232,7 +233,11 @@ async def _briefing_run(settings, *, edition: str):
             generate_front_matter=briefing_generator.generate_front_matter,
             generate_panel=briefing_generator.generate_panel,
             generate_briefs=briefing_generator.generate_briefs,
-            render=briefing_renderer.render_pdf,
+            render=make_render_and_save_json(
+                briefing_renderer.render_pdf,
+                briefings_dir=settings.briefings_dir,
+                edition=edition,
+            ),
             print_pdf=briefing_printer.print_pdf,
             notify_printed=briefing_notify.notify_printed,
             notify_failure=briefing_notify.notify_failure,
@@ -250,6 +255,14 @@ async def _briefing_run(settings, *, edition: str):
                 totals["calls"], totals["input"], totals["output"],
                 totals["cache_read"], totals["cache_creation"],
             )
+
+
+def _briefing_publish_web(settings: Settings) -> None:
+    """Downstream web-publish step: rebuild index.json from the edition
+    JSONs the print run dropped. No LLM, no print, no DB — safe to run on
+    its own cron, decoupled from the print briefing."""
+    index_path = rebuild_index(settings.briefings_dir)
+    logging.info("rebuilt web index: %s", index_path)
 
 
 async def _run_slack_digest(settings: Settings, *, edition: str, dry_run: bool):
@@ -355,6 +368,11 @@ def main():
         help="Which edition to produce: morning (08:10 ET) or evening (20:10 ET).",
     )
 
+    briefing_sub.add_parser(
+        "publish-web",
+        help="Rebuild briefings/index.json from on-disk editions (downstream web publish).",
+    )
+
     slack_p = sub.add_parser("slack-digest")
     slack_p.add_argument(
         "--edition", required=True, choices=["morning", "afternoon"],
@@ -381,6 +399,8 @@ def main():
             _briefing_print(settings, args.pdf)
         elif args.action == "run":
             asyncio.run(_briefing_run(settings, edition=args.edition))
+        elif args.action == "publish-web":
+            _briefing_publish_web(settings)
     elif args.cmd == "slack-digest":
         asyncio.run(
             _run_slack_digest(settings, edition=args.edition, dry_run=args.dry_run)

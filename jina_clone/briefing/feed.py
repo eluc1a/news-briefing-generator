@@ -168,6 +168,12 @@ body {{ font-family: Georgia, 'Times New Roman', serif; max-width: 40rem;
 .masthead-meta {{ display: flex; justify-content: space-between;
                  font-size: .72rem; text-transform: uppercase;
                  letter-spacing: 1.2px; margin-top: .6rem; color: #555; }}
+.broadsheet-link {{ display: inline-block; margin-top: .6rem;
+        font-family: 'Bodoni Moda', Georgia, serif; font-size: .7rem;
+        text-transform: uppercase; letter-spacing: 1.5px;
+        text-decoration: none; color: #faf8f3; background: #1a1a1a;
+        padding: .34rem .75rem; border-radius: 2px; }}
+.broadsheet-link:hover {{ background: #8b2e2e; }}
 .lead {{ font-size: 1.08rem; font-style: italic; color: #333;
         margin: 0 0 1rem; }}
 .story {{ border-top: 1px solid #b5b0a4; padding-top: .75rem;
@@ -200,6 +206,7 @@ footer {{ margin-top: 2rem; font-size: .68rem; color: #777;
 <h1 class="masthead-title">{masthead}</h1>
 <div class="masthead-meta"><span>{edition_label} Edition</span>
 <span>{date_label}</span></div>
+<a class="broadsheet-link" href="https://themorningfox.com">Read the full broadsheet → themorningfox.com</a>
 </header>
 {body}
 <footer>Generated {generated_at}</footer>

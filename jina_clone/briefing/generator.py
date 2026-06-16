@@ -11,7 +11,8 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel, SlackDigest,
+    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel,
+    SlackDigest, Source,
 )
 
 
@@ -615,6 +616,7 @@ async def generate_front_matter(
         articles=articles, weather=weather, today=today, volume=volume,
     )
     valid_urls = {a.get("link") for a in articles}
+    source_by_url = {a.get("link"): a.get("source") for a in articles}
 
     def parse(raw: str) -> FrontMatter:
         fm = FrontMatter.model_validate_json(raw)
@@ -622,6 +624,10 @@ async def generate_front_matter(
             raise ValueError(
                 f"lead_source_url {fm.lead_source_url!r} not in input article links"
             )
+        fm.lead.sources = [
+            Source(url=fm.lead_source_url,
+                   source=source_by_url.get(fm.lead_source_url) or "?")
+        ]
         return fm
 
     return await _call_with_retry(

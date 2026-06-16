@@ -152,6 +152,20 @@ async def test_front_matter_double_failure_raises():
         )
 
 
+async def test_front_matter_resolves_lead_source():
+    async def fake(client, prompt: str) -> str:
+        return _front_matter_payload("https://a")
+
+    fm = await generate_front_matter(
+        articles=_articles(), weather=WEATHER,
+        today="Sat", volume="Vol", title="The Morning Fox",
+        call_llm=fake, client=None,
+    )
+    assert len(fm.lead.sources) == 1
+    assert fm.lead.sources[0].url == "https://a"
+    assert fm.lead.sources[0].source == "S1"
+
+
 # ------------- panel -------------
 
 NATIONAL_SECTION = SectionDef(

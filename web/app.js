@@ -15,6 +15,10 @@ function section(name) {
 
 function renderMasthead(b) {
   const s = section("masthead");
+  const logo = el("img", "masthead-logo");
+  logo.src = "morningfox.png";
+  logo.alt = "";
+  s.append(logo);
   s.append(el("h1", "masthead-title", b.title));
   const sub = el("div", "masthead-sub");
   sub.append(el("span", null, b.volume), el("span", null, b.date), el("span", null, b.location));

@@ -40,13 +40,28 @@ def _front_matter_payload(lead_source_url: str = "https://a") -> str:
     })
 
 
-def _panel_payload(section: str = "National") -> str:
+def _panel_payload(section: str = "National",
+                   lede_url: str = "https://b", also_url: str = "https://b") -> str:
     panel = next(p for p in GOOD_BRIEFING["panels"] if p["section"] == section)
-    return json.dumps(panel)
+    out = {
+        "section": panel["section"],
+        "lede_headline": panel["lede_headline"],
+        "lede_body": panel["lede_body"],
+        "lede_source_url": lede_url,
+        "also": [
+            {"headline": a["headline"], "body": a["body"], "source_url": also_url}
+            for a in panel["also"]
+        ],
+    }
+    return json.dumps(out)
 
 
-def _briefs_payload() -> str:
-    return json.dumps({"briefs": GOOD_BRIEFING["briefs"]})
+def _briefs_payload(url: str = "https://b") -> str:
+    out = {"briefs": [
+        {"topic": b["topic"], "body": b["body"], "source_url": url}
+        for b in GOOD_BRIEFING["briefs"]
+    ]}
+    return json.dumps(out)
 
 
 def _articles():
@@ -239,6 +254,54 @@ async def test_generate_briefs_double_failure_raises():
         await generate_briefs(
             articles=_articles(), exclude_urls=set(), title="The Morning Fox",
             call_llm=fake, client=None,
+        )
+
+
+async def test_panel_resolves_sources():
+    async def fake(client, prompt: str) -> str:
+        return _panel_payload(lede_url="https://a", also_url="https://b")
+
+    panel = await generate_panel(
+        section=NATIONAL_SECTION, articles=_articles(), exclude_urls=set(),
+        title="The Morning Fox", call_llm=fake, client=None,
+    )
+    assert panel.lede_sources[0].url == "https://a"
+    assert panel.lede_sources[0].source == "S1"
+    assert all(it.sources[0].url == "https://b" for it in panel.also)
+    assert all(it.sources[0].source == "S2" for it in panel.also)
+
+
+async def test_panel_rejects_unknown_source_url():
+    async def fake(client, prompt: str) -> str:
+        return _panel_payload(lede_url="https://not-in-input")
+
+    with pytest.raises(GeneratorFailure):
+        await generate_panel(
+            section=NATIONAL_SECTION, articles=_articles(), exclude_urls=set(),
+            title="The Morning Fox", call_llm=fake, client=None,
+        )
+
+
+async def test_briefs_resolves_sources():
+    async def fake(client, prompt: str) -> str:
+        return _briefs_payload("https://b")
+
+    briefs = await generate_briefs(
+        articles=_articles(), exclude_urls=set(),
+        title="The Morning Fox", call_llm=fake, client=None,
+    )
+    assert all(b.sources[0].url == "https://b" for b in briefs)
+    assert all(b.sources[0].source == "S2" for b in briefs)
+
+
+async def test_briefs_rejects_unknown_source_url():
+    async def fake(client, prompt: str) -> str:
+        return _briefs_payload("https://not-in-input")
+
+    with pytest.raises(GeneratorFailure):
+        await generate_briefs(
+            articles=_articles(), exclude_urls=set(),
+            title="The Morning Fox", call_llm=fake, client=None,
         )
 
 

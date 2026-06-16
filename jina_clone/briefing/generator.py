@@ -11,8 +11,8 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel,
-    SlackDigest, Source,
+    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel, PanelItem,
+    PANEL_ALSO_COUNT, SlackDigest, Source,
 )
 
 
@@ -177,6 +177,12 @@ PANEL_STRUCTURE_RULES = """STRUCTURE — every field required:
         BAD (`reported Sunday` glued to object clause): "U.S. Southern Command reported Sunday a strike on a drug vessel killed 3"
         BAD (run-on via "after"): "Africa Corps withdrew from Kidal after Tuareg rebels attacked across Mali"
         BAD (run-on via dropped "that" + relative clause): "AA closed the door on merger talks he argued would have created jobs"
+- lede_source_url: EXACTLY the `Link` value of the input article the lede
+  is based on. It MUST match one of the input `Link` values verbatim — a
+  hallucinated or altered URL will cause the panel to be rejected.
+- Each `also` item additionally has:
+    - source_url: EXACTLY the `Link` of the input article that item is
+      primarily based on, verbatim. Same rule — must match an input Link.
 Never fabricate. If fewer than 4 distinct stories exist in the input,
 repeat the strongest adjacent items but do NOT invent facts."""
 
@@ -209,6 +215,9 @@ Output {"briefs": [...]} containing EXACTLY 6 Brief entries. Each entry:
   - topic: 1-3 word category label ("Cybersecurity", "Markets", "Linux",
     "Investigations").
   - body: 22-30 words, facts only. NEVER exceed 30 words.
+  - source_url: EXACTLY the `Link` of the input article this brief is
+    based on, verbatim. It MUST match one of the input `Link` values — a
+    hallucinated URL will cause the briefs to be rejected.
 Each brief covers a distinct story. Consequence beats curiosity."""
 
 
@@ -364,14 +373,36 @@ def _build_panel_user_msg(
         parts.append(_format_article(art))
     parts.append("")
     parts.append("--- Schema ---")
-    parts.append(json.dumps(Panel.model_json_schema(), indent=2))
+    parts.append(json.dumps(_PanelDraft.model_json_schema(), indent=2))
     parts.append("")
     parts.append(f"Emit the Panel JSON for \"{section.title}\" now.")
     return "\n".join(parts)
 
 
+class _PanelItemDraft(BaseModel):
+    headline: str
+    body: str
+    source_url: str
+
+
+class _PanelDraft(BaseModel):
+    section: str
+    lede_headline: str
+    lede_body: str
+    lede_source_url: str
+    also: list[_PanelItemDraft] = Field(
+        min_length=PANEL_ALSO_COUNT, max_length=PANEL_ALSO_COUNT,
+    )
+
+
+class _BriefDraft(BaseModel):
+    topic: str
+    body: str
+    source_url: str
+
+
 class _BriefsResponse(BaseModel):
-    briefs: list[Brief] = Field(
+    briefs: list[_BriefDraft] = Field(
         min_length=BRIEFS_COUNT_MIN, max_length=BRIEFS_COUNT_MAX,
     )
 
@@ -652,10 +683,34 @@ async def generate_panel(
 
     filtered = _filter_excluded(articles, exclude_urls)
     user_msg = _build_panel_user_msg(section=section, articles=filtered)
+    valid_urls = {a.get("link") for a in filtered}
+    source_by_url = {a.get("link"): a.get("source") for a in filtered}
+
+    def _src(url: str) -> list[Source]:
+        return [Source(url=url, source=source_by_url.get(url) or "?")]
+
+    def parse(raw: str) -> Panel:
+        draft = _PanelDraft.model_validate_json(raw)
+        urls = [draft.lede_source_url] + [it.source_url for it in draft.also]
+        for u in urls:
+            if u not in valid_urls:
+                raise ValueError(f"source_url {u!r} not in input article links")
+        return Panel(
+            section=draft.section,
+            lede_headline=draft.lede_headline,
+            lede_body=draft.lede_body,
+            lede_sources=_src(draft.lede_source_url),
+            also=[
+                PanelItem(headline=it.headline, body=it.body,
+                          sources=_src(it.source_url))
+                for it in draft.also
+            ],
+        )
+
     return await _call_with_retry(
         call_llm=call_llm, client=client,
         user_msg=user_msg,
-        parse=Panel.model_validate_json,
+        parse=parse,
     )
 
 
@@ -673,9 +728,23 @@ async def generate_briefs(
 
     filtered = _filter_excluded(articles, exclude_urls)
     user_msg = _build_briefs_user_msg(articles=filtered)
+    valid_urls = {a.get("link") for a in filtered}
+    source_by_url = {a.get("link"): a.get("source") for a in filtered}
 
     def parse(raw: str) -> list[Brief]:
-        return _BriefsResponse.model_validate_json(raw).briefs
+        resp = _BriefsResponse.model_validate_json(raw)
+        out: list[Brief] = []
+        for d in resp.briefs:
+            if d.source_url not in valid_urls:
+                raise ValueError(
+                    f"source_url {d.source_url!r} not in input article links"
+                )
+            out.append(Brief(
+                topic=d.topic, body=d.body,
+                sources=[Source(url=d.source_url,
+                                source=source_by_url.get(d.source_url) or "?")],
+            ))
+        return out
 
     return await _call_with_retry(
         call_llm=call_llm, client=client,

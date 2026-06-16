@@ -4,6 +4,17 @@ const EDITIONS = "/editions/";
 // (e.g. "2026-06-15-evening" ↔ "2026-06-15-evening.json").
 const slug = (entry) => `${entry.date}-${entry.edition}`;
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Format "2026-06-15" → "Jun 15, 2026" without Date() (avoids UTC shift).
+const formatDate = (iso) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${MONTHS[m - 1]} ${d}, ${y}`;
+};
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -114,7 +125,26 @@ function renderDownload(entry) {
   return s;
 }
 
-function render(b, entry) {
+// Footer dropdown for browsing every published edition. Selecting one
+// navigates to its ?edition= slug, which main() then renders.
+function renderArchive(index, current) {
+  const s = section("archive");
+  const sel = el("select", "archive-select");
+  sel.setAttribute("aria-label", "Choose an edition");
+  for (const e of index) {
+    const opt = el("option", null, `${formatDate(e.date)} · ${cap(e.edition)}`);
+    opt.value = slug(e);
+    if (slug(e) === slug(current)) opt.selected = true;
+    sel.append(opt);
+  }
+  sel.addEventListener("change", () => {
+    window.location.search = `?edition=${sel.value}`;
+  });
+  s.append(el("span", "archive-label", "Past editions"), sel);
+  return s;
+}
+
+function render(b, entry, index) {
   const paper = document.getElementById("paper");
   paper.replaceChildren(
     renderMasthead(b),
@@ -126,6 +156,7 @@ function render(b, entry) {
     renderBriefs(b),
     renderExtras(b),
     renderDownload(entry),
+    renderArchive(index, entry),
   );
 }
 
@@ -149,7 +180,7 @@ async function main() {
     const editionRes = await fetch(EDITIONS + entry.json, { cache: "no-store" });
     if (!editionRes.ok) throw new Error(`${entry.json}: HTTP ${editionRes.status}`);
     const briefing = await editionRes.json();
-    render(briefing, entry);
+    render(briefing, entry, index);
   } catch (e) {
     showStatus("Could not load the latest edition. Please try again shortly.");
     console.error(e);

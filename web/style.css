@@ -63,3 +63,8 @@ blockquote { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(20px, 
 
 .pdf-link { display: inline-block; margin-top: 8px; font-size: 14px; }
 [data-section="download"] { text-align: center; border-top: 3px double var(--rule); padding-top: 14px; }
+
+[data-section="archive"] { text-align: center; margin-top: 0; font-size: 13px; color: var(--muted); }
+.archive-label { text-transform: uppercase; letter-spacing: 1px; margin-right: 8px; }
+.archive-select { font-family: Georgia, 'Times New Roman', serif; font-size: 13px;
+  color: var(--ink); background: #fffdf8; border: 1px solid #ccc; border-radius: 0; padding: 3px 6px; }

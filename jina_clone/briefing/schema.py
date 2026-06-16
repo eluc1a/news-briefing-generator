@@ -40,16 +40,23 @@ class MarketsBlock(BaseModel):
     items: list[MarketItem] = Field(min_length=MARKETS_COUNT, max_length=MARKETS_COUNT)
 
 
+class Source(BaseModel):
+    url: str
+    source: str   # outlet name, resolved from the input article — never from the LLM
+
+
 class LeadStory(BaseModel):
     headline: str
     deck: str
     body: str
     at_a_glance: list[str] = Field(min_length=3, max_length=4)
+    sources: list[Source] = Field(default_factory=list)
 
 
 class PanelItem(BaseModel):
     headline: str
     body: str
+    sources: list[Source] = Field(default_factory=list)
 
 
 class Panel(BaseModel):
@@ -61,12 +68,14 @@ class Panel(BaseModel):
     ]
     lede_headline: str
     lede_body: str
+    lede_sources: list[Source] = Field(default_factory=list)
     also: list[PanelItem] = Field(min_length=PANEL_ALSO_COUNT, max_length=PANEL_ALSO_COUNT)
 
 
 class Brief(BaseModel):
     topic: str
     body: str
+    sources: list[Source] = Field(default_factory=list)
 
 
 DIGEST_ITEMS_MAX = 10

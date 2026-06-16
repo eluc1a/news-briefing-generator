@@ -174,3 +174,33 @@ def test_slack_digest_bounds():
         SlackDigest(lead="L", items=[])          # min 1
     with pytest.raises(VErr):
         SlackDigest(lead="L", items=[item] * 11)  # max 10
+
+
+def test_legacy_briefing_without_sources_validates():
+    # Editions published before this feature have no `sources` keys.
+    # They must still validate and default to empty lists.
+    from pathlib import Path
+    import json
+    from jina_clone.briefing.schema import Briefing
+
+    data = json.loads(Path("jina_clone/briefing/fixtures/sample_briefing.json").read_text())
+    # Ensure the fixture truly lacks sources (defensive — strip if present).
+    data["lead"].pop("sources", None)
+    for p in data["panels"]:
+        p.pop("lede_sources", None)
+        for a in p["also"]:
+            a.pop("sources", None)
+    for b in data["briefs"]:
+        b.pop("sources", None)
+
+    briefing = Briefing.model_validate(data)
+    assert briefing.lead.sources == []
+    assert briefing.panels[0].lede_sources == []
+    assert briefing.panels[0].also[0].sources == []
+    assert briefing.briefs[0].sources == []
+
+
+def test_source_model_roundtrips():
+    from jina_clone.briefing.schema import Source
+    s = Source(url="https://example.com/a", source="Reuters")
+    assert s.model_dump() == {"url": "https://example.com/a", "source": "Reuters"}

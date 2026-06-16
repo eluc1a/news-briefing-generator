@@ -1,5 +1,9 @@
 const EDITIONS = "/editions/";
 
+// An edition's stable slug, used in ?edition= and matching its JSON basename
+// (e.g. "2026-06-15-evening" ↔ "2026-06-15-evening.json").
+const slug = (entry) => `${entry.date}-${entry.edition}`;
+
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -138,7 +142,10 @@ async function main() {
       showStatus("No briefing published yet. Check back after the next edition.");
       return;
     }
-    const entry = index[0];
+    // Honor ?edition=<slug> for shareable/bookmarkable editions; fall back to
+    // the latest if the param is absent or names an edition we don't have.
+    const wanted = new URLSearchParams(window.location.search).get("edition");
+    const entry = (wanted && index.find((e) => slug(e) === wanted)) || index[0];
     const editionRes = await fetch(EDITIONS + entry.json, { cache: "no-store" });
     if (!editionRes.ok) throw new Error(`${entry.json}: HTTP ${editionRes.status}`);
     const briefing = await editionRes.json();

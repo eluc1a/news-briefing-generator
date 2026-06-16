@@ -68,3 +68,25 @@ blockquote { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(20px, 
 .archive-label { text-transform: uppercase; letter-spacing: 1px; margin-right: 8px; }
 .archive-select { font-family: Georgia, 'Times New Roman', serif; font-size: 13px;
   color: var(--ink); background: #fffdf8; border: 1px solid #ccc; border-radius: 0; padding: 3px 6px; }
+
+/* source click-through (#3) */
+.src-link { color: var(--ink); text-decoration: none;
+  border-bottom: 1px solid rgba(26,26,26,0.35); }
+.src-link:hover { border-bottom-color: var(--ink); }
+.src-credit { color: var(--muted); font-size: 0.72em; font-style: italic; }
+.brief .src-link, .panel-also .src-link { font-size: 0.92em; }
+
+.src-multi { position: relative; display: inline-block; }
+.src-count { font: inherit; font-size: 0.62em; vertical-align: super;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  padding: 0 2px; line-height: 1; }
+.src-count:hover { color: var(--ink); }
+.src-popover { display: none; position: absolute; left: 0; top: 1.4em; z-index: 10;
+  min-width: 160px; background: #fffdf8; border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18); padding: 6px 8px; }
+.src-popover .src-link { display: block; font-size: 13px; padding: 3px 0;
+  border-bottom: none; }
+.src-multi.open .src-popover { display: block; }
+@media (hover: hover) {
+  .src-multi:hover .src-popover { display: block; }
+}

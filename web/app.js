@@ -22,6 +22,58 @@ const el = (tag, cls, text) => {
   return n;
 };
 
+function srcAnchor(s, text) {
+  const a = el("a", "src-link", text);
+  a.href = s.url;
+  a.target = "_blank";
+  a.rel = "noopener";
+  return a;
+}
+
+// Count chip + popover listing each source. Tap toggles; hover opens on
+// desktop via CSS. Returns a <span class="src-multi">.
+function sourcePopover(sources) {
+  const wrap = el("span", "src-multi");
+  const count = el("button", "src-count", String(sources.length));
+  count.type = "button";
+  count.setAttribute("aria-label", `${sources.length} sources`);
+  const pop = el("div", "src-popover");
+  for (const s of sources) pop.append(srcAnchor(s, `${s.source} ↗`));
+  count.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    wrap.classList.toggle("open");
+  });
+  wrap.append(count, pop);
+  return wrap;
+}
+
+// Headline items: make the headline the link (1 src) or append the
+// popover (2+). Mutates and returns headlineEl.
+function linkifyHeadline(headlineEl, sources) {
+  if (!sources || sources.length === 0) return headlineEl;
+  if (sources.length === 1) {
+    const text = headlineEl.textContent;
+    headlineEl.textContent = "";
+    headlineEl.append(srcAnchor(sources[0], text));
+    const credit = el("span", "src-credit", ` ${sources[0].source}`);
+    headlineEl.append(credit);
+    return headlineEl;
+  }
+  headlineEl.append(document.createTextNode(" "));
+  headlineEl.append(sourcePopover(sources));
+  return headlineEl;
+}
+
+// Briefs (no headline): an element to append after the body.
+function trailingAffordance(sources) {
+  if (!sources || sources.length === 0) return null;
+  if (sources.length === 1) return srcAnchor(sources[0], ` — ${sources[0].source} ↗`);
+  const span = el("span", null, " ");
+  span.append(sourcePopover(sources));
+  return span;
+}
+
 function section(name) {
   const s = el("section");
   s.dataset.section = name;            // structural hook for future hover/click/reorder
@@ -63,7 +115,9 @@ function renderMarkets(b) {
 
 function renderLead(b) {
   const s = section("lead");
-  s.append(el("h2", "lead-headline", b.lead.headline));
+  const h = el("h2", "lead-headline", b.lead.headline);
+  linkifyHeadline(h, b.lead.sources);
+  s.append(h);
   s.append(el("p", "lead-deck", b.lead.deck));
   s.append(el("p", "lead-body", b.lead.body));
   const ul = el("ul", "at-a-glance");
@@ -78,11 +132,15 @@ function renderPanels(b) {
     const panel = el("article", "panel");
     panel.dataset.panel = p.section;
     panel.append(el("h3", "panel-section", p.section));
-    panel.append(el("h4", "panel-lede-headline", p.lede_headline));
+    const lede = el("h4", "panel-lede-headline", p.lede_headline);
+    linkifyHeadline(lede, p.lede_sources);
+    panel.append(lede);
     panel.append(el("p", "panel-lede-body", p.lede_body));
     for (const a of p.also) {
       const item = el("div", "panel-also");
-      item.append(el("strong", null, a.headline), el("span", null, ` ${a.body}`));
+      const head = el("strong", null, a.headline);
+      linkifyHeadline(head, a.sources);
+      item.append(head, el("span", null, ` ${a.body}`));
       panel.append(item);
     }
     wrap.append(panel);
@@ -102,6 +160,8 @@ function renderBriefs(b) {
   for (const br of b.briefs) {
     const item = el("div", "brief");
     item.append(el("strong", null, br.topic), el("span", null, ` ${br.body}`));
+    const aff = trailingAffordance(br.sources);
+    if (aff) item.append(aff);
     s.append(item);
   }
   return s;
@@ -186,5 +246,18 @@ async function main() {
     console.error(e);
   }
 }
+
+document.addEventListener("click", (e) => {
+  for (const w of document.querySelectorAll(".src-multi.open")) {
+    if (!w.contains(e.target)) w.classList.remove("open");
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    for (const w of document.querySelectorAll(".src-multi.open")) {
+      w.classList.remove("open");
+    }
+  }
+});
 
 main();

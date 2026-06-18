@@ -96,8 +96,12 @@ function renderMasthead(b) {
 function renderWeather(b) {
   const w = b.weather;
   const s = section("weather");
-  s.append(el("span", "wx-cond", w.conditions));
+  // The high/low are the max/min across the next ~24h of forecast slots
+  // (both editions), not today's observed extremes — label it so readers
+  // don't read it as "today's actual" high/low.
+  s.append(el("span", "wx-window", "Next 24h"));
   s.append(el("span", "wx-temp", `${w.temp_high}° / ${w.temp_low}°`));
+  s.append(el("span", "wx-cond", w.conditions));
   s.append(el("span", "wx-sun", `↑ ${w.sunrise}  ↓ ${w.sunset}  ${w.daylight}`));
   return s;
 }

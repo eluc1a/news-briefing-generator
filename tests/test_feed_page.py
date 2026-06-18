@@ -22,3 +22,17 @@ def test_page_has_broadsheet_button():
     assert 'class="broadsheet-link"' in html
     # Button lives in the masthead header, before the body content.
     assert html.index("broadsheet-link") < html.index("</header>")
+
+
+def test_page_has_dark_mode_toggle():
+    html = render_page_html(_record())
+    # Pre-paint theme script + meta, mirroring the main site (web/index.html).
+    assert '<meta name="color-scheme" content="light dark">' in html
+    assert 'localStorage.getItem("theme")' in html
+    # Toggle button and the dark CSS-variable override it switches.
+    assert '<button id="theme-toggle"' in html
+    assert ':root[data-theme="dark"]' in html
+    # Pre-paint script must run before the toggle button renders.
+    assert html.index('document.documentElement.dataset.theme') < html.index(
+        '<button id="theme-toggle"'
+    )

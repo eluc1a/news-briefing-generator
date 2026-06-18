@@ -8,14 +8,77 @@
   src: url('fonts/BodoniModa-Medium.ttf') format('truetype');
   font-weight: 500;
 }
+@font-face {
+  font-family: 'Libre Baskerville';
+  src: url('fonts/LibreBaskerville-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Libre Baskerville';
+  src: url('fonts/LibreBaskerville-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Libre Baskerville';
+  src: url('fonts/LibreBaskerville-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+}
 
-:root { --ink: #1a1a1a; --muted: #777; --rule: #1a1a1a; }
+:root {
+  --ink: #1a1a1a;        /* primary text + heavy rules */
+  --ink-strong: var(--ink);  /* bold/emphasis; light mode needs no boost */
+  --ink-soft: #333;      /* secondary text (decks, extras) */
+  --muted: #777;         /* labels, changes, masthead sub */
+  --rule: #1a1a1a;       /* masthead/panel/download rules */
+  --rule-soft: #ccc;     /* hairline section dividers, borders */
+  --bg: #f7f5f0;         /* page backdrop */
+  --paper: #fffdf8;      /* the broadsheet itself + popovers */
+  --src-underline: rgba(26, 26, 26, 0.35);
+  --shadow: rgba(0, 0, 0, 0.18);
+}
+
+/* Cream palette inverted to warm dark for the evening read. */
+:root[data-theme="dark"] {
+  --ink: #d6cfbf;
+  /* Brighter than --ink so emphasis reads by luminance, not weight alone:
+     light text blooms on dark (irradiation illusion), which flattens the
+     perceived gap between bold and regular. Body is held a notch lower to
+     widen that gap from both ends. */
+  --ink-strong: #fbf8f2;
+  --ink-soft: #cac4b6;
+  --muted: #968f7d;
+  --rule: #bcb5a4;
+  --rule-soft: #3a352c;
+  --bg: #16140f;
+  --paper: #1e1b15;
+  --src-underline: rgba(231, 226, 214, 0.4);
+  --shadow: rgba(0, 0, 0, 0.5);
+}
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; color: var(--ink); background: #f7f5f0;
-  font-family: Georgia, 'Times New Roman', serif; line-height: 1.5; }
+html, body { margin: 0; padding: 0; color: var(--ink); background: var(--bg);
+  font-family: Georgia, 'Times New Roman', serif; line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease; }
 
-#paper { max-width: 760px; margin: 0 auto; padding: 24px 18px 64px; background: #fffdf8; }
+#paper { max-width: 760px; margin: 0 auto; padding: 24px 18px 64px; background: var(--paper);
+  transition: background-color 0.2s ease; }
+
+/* Dark-mode toggle — fixed chip, sits clear of the broadsheet column. */
+#theme-toggle { position: fixed; top: 12px; right: 12px; z-index: 20;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--rule-soft); background: var(--paper); color: var(--ink);
+  font-size: 15px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px var(--shadow);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+#theme-toggle:hover { border-color: var(--ink); }
+
+/* Bold/emphasis text gets the brighter ink (see --ink-strong). */
+strong, .briefs-title, .dp-value, .wx-temp, .mkt-sym,
+.lead-headline { color: var(--ink-strong); }
 
 .status { text-align: center; color: var(--muted); padding: 48px 0; font-style: italic; }
 
@@ -29,37 +92,55 @@ section { margin: 0 0 22px; }
   text-transform: uppercase; letter-spacing: 1px; font-size: 12px; color: var(--muted); }
 
 [data-section="weather"] { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
-  align-items: baseline; font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
+  align-items: baseline; font-size: 14px; border-bottom: 1px solid var(--rule-soft); padding-bottom: 12px; }
 .wx-temp { font-weight: bold; }
 .wx-window { text-transform: uppercase; letter-spacing: 1px; font-size: 12px; color: var(--muted); }
 
 [data-section="markets"] { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px;
-  font-size: 13px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
+  font-size: 13px; border-bottom: 1px solid var(--rule-soft); padding-bottom: 12px; }
 @media (min-width: 620px) { [data-section="markets"] { grid-template-columns: repeat(3, 1fr); } }
 .market { display: flex; gap: 5px; align-items: baseline; justify-content: center; }
 .mkt-sym { font-weight: bold; } .mkt-chg { color: var(--muted); }
 
-.lead-headline { font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500;
-  font-size: clamp(24px, 6vw, 34px); margin: 0 0 6px; line-height: 1.15; }
-.lead-deck { font-style: italic; color: #333; margin: 0 0 10px; }
+.lead-headline { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 700;
+  font-size: clamp(24px, 6vw, 34px); margin: 0 0 6px; line-height: 1.2; }
+.lead-deck { font-style: italic; color: var(--ink-soft); margin: 0 0 10px; }
+/* Match the print edition: justified body that stretches edge to edge,
+   set in two columns on wider screens like a traditional broadsheet. */
+.lead-body { margin: 0 0 12px; text-align: justify; hyphens: auto; }
+@media (min-width: 620px) { .lead-body { column-count: 2; column-gap: 24px; } }
 .at-a-glance { margin: 12px 0; padding-left: 20px; font-size: 14px; }
 
 [data-section="panels"] { display: grid; gap: 20px; }
 @media (min-width: 620px) { [data-section="panels"] { grid-template-columns: 1fr 1fr; } }
 .panel { border-top: 2px solid var(--rule); padding-top: 8px; }
 .panel-section { text-transform: uppercase; letter-spacing: 1px; font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+.section-link { color: inherit; text-decoration: none; }
+.section-link:hover { text-decoration: underline; }
 .panel-lede-headline { font-size: 18px; margin: 0 0 4px; }
+/* Justified body, matching the print edition's .panel-body. The panels are
+   already a 2-column grid, so each body is one justified column. */
+.panel-lede-body { text-align: justify; hyphens: auto; }
 .panel-also { font-size: 14px; margin: 6px 0; }
 
-blockquote { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(20px, 5vw, 26px);
-  font-style: italic; text-align: center; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc;
-  padding: 16px 0; margin: 0; }
+blockquote { font-family: 'Libre Baskerville', Georgia, serif; font-size: clamp(20px, 5vw, 26px);
+  font-style: italic; text-align: center; border-top: 2px solid var(--rule);
+  border-bottom: 2px solid var(--rule); padding: 16px 0; margin: 0; }
 
 .briefs-title, .panel-section { font-weight: bold; }
-.brief { font-size: 14px; margin: 6px 0; }
+.brief { font-size: 14px; margin: 0; }
 
-[data-section="extras"] { display: grid; gap: 12px; font-size: 13px; color: #333;
-  border-top: 1px solid #ccc; padding-top: 12px; }
+/* Briefs in a 2-across grid; the briefs come in 6, so this reads 2×3.
+   Single column on narrow screens, where stacked is more legible. */
+.briefs-grid { display: grid; gap: 12px 20px; margin-top: 8px; }
+@media (min-width: 620px) { .briefs-grid { grid-template-columns: 1fr 1fr; } }
+
+[data-section="extras"] { display: grid; gap: 12px 20px; font-size: 13px; color: var(--ink-soft); }
+@media (min-width: 620px) { [data-section="extras"] { grid-template-columns: 1fr 1fr; } }
+/* Split rule per column, matching the panels above. */
+.data-point, .on-this-day { border-top: 2px solid var(--rule); padding-top: 12px; }
+.extras-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin: 0 0 4px; font-weight: bold; }
 .dp-value { font-weight: bold; margin-right: 6px; }
 
 .pdf-link { display: inline-block; margin-top: 8px; font-size: 14px; }
@@ -68,13 +149,12 @@ blockquote { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(20px, 
 [data-section="archive"] { text-align: center; margin-top: 0; font-size: 13px; color: var(--muted); }
 .archive-label { text-transform: uppercase; letter-spacing: 1px; margin-right: 8px; }
 .archive-select { font-family: Georgia, 'Times New Roman', serif; font-size: 13px;
-  color: var(--ink); background: #fffdf8; border: 1px solid #ccc; border-radius: 0; padding: 3px 6px; }
+  color: var(--ink); background: var(--paper); border: 1px solid var(--rule-soft); border-radius: 0; padding: 3px 6px; }
 
 /* source click-through (#3) */
-.src-link { color: var(--ink); text-decoration: none;
-  border-bottom: 1px solid rgba(26,26,26,0.35); }
-.src-link:hover { border-bottom-color: var(--ink); }
-.src-credit { color: var(--muted); font-size: 0.72em; font-style: italic; }
+/* inherit so a linkified bold headline keeps its --ink-strong brightness */
+.src-link { color: inherit; text-decoration: none; border-bottom: none; }
+.src-link:hover { border-bottom: 1px solid var(--src-underline); }
 .brief .src-link, .panel-also .src-link { font-size: 0.92em; }
 
 .src-multi { position: relative; display: inline-block; }
@@ -83,8 +163,8 @@ blockquote { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(20px, 
   padding: 0 2px; line-height: 1; }
 .src-count:hover { color: var(--ink); }
 .src-popover { display: none; position: absolute; left: 0; top: 1.4em; z-index: 10;
-  min-width: 160px; background: #fffdf8; border: 1px solid #ccc;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18); padding: 6px 8px; }
+  min-width: 160px; background: var(--paper); border: 1px solid var(--rule-soft);
+  box-shadow: 0 2px 8px var(--shadow); padding: 6px 8px; }
 .src-popover .src-link { display: block; font-size: 13px; padding: 3px 0;
   border-bottom: none; }
 .src-multi.open .src-popover { display: block; }

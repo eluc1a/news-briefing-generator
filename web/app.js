@@ -56,22 +56,11 @@ function linkifyHeadline(headlineEl, sources) {
     const text = headlineEl.textContent;
     headlineEl.textContent = "";
     headlineEl.append(srcAnchor(sources[0], text));
-    const credit = el("span", "src-credit", ` ${sources[0].source}`);
-    headlineEl.append(credit);
     return headlineEl;
   }
   headlineEl.append(document.createTextNode(" "));
   headlineEl.append(sourcePopover(sources));
   return headlineEl;
-}
-
-// Briefs (no headline): an element to append after the body.
-function trailingAffordance(sources) {
-  if (!sources || sources.length === 0) return null;
-  if (sources.length === 1) return srcAnchor(sources[0], ` — ${sources[0].source} ↗`);
-  const span = el("span", null, " ");
-  span.append(sourcePopover(sources));
-  return span;
 }
 
 function section(name) {
@@ -135,7 +124,14 @@ function renderPanels(b) {
   for (const p of b.panels) {
     const panel = el("article", "panel");
     panel.dataset.panel = p.section;
-    panel.append(el("h3", "panel-section", p.section));
+    const heading = el("h3", "panel-section", p.section);
+    if (p.section === "AI & Technology") {
+      const a = el("a", "section-link", p.section);
+      a.href = "/ai";                 // → latest AI digest (nginx 302)
+      heading.textContent = "";
+      heading.append(a);
+    }
+    panel.append(heading);
     const lede = el("h4", "panel-lede-headline", p.lede_headline);
     linkifyHeadline(lede, p.lede_sources);
     panel.append(lede);
@@ -160,22 +156,26 @@ function renderPullQuote(b) {
 
 function renderBriefs(b) {
   const s = section("briefs");
-  s.append(el("h3", "briefs-title", "In Brief"));
+  s.append(el("h3", "briefs-title", "Briefs · what else happened"));
+  const grid = el("div", "briefs-grid");
   for (const br of b.briefs) {
     const item = el("div", "brief");
-    item.append(el("strong", null, br.topic), el("span", null, ` ${br.body}`));
-    const aff = trailingAffordance(br.sources);
-    if (aff) item.append(aff);
-    s.append(item);
+    const topic = el("strong", null, br.topic);
+    linkifyHeadline(topic, br.sources);
+    item.append(topic, el("span", null, ` ${br.body}`));
+    grid.append(item);
   }
+  s.append(grid);
   return s;
 }
 
 function renderExtras(b) {
   const s = section("extras");
   const dp = el("div", "data-point");
+  dp.append(el("h3", "extras-title", "Data point of the day"));
   dp.append(el("span", "dp-value", b.data_point.value), el("span", "dp-context", b.data_point.context));
   const otd = el("div", "on-this-day");
+  otd.append(el("h3", "extras-title", "On this day"));
   otd.append(el("strong", null, b.on_this_day.year_and_title), el("span", null, ` ${b.on_this_day.body}`));
   s.append(dp, otd);
   return s;
@@ -228,6 +228,27 @@ function showStatus(msg) {
   document.getElementById("paper").replaceChildren(el("p", "status", msg));
 }
 
+// Dark-mode toggle. The pre-paint script in index.html sets the initial
+// theme from localStorage / system preference; here we sync the button
+// label and persist the reader's choice on click.
+function setupThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  const root = document.documentElement;
+  const sync = (dark) => {
+    btn.textContent = dark ? "☀" : "☾";       // icon of the mode a click switches TO
+    btn.setAttribute("aria-pressed", String(dark));
+  };
+  sync(root.dataset.theme === "dark");
+  btn.addEventListener("click", () => {
+    const dark = root.dataset.theme !== "dark";
+    if (dark) root.dataset.theme = "dark";
+    else delete root.dataset.theme;
+    try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
+    sync(dark);
+  });
+}
+
 async function main() {
   try {
     const indexRes = await fetch(EDITIONS + "index.json", { cache: "no-store" });
@@ -264,4 +285,5 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+setupThemeToggle();
 main();

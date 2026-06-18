@@ -1,0 +1,377 @@
+{
+  "title": "The Morning Fox",
+  "date": "Tuesday, June 16, 2026 · 8:10 AM",
+  "volume": "Vol. I · No. 167 · Morning",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 83,
+    "temp_low": 67,
+    "conditions": "clear sky",
+    "sunrise": "5:42",
+    "sunset": "8:35",
+    "daylight": "14h 52m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "11am",
+        "temp_f": 67,
+        "precip_pct": 0,
+        "code": 801
+      },
+      {
+        "time_label": "2pm",
+        "temp_f": 74,
+        "precip_pct": 0,
+        "code": 802
+      },
+      {
+        "time_label": "5pm",
+        "temp_f": 82,
+        "precip_pct": 0,
+        "code": 800
+      },
+      {
+        "time_label": "8pm",
+        "temp_f": 83,
+        "precip_pct": 0,
+        "code": 802
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "754.83",
+        "change": "▲1.76%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "744.00",
+        "change": "▲3.14%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "84.59",
+        "change": "▲9.12%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "—",
+        "change": null
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.48%",
+        "change": "▲3bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "4.2%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "Iran Says U.S.-Iran Deal Requires Israeli Withdrawal from Lebanon",
+    "deck": "A signing ceremony is set for Friday in Switzerland as Israel insists the agreement does not bind it.",
+    "body": "Iran's Foreign Minister Abbas Araghchi said Tuesday that Israeli forces remaining in southern Lebanon constitute a violation of the memorandum of understanding reached between the U.S. and Iran. Speaking to foreign diplomats in Tehran, Araghchi stated: \"Any continued occupation of Lebanese territory will be regarded by us as a violation of the memorandum of understanding.\" He also framed the agreement's parties as the U.S. and Israel on one side, and Iran and Hezbollah on the other. Israel's National Security Minister Itamar Ben-Gvir responded Monday that \"Trump's agreement does not bind us,\" and Israeli officials said troops would remain across a wide section of southern Lebanon they have occupied for over three months. The deal's formal signing is scheduled for Friday in Switzerland. A second phase of direct talks on Iran's nuclear program is expected to follow. President Trump said ships were already transiting the Strait of Hormuz, with full reopening expected Friday. Shipping firms have been reluctant to resume normal transits, citing a lack of details. Vice President Vance denied Monday that Iran would receive \"billions of dollars\" in assets under the deal; Iran's Revolutionary Guard said Sunday the country would receive $24 billion in frozen funds during a 60-day negotiation period.",
+    "at_a_glance": [
+      "Signing ceremony set for Friday in Switzerland",
+      "Israel says the deal does not bind its forces in Lebanon",
+      "Iran's IRGC claims $24 billion in frozen funds to be released"
+    ],
+    "sources": [
+      {
+        "url": "https://www.cbsnews.com/live-updates/iran-war-us-deal-peace-israel-lebanon-hezbollah-strait-of-hormuz/",
+        "source": "CBS News"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "Trump and Iran Sign 60-Day Ceasefire Extension, Strait of Hormuz to Reopen",
+      "lede_body": "President Donald Trump, Vice President JD Vance, and Iran's parliamentary speaker Mohammad Bagher Ghalibaf signed a memorandum of understanding extending the US-Iran ceasefire for 60 days. Trump said the Strait of Hormuz would be \"completely opened\" Friday. The S&P 500 rose 1.7 percent and the Dow Jones Industrial Average reached a record high on news of the deal. Oil prices fell, with US WTI dropping 4.87 percent to $80.75 per barrel.",
+      "lede_sources": [
+        {
+          "url": "https://www.upi.com/Top_News/World-News/2026/06/16/korea-Korea-consultations-US-Iran-navigation-Strait-of-Hormuz-MOU-deal/4501781602234/",
+          "source": "UPI"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Georgia, Alabama GOP runoffs decide Senate nominees",
+          "body": "Rep. Mike Collins and former coach Derek Dooley face off in Georgia's GOP Senate runoff Tuesday · Collins holds Trump's endorsement · Dooley is backed by Gov. Brian Kemp.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/primaries-georgia-senate-governor-republican-runoff-alabama-oklahoma-washington-dc/",
+              "source": "CBS News"
+            }
+          ]
+        },
+        {
+          "headline": "Iran World Cup team ordered out of US after match",
+          "body": "Coach Amir Ghalenoei said · Iran's team was told to leave the US immediately after a 2-2 draw with New Zealand on Monday · the team returned to its base in Tijuana.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/iran-world-cup-team-coach-says-team-ordered-out-of-us-right-after-first-match-amir-ghalenoei/",
+              "source": "CBS News"
+            }
+          ]
+        },
+        {
+          "headline": "New Fed Chair Warsh faces inflation at debut meeting",
+          "body": "Kevin M. Warsh begins his first Federal Reserve meeting as chairman · elevated inflation and the specter of rate increases are the principal issues before the committee.",
+          "sources": [
+            {
+              "url": "https://www.nytimes.com/2026/06/16/business/warsh-fed-chair.html",
+              "source": "The New York Times"
+            }
+          ]
+        },
+        {
+          "headline": "Minnesota poll shows Trump approval at 44 percent",
+          "body": "A Star Tribune/KARE 11 poll found 56% of Minnesota voters disapprove of Trump · up from 54% the previous year · the entire Minnesota Legislature and a US Senate seat are on the November ballot.",
+          "sources": [
+            {
+              "url": "https://www.startribune.com/mn-poll-trump-approval-rating-minnesota-voters-war-iran-inflation-immigration-metro-surge/601850019",
+              "source": "Star Tribune (Minneapolis)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "Fed Expected to Hold Rates as May CPI Hits 4.2%, Warsh Debuts",
+      "lede_body": "The Federal Reserve is set to hold its benchmark rate at 3.5%–3.75% at this week's FOMC meeting after CPI rose to 4.2% in May, the highest since April 2023, driven in part by energy prices following the Iran war. CME FedWatch puts the probability of no change at 98.4%. Incoming Chair Kevin Warsh will hold his first post-meeting press conference.",
+      "lede_sources": [
+        {
+          "url": "https://www.foxbusiness.com/economy/kevin-warshs-first-fed-press-conference-looms-inflation-surge-makes-rate-cuts-increasingly-unlikely",
+          "source": "Fox Business"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Bank of Japan raises rates to 1%",
+          "body": "The Bank of Japan raised its benchmark interest rate to 1% · its highest level since 1995.",
+          "sources": [
+            {
+              "url": "https://www.ft.com/content/1e887867-8533-423b-977c-c019759f7787",
+              "source": "Financial Times"
+            }
+          ]
+        },
+        {
+          "headline": "SpaceX market cap crosses $2.5 trillion after IPO",
+          "body": "SpaceX shares rose 10.35% in premarket Tuesday · the stock hit $212.40 · market cap crossed $2.5 trillion Monday after its IPO.",
+          "sources": [
+            {
+              "url": "https://www.forbes.com/sites/siladityaray/2026/06/16/spacex-shares-soar-again-in-premarket-as-it-inches-towards-275-trillion-market-cap/",
+              "source": "Forbes"
+            }
+          ]
+        },
+        {
+          "headline": "Fox acquires Roku in $22 billion deal",
+          "body": "Fox agreed to acquire Roku in a cash-and-stock deal at approximately $22 billion enterprise value · Fox shareholders to own 73% of the combined company.",
+          "sources": [
+            {
+              "url": "https://www.forbes.com/sites/maureenkerr/2026/06/16/foxs-roku-deal-puts-tubi-on-a-screen-fox-owns/",
+              "source": "Forbes"
+            }
+          ]
+        },
+        {
+          "headline": "China retail sales fall for first time since Covid",
+          "body": "China retail sales declined for the first time since the Covid pandemic · the drop signals weakening domestic consumer demand.",
+          "sources": [
+            {
+              "url": "https://www.ft.com/content/f0238d1d-8b35-4686-84f7-cdf90a628ebf",
+              "source": "Financial Times"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "U.S. export control on Anthropic's Fable 5 triggered by three-word prompt",
+      "lede_body": "The Trump administration's export control directive suspending foreign-national access to Anthropic's Fable 5 and Mythos 5 models was triggered by researchers prompting the AI to \"fix this code,\" not a jailbreak, according to Katie Moussouris, CEO of Luta Security and the only outside expert who reviewed the third-party research paper. Anthropic disabled both models for all customers to ensure compliance. Over 100 cybersecurity leaders signed an open letter on Sunday urging the administration to reverse the restrictions.",
+      "lede_sources": [
+        {
+          "url": "https://www.theregister.com/security/2026/06/15/feds-freaked-over-fable-5-after-simple-fix-this-code-prompt-not-jailbreak-says-researcher/5255827",
+          "source": "Hacker News"
+        }
+      ],
+      "also": [
+        {
+          "headline": "SpaceX acquires AI coding startup Cursor for $60B",
+          "body": "SpaceX agreed June 16 to acquire Cursor in a $60 billion stock deal · closing expected Q3 2026 · Cursor had raised $900M in June 2025 and $2.3B in late 2025.",
+          "sources": [
+            {
+              "url": "https://techcrunch.com/2026/06/16/spacex-to-acquire-cursor-for-60b-in-stock-days-after-blockbuster-ipo/",
+              "source": "TechCrunch AI"
+            }
+          ]
+        },
+        {
+          "headline": "Microsoft CEO Nadella publishes AI strategy essay",
+          "body": "Satya Nadella's X article on \"frontier ecosystems\" exceeded 60 million views · it argued companies should build learning loops over models, not pick the best model.",
+          "sources": [
+            {
+              "url": "https://www.latent.space/p/ainews-satya-on-loopcraft-building",
+              "source": "Latent Space"
+            }
+          ]
+        },
+        {
+          "headline": "Malaysia's Respond.io raises $62.5M Series B",
+          "body": "Respond.io closed a $62.5M Series B led by Camber Partners · ARR reached $35M, up 169% year-over-year · the firm processes 2 billion messages per quarter.",
+          "sources": [
+            {
+              "url": "https://techcrunch.com/2026/06/15/malaysias-respond-io-raises-62-5m-eyes-acquisitions-in-north-america-and-europe/",
+              "source": "TechCrunch AI"
+            }
+          ]
+        },
+        {
+          "headline": "Manassas 96 MW AI data center tests grid flexibility",
+          "body": "Emerald AI, Nvidia, and Digital Realty are building a 96-megawatt AI facility in Manassas, Virginia · Virginia electricity demand forecast to rise 183% by 2040.",
+          "sources": [
+            {
+              "url": "https://www.technologyreview.com/2026/06/16/1138591/data-center-online-quickly-electric-grid-flex/",
+              "source": "MIT Tech Review AI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "CIA doubts Iran's nuclear intentions despite US-Iran peace accord",
+      "lede_body": "CIA Director John Ratcliffe briefed President Trump and senior advisers that intelligence shows a significant gap between Iranian officials' public commitments and their private statements on nuclear concessions, according to Axios. The memorandum of understanding signed Sunday contains only provisional nuclear provisions; a more detailed agreement must be negotiated within 60 days. Secretary of State Marco Rubio and Defense Secretary Pete Hegseth expressed skepticism internally, while Vice President JD Vance and envoys Steve Witkoff and Jared Kushner backed the deal.",
+      "lede_sources": [
+        {
+          "url": "https://www.lefigaro.fr/international/iran-malgre-l-accord-de-paix-la-cia-doute-des-veritables-intentions-nucleaires-de-teheran-20260616",
+          "source": "Le Figaro"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Ukraine drones strike Moscow oil refinery",
+          "body": "Ukraine struck the Kapotnya refinery, 15 km from the Kremlin, on June 16 · the attack caused a fire and damage but no fatalities · President Zelensky said the drone was launched from 500 km away.",
+          "sources": [
+            {
+              "url": "https://www.hs.fi/maailma/art-2000012082804.html",
+              "source": "Helsingin Sanomat"
+            }
+          ]
+        },
+        {
+          "headline": "US military ran secret Hormuz oil transfers since May",
+          "body": "Reuters identified at least 92 ships involved in ship-to-ship oil transfers off Fujairah and Oman's Sohar since early May · an Apache helicopter downed by Iran on June 9 was part of the operation.",
+          "sources": [
+            {
+              "url": "https://www.timesofisrael.com/us-has-been-using-iranian-smuggling-tactics-to-sneak-gulf-oil-past-hormuz-blockade/",
+              "source": "The Times of Israel"
+            }
+          ]
+        },
+        {
+          "headline": "Mission 300 connects 50 million Africans to electricity",
+          "body": "The World Bank, African Development Bank, and Global Energy Alliance partnership connected 50 million people in Sub-Saharan Africa to electricity in two years · the initiative targets 300 million connections by 2030.",
+          "sources": [
+            {
+              "url": "https://www.independent.co.uk/climate-change/africa-energy-power-electricity-aid-b2995967.html",
+              "source": "The Independent (UK)"
+            }
+          ]
+        },
+        {
+          "headline": "Philippines fuel prices need 12 months to normalize",
+          "body": "DOE Undersecretary Alessandro Sales said June 15 · restoring supply chains could take 6–12 months · around 90% of Philippine fuel originates from the Middle East.",
+          "sources": [
+            {
+              "url": "https://www.rappler.com/business/department-energy-fuel-price-pre-war-levels-take-12-months/",
+              "source": "Rappler (Philippines)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"Any continued occupation of Lebanese territory will be regarded by us as a violation of the memorandum of understanding.\" — Abbas Araghchi, CBS News",
+  "briefs": [
+    {
+      "topic": "Cybersecurity",
+      "body": "North Korean APT37 is sending spear-phishing emails impersonating Microsoft account security alerts to deliver NarwhalRAT malware via ZIP archives containing malicious LNK files.",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/06/fake-microsoft-alerts-used-to-deploy.html",
+          "source": "The Hacker News"
+        }
+      ]
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "CISA added CVE-2026-54420, a privilege-escalation flaw in LiteSpeed's cPanel plugin, to its Known Exploited Vulnerabilities catalog; FCEB agencies must patch by June 18, 2026.",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/06/cisa-flags-litespeed-cpanel-plugin-flaw.html",
+          "source": "The Hacker News"
+        }
+      ]
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "Cisco released patches for CVE-2026-20262, an actively exploited file-overwrite flaw in Catalyst SD-WAN Manager carrying a CVSS score of 6.5, affecting on-prem and cloud deployments.",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/06/cisco-releases-security-updates-for.html",
+          "source": "The Hacker News"
+        }
+      ]
+    },
+    {
+      "topic": "Elections",
+      "body": "Rep. Adriano Espaillat raised $112,000 from 69 donors on June 4; 67 of those donors have also contributed to AIPAC since 2023, and none listed addresses inside NY-13.",
+      "sources": [
+        {
+          "url": "https://www.dropsitenews.com/p/pro-israel-donors-aipac-adriano-espaillat-avila-chevalier",
+          "source": "Drop Site News"
+        }
+      ]
+    },
+    {
+      "topic": "Space Debris",
+      "body": "A Chinese Zhuque-2E rocket upper stage broke apart after its June 9 launch, generating an estimated 100–150 debris fragments in low-Earth orbit near the ISS and Starlink constellation.",
+      "sources": [
+        {
+          "url": "https://science.slashdot.org/story/26/06/16/0539205/a-chinese-rocket-breaks-apart-dangerously-close-to-the-starlink-constellation?utm_source=rss1.0mainlinkanon&utm_medium=feed",
+          "source": "Slashdot"
+        }
+      ]
+    },
+    {
+      "topic": "AI Policy",
+      "body": "The DOJ filed a memorandum supporting xAI in an NAACP lawsuit, stating that four AI models including Grok support classified military networks and that stopping xAI's turbines threatens national security.",
+      "sources": [
+        {
+          "url": "https://www.wired.com/story/doj-lawyers-argue-xai-vital-national-security-naacp-lawsuit/",
+          "source": "WIRED Science"
+        }
+      ]
+    }
+  ],
+  "data_point": {
+    "value": "4.2%",
+    "context": "U.S. Consumer Price Index for May 2026, the highest reading since April 2023, reported by the Bureau of Labor Statistics and cited by Fox Business. Energy prices rose after the Iran conflict."
+  },
+  "on_this_day": {
+    "year_and_title": "1976 — Soweto Uprising Begins",
+    "body": "On June 16, 1976, an estimated 20,000 Black students in Soweto, South Africa, marched to protest a government directive requiring Afrikaans as the medium of instruction in schools. Police opened fire on the crowd. Official figures recorded 176 deaths; other estimates placed the toll higher. The date is now commemorated as Youth Day in South Africa."
+  }
+}

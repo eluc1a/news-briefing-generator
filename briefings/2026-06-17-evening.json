@@ -1,0 +1,377 @@
+{
+  "title": "The Evening Fox",
+  "date": "Wednesday, June 17, 2026 · 8:10 PM",
+  "volume": "Vol. I · No. 168 · Evening",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 95,
+    "temp_low": 75,
+    "conditions": "broken clouds",
+    "sunrise": "5:42",
+    "sunset": "8:35",
+    "daylight": "14h 53m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "11pm",
+        "temp_f": 81,
+        "precip_pct": 0,
+        "code": 803
+      },
+      {
+        "time_label": "2am",
+        "temp_f": 77,
+        "precip_pct": 0,
+        "code": 804
+      },
+      {
+        "time_label": "5am",
+        "temp_f": 75,
+        "precip_pct": 0,
+        "code": 804
+      },
+      {
+        "time_label": "8am",
+        "temp_f": 77,
+        "precip_pct": 0,
+        "code": 804
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "740.96",
+        "change": "▼1.25%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "722.51",
+        "change": "▼1.01%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "77.54",
+        "change": "▼2.99%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "—",
+        "change": null
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.43%",
+        "change": "▼4bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "4.2%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "US and Iran Sign Memorandum of Understanding to End West Asia War",
+    "deck": "Trump signed the deal during a dinner with Macron at Versailles; the Strait of Hormuz blockade was lifted.",
+    "body": "US President Donald Trump and Iranian President Masoud Pezeshkian signed an interim memorandum of understanding on June 17, 2026, ending the approximately four-month-old US-Iran war. Trump signed a physical copy during a dinner with French President Emmanuel Macron at the Palace of Versailles following the G7 summit in Evian. The memo had been signed digitally on June 14 by US Vice President JD Vance and Iran's chief negotiator Mohammad Baqer Qalibaf, witnessed by Trump. Iranian Foreign Ministry Spokesman Esmaeil Baghaei confirmed the signing on state television. Trump simultaneously announced the removal of the US naval blockade of the Strait of Hormuz. A planned formal signing ceremony in Switzerland on June 19 was called off. Key outstanding issues—including Iran's nuclear programme, sanctions relief, and Lebanon—were not resolved in the memorandum. A planned $300 billion Gulf-backed reconstruction fund for Iran was referenced in leaked drafts. Iran confirmed implementation would now be tested.",
+    "at_a_glance": [
+      "Trump signed at Versailles during G7 dinner with Macron.",
+      "Digital signing occurred June 14; Hormuz blockade lifted.",
+      "Nuclear, sanctions, and Lebanon issues remain unresolved."
+    ],
+    "sources": [
+      {
+        "url": "https://www.straitstimes.com/world/middle-east/us-iran-deal-takes-effect-as-both-sides-say-memorandum-signed",
+        "source": "The Straits Times"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "Mississippi officer kills 1-year-old Kohen Wiley during Walmart shoplifting response",
+      "lede_body": "A Senatobia, Mississippi, officer shot into a vehicle Sunday outside a Walmart while responding to a shoplifting call, killing 1-year-old Kohen Wiley. The Mississippi Bureau of Investigation said the driver allegedly moved toward officers before the shot was fired. One officer was placed on administrative leave Tuesday. Tear gas was deployed Tuesday night as protests grew. Civil rights attorney Ben Crump said Wednesday he is representing the family.",
+      "lede_sources": [
+        {
+          "url": "https://www.wcvb.com/article/child-killed-police-walmart-mississippi/71618506",
+          "source": "WCVB Boston"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Fed holds rates at 3.5%–3.75% under Warsh",
+          "body": "Chairman Kevin Warsh held the federal funds rate at 3.5%–3.75% Wednesday · the Dow fell 183 points · the S&P 500 and Nasdaq each dropped about 0.8%.",
+          "sources": [
+            {
+              "url": "https://www.upi.com/Top_News/US/2026/06/17/interest-rates-unchanged-kevin-warsh/9351781721608/",
+              "source": "UPI"
+            }
+          ]
+        },
+        {
+          "headline": "Trump feuds with Thune over filibuster, nominations",
+          "body": "Trump pulled intelligence nominee Jay Clayton from a Senate confirmation hearing · he demanded an end to the filibuster · the dispute widened a rift with Majority Leader John Thune ahead of 2026 elections.",
+          "sources": [
+            {
+              "url": "https://www.nytimes.com/2026/06/17/us/politics/trump-thune-republicans-election-year-rift.html",
+              "source": "The New York Times"
+            }
+          ]
+        },
+        {
+          "headline": "Federal prosecutors indict 15 in anti-ICE conspiracy case",
+          "body": "Federal prosecutors unsealed a 94-page indictment Tuesday charging 15 Twin Cities residents with conspiring to impede immigration enforcement · U.S. Attorney Daniel Rosen confirmed · no federal agents were injured.",
+          "sources": [
+            {
+              "url": "https://www.startribune.com/conspiracy-indictment-against-anti-ice-demonstrators-comes-as-federal-prosecutors-struggle-to-hold-up-similar-charges/601858014",
+              "source": "Star Tribune (Minneapolis)"
+            }
+          ]
+        },
+        {
+          "headline": "Trump nominates Sullivan & Cromwell partner for SDNY",
+          "body": "Trump nominated Sullivan & Cromwell partner Jamie McDonald to lead the Southern District of New York · McDonald would succeed Jay Clayton · Democratic senators said prosecutorial independence will be central to any review.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/trump-jamie-mcdonald-sullivan-and-cromwell-sdny/",
+              "source": "CBS News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "Fed Holds Rates Steady, Nine Members Project Hike Before Year-End",
+      "lede_body": "The Federal Reserve voted 12-0 on June 17 to hold the benchmark federal funds rate at 3.5%–3.75%, citing inflation above its 2% target. Nine of 18 FOMC members now project at least one rate hike before end of 2026. The committee raised its year-end PCE inflation forecast to 3.6%, up from 2.7% in March, and trimmed its real GDP growth projection to 2.2% from 2.4%.",
+      "lede_sources": [
+        {
+          "url": "https://www.foxbusiness.com/economy/federal-reserve-interest-rate-decision-june-17-2026",
+          "source": "Fox Business"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Warsh Drops Rate-Cut Bias at First Presser",
+          "body": "Chair Kevin Warsh said · inflation has exceeded the Fed's 2% goal for more than five years · he rejected the view that growth causes inflation.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/politics/larry-kudlow-kevin-warshs-message-markets-good-news-can-good-news-again",
+              "source": "Fox Business"
+            }
+          ]
+        },
+        {
+          "headline": "Oil Wavers on Pending US-Iran Strait Deal",
+          "body": "Brent Crude briefly crossed $80 before settling near $79 · WTI reached ~$77 · deal signing expected Friday · Strait of Hormuz closure drove Brent to $120 in April.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/economy/oil-prices-fluctuate-trumps-iran-deal-could-fully-reopen-strait-hormuz",
+              "source": "Fox Business"
+            }
+          ]
+        },
+        {
+          "headline": "Michael Dell Surpasses Ellison as Fifth-Richest",
+          "body": "Dell's net worth rose 3.3% to $234 billion on June 17 · Dell Technologies shares gained 3.7% · Oracle fell 2.6% to $183.48, cutting Ellison's net worth to $230.8 billion.",
+          "sources": [
+            {
+              "url": "https://www.forbes.com/sites/antoniopequenoiv/2026/06/17/michael-dell-overtakes-larry-ellison-as-worlds-fifth-richest-person-amid-dell-stock-surge/",
+              "source": "Forbes"
+            }
+          ]
+        },
+        {
+          "headline": "NAR Economist Projects $1M Median Home Price by 2050",
+          "body": "NAR chief economist Lawrence Yun said Tuesday · the national median home price will reach $1 million by 2050 · the current median stands near $430,000.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/real-estate/median-us-home-price-projected-hit-1-million-2050-right-millennials-retire",
+              "source": "Fox Business"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "G7 leaders demand guaranteed access to U.S. AI models after Anthropic export block",
+      "lede_body": "At the G7 Summit on June 17, French President Macron and Indian Prime Minister Modi warned that U.S. ability to revoke AI model access overnight threatens partner economies. The concern followed the Trump administration blocking Anthropic's Mythos 5 and Fable 5 exports on national security grounds after Amazon flagged bypassed safety guardrails. G7 leaders discussed a \"trusted partners\" scheme to grant allied nations continued access to models from Anthropic and OpenAI.",
+      "lede_sources": [
+        {
+          "url": "https://techcrunch.com/2026/06/17/world-leaders-want-american-ai-they-just-dont-want-america-to-be-able-to-turn-it-off/",
+          "source": "TechCrunch AI"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Odyssey raises $310M at $1.45B valuation",
+          "body": "World model startup Odyssey closed a $310M Series B led by Natural Capital · Amazon, AMD Ventures, and GV participated · AWS named preferred cloud provider.",
+          "sources": [
+            {
+              "url": "https://techcrunch.com/2026/06/17/world-model-maker-odyssey-nabs-1-45b-valuation-backed-by-amazon-and-other-big-names/",
+              "source": "TechCrunch AI"
+            }
+          ]
+        },
+        {
+          "headline": "Anthropic joins Frontier carbon removal coalition",
+          "body": "Anthropic joined Frontier's $915M new tranche · total pledges reached $1.8B · Anthropic is the first pure AI company in the coalition.",
+          "sources": [
+            {
+              "url": "https://techcrunch.com/2026/06/17/anthropic-becomes-first-ai-startup-to-join-the-frontier-carbon-removal-coalition/",
+              "source": "TechCrunch AI"
+            }
+          ]
+        },
+        {
+          "headline": "Z.ai launches GLM-5.2 coding model",
+          "body": "Z.ai released GLM-5.2 with a 1M-token context window · available immediately to Coding Plan users · open weights under MIT license planned the following week.",
+          "sources": [
+            {
+              "url": "https://tldr.tech/ai/2026-06-17",
+              "source": "TLDR AI"
+            }
+          ]
+        },
+        {
+          "headline": "Apple Intelligence may become mandatory in iOS 27",
+          "body": "iOS 27 beta 1 removes the option to disable Apple Intelligence · the suite occupies several gigabytes of storage · final release policy remains unconfirmed.",
+          "sources": [
+            {
+              "url": "https://manualdousuario.net/en/apple-intelligence-mandatory-ios-macos-27/",
+              "source": "Hacker News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "US and Iran sign Islamabad MOU, ending West Asia war",
+      "lede_body": "The United States and Iran confirmed the signing of a memorandum of understanding to end their war on June 17, 2026. Trump signed a copy during a dinner with French President Macron at the Palace of Versailles. Iran's Foreign Ministry spokesman Esmaeil Baqaei confirmed Tehran's signature June 18, stating the 60-day period for finalising a permanent agreement had begun. A ceremonial signing in Switzerland was planned for Friday.",
+      "lede_sources": [
+        {
+          "url": "https://www.thehindu.com/news/international/us-iran-confirm-deal-signed-to-end-west-asia-war/article71115548.ece",
+          "source": "The Hindu"
+        }
+      ],
+      "also": [
+        {
+          "headline": "UN records 38,558 child violations globally in 2025",
+          "body": "UN Secretary-General Guterres warned June 17 · Israeli settler groups could be added to the child-violations blacklist · 6,266 children killed in 2025, a 34% rise over 2024.",
+          "sources": [
+            {
+              "url": "https://www.straitstimes.com/world/middle-east/un-warns-israeli-settlers-could-join-blacklist-for-violations-against-children",
+              "source": "The Straits Times"
+            }
+          ]
+        },
+        {
+          "headline": "EU chief pledges India free trade deal by year-end",
+          "body": "European Commission President von der Leyen said at the G7 · the India-EU FTA would be signed by end of 2026 · both sides will also advance IMEC connectivity work.",
+          "sources": [
+            {
+              "url": "https://timesofindia.indiatimes.com/india/india-fta-by-year-end-says-european-commission-president/articleshow/131814653.cms",
+              "source": "Times of India"
+            }
+          ]
+        },
+        {
+          "headline": "Netherlands: 300,000 households face energy crisis losses",
+          "body": "Dutch CPB research found 300,000 households face above-average energy cost impact · low-income households could lose up to 6% purchasing power · average Dutch household loss under 1%.",
+          "sources": [
+            {
+              "url": "https://nos.nl/l/2619080",
+              "source": "NOS (Netherlands)"
+            }
+          ]
+        },
+        {
+          "headline": "Zelenskyy calls Trump, Macron after G7 summit",
+          "body": "Ukrainian President Zelenskyy said June 17 · he held a coordinating call with Trump and Macron following the Evian G7 · Ukraine sought $20 billion in additional military funding at the Ramstein group meeting.",
+          "sources": [
+            {
+              "url": "https://www.straitstimes.com/world/europe/ukraines-zelenskiy-says-he-spoke-to-trump-macron-after-g7-summit",
+              "source": "The Straits Times"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"The text of the Islamabad Memorandum of Understanding was finalised with the signatures of the Presidents — now it is time to test the implementation of the agreement.\" — Esmaeil Baqaei, Iranian Foreign Ministry, IRNA",
+  "briefs": [
+    {
+      "topic": "Cybersecurity",
+      "body": "Nearly 74,000 Fortinet devices across 194 countries have been compromised, exposing plaintext credentials for organizations including Oracle, Chevron, FedEx, and a NATO defense contractor, researcher Bob Diachenko reported.",
+      "sources": [
+        {
+          "url": "https://arstechnica.com/security/2026/06/massive-breach-spills-credentials-for-thousands-of-sensitive-networks/",
+          "source": "Ars Technica"
+        }
+      ]
+    },
+    {
+      "topic": "AI Policy",
+      "body": "Anthropic's roughly 3,000 employees lack clear answers six days after the Trump administration ordered suspension of Fable 5 and Mythos access for foreign nationals; CEO Dario Amodei's talks with officials produced no breakthrough Monday or Tuesday.",
+      "sources": [
+        {
+          "url": "https://yro.slashdot.org/story/26/06/17/1737246/anthropic-employees-accuse-trump-administration-of-targeting-them?utm_source=rss1.0mainlinkanon&utm_medium=feed",
+          "source": "Slashdot"
+        }
+      ]
+    },
+    {
+      "topic": "Iran War Costs",
+      "body": "Moody's Analytics estimates the Iran conflict has cost U.S. consumers and taxpayers $132 billion so far; 13 U.S. service members and over 3,300 Iranians were killed, with nearly 3,826 additional deaths in Lebanon.",
+      "sources": [
+        {
+          "url": "https://www.npr.org/2026/06/17/nx-s1-5860739/iran-war-cost-oil-military-trade",
+          "source": "NPR"
+        }
+      ]
+    },
+    {
+      "topic": "Markets",
+      "body": "Apple CEO Tim Cook told The Wall Street Journal that product price increases are \"unavoidable\" due to memory chip shortages; TechInsights estimates the iPhone 18 Pro may need to cost $270 more to maintain existing margins.",
+      "sources": [
+        {
+          "url": "https://www.macrumors.com/2026/06/17/apple-increasing-prices/",
+          "source": "MacRumors"
+        }
+      ]
+    },
+    {
+      "topic": "Telecom",
+      "body": "California regulators filed a June 15 FCC brief accusing AT&T of misrepresenting state rules to obtain federal permission to abandon copper phone service for approximately 199,000 customers.",
+      "sources": [
+        {
+          "url": "https://arstechnica.com/tech-policy/2026/06/california-says-att-lied-to-fcc-in-attempt-to-shut-off-old-phone-network/",
+          "source": "Ars Technica"
+        }
+      ]
+    },
+    {
+      "topic": "Consumer Tech",
+      "body": "Global smartphone shipments are forecast to fall 15% in 2026, per CCS Insight, as memory makers prioritize higher-margin server chips; some entry-level device prices have already risen more than 50% year-over-year.",
+      "sources": [
+        {
+          "url": "https://mobile.slashdot.org/story/26/06/17/2022201/smartphone-market-to-shrink-15-this-year-due-to-memory-crisis?utm_source=rss1.0mainlinkanon&utm_medium=feed",
+          "source": "Slashdot"
+        }
+      ]
+    }
+  ],
+  "data_point": {
+    "value": "$300 billion",
+    "context": "Leaked drafts of the US-Iran memorandum reference a Gulf-backed reconstruction fund for Iran of this size, according to The Straits Times report on the deal's terms."
+  },
+  "on_this_day": {
+    "year_and_title": "1972 — Watergate Break-In Arrests",
+    "body": "On June 17, 1972, five men were arrested inside the Democratic National Committee headquarters at the Watergate complex in Washington, DC, while attempting to wiretap phones and steal documents. The break-in, linked to President Richard Nixon's re-election committee, ultimately led to Nixon's resignation on August 9, 1974."
+  }
+}

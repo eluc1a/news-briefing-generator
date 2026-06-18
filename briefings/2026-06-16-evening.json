@@ -1,0 +1,377 @@
+{
+  "title": "The Evening Fox",
+  "date": "Tuesday, June 16, 2026 · 8:10 PM",
+  "volume": "Vol. I · No. 167 · Evening",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 91,
+    "temp_low": 65,
+    "conditions": "scattered clouds",
+    "sunrise": "5:42",
+    "sunset": "8:35",
+    "daylight": "14h 52m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "11pm",
+        "temp_f": 73,
+        "precip_pct": 38,
+        "code": 500
+      },
+      {
+        "time_label": "2am",
+        "temp_f": 71,
+        "precip_pct": 9,
+        "code": 803
+      },
+      {
+        "time_label": "5am",
+        "temp_f": 65,
+        "precip_pct": 3,
+        "code": 804
+      },
+      {
+        "time_label": "8am",
+        "temp_f": 74,
+        "precip_pct": 0,
+        "code": 803
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "750.33",
+        "change": "▼0.60%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "729.86",
+        "change": "▼1.90%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "79.93",
+        "change": "▼5.51%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "—",
+        "change": null
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.47%",
+        "change": "▼1bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "4.2%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "Trump Invokes Defense Production Act Amid Iran War Munitions Shortfall",
+    "deck": "A presidential memo delegates authority to the Defense Secretary to use the 1950 law to address munitions supply-chain bottlenecks exposed by the Iran conflict.",
+    "body": "President Trump signed a memo Tuesday invoking the Defense Production Act to address production constraints on munitions, missiles, and military equipment. The memo delegates authority to Defense Secretary Pete Hegseth to use the law, which allows the government and private firms to form voluntary agreements aimed at national defense production. The memo cited fragile supply chains and production bottlenecks that may \"impair the ability\" to expand munitions availability. Michael Cadenazzi, assistant secretary of defense for industrial base policy, said at a Center for New American Security event Tuesday that he has worked since approximately September to launch a voluntary agreement under the act to bring defense industry companies into supply-chain discussions. An April analysis by the Center for Strategic and International Studies estimated the U.S. may have expended more than half its inventory of four critical munitions, including Tomahawk missiles, during the Iran campaign. Hegseth, testifying in April, said replenishment could take \"months to years.\"",
+    "at_a_glance": [
+      "Memo delegates DPA authority to Defense Secretary Hegseth.",
+      "CSIS: U.S. may have used half of four critical munitions stocks.",
+      "Hegseth said replenishment could take months to years."
+    ],
+    "sources": [
+      {
+        "url": "https://www.cbsnews.com/news/trump-defense-production-weapons-manufacturing-iran-war/",
+        "source": "CBS News"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "DOJ charges five men in armed plot to attack White House UFC event",
+      "lede_body": "The Justice Department on Tuesday charged five men — Tycen Proper of Ohio, Daniel Eskridge of Missouri, Abraham Alvarez of Nebraska, and Bryan Roa and Michael Thomas of California — with conspiracy to commit murder in an alleged plan to attack UFC Freedom 250 at the White House. Investigators say Proper's mother alerted police. Seized materials included rifles, handguns, tactical vests, and radios. Each defendant faces up to life in prison if convicted.",
+      "lede_sources": [
+        {
+          "url": "https://www.wcvb.com/article/five-men-charged-plot-attack-white-house-ufc-event/71605936",
+          "source": "WCVB Boston"
+        }
+      ],
+      "also": [
+        {
+          "headline": "DOJ weighs death penalty for National Guard shooter",
+          "body": "Rahmanullah Lakanwal was indicted Tuesday on 8 new counts, including murder of a person assisting a federal officer · he pleaded not guilty · DOJ's Capital Case Committee will review whether to seek death.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/alleged-dc-national-guard-shooter-death-penalty-counts-doj-new-charges-lakanwal/",
+              "source": "CBS News"
+            }
+          ]
+        },
+        {
+          "headline": "GM and Lockheed Martin announce defense manufacturing partnership",
+          "body": "GM and Lockheed Martin announced Tuesday a DoD-facilitated partnership · Lockheed plans $9 billion in facility investment through 2030 · GM will spend $7 billion on R&D.",
+          "sources": [
+            {
+              "url": "https://www.upi.com/Top_News/US/2026/06/16/GM-Lockheed-Martin-defense-partnership/2561781642531/",
+              "source": "UPI"
+            }
+          ]
+        },
+        {
+          "headline": "Senate Republicans again block Iran war powers vote",
+          "body": "Four Republican senators joined Democrats Tuesday to back a war powers resolution directing Trump to halt the Iran war · the measure failed · Senate Republicans blocked it.",
+          "sources": [
+            {
+              "url": "https://www.nytimes.com/2026/06/16/us/politics/republicans-iran-war-powers-senate.html",
+              "source": "The New York Times"
+            }
+          ]
+        },
+        {
+          "headline": "Two people shot inside Wilmington Hospital Delaware",
+          "body": "Two people were shot at Wilmington Hospital around 3:30 p.m. Tuesday · police declared a possible active shooter · the emergency department was placed on divert.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/wilmington-hospital-delaware-shooting/",
+              "source": "CBS News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "SpaceX to acquire AI coding startup Cursor in $60 billion all-stock deal",
+      "lede_body": "SpaceX announced plans to acquire Cursor, an AI coding startup, in an all-stock deal valued at $60 billion, targeting close by Q3 2026. Cursor's four cofounders — Michael Truell, Aman Sanger, Sualeh Asif, and Arvid Lunnemark, all aged 25–26 — would each reach an estimated net worth of $2.7 billion. Andreessen Horowitz holds roughly 10% of Cursor, a stake worth approximately $6 billion at deal price. Cursor crossed $4 billion in annualized revenue in early June.",
+      "lede_sources": [
+        {
+          "url": "https://www.forbes.com/sites/rashishrivastava/2026/06/16/spacexs-60-billion-cursor-acquisition-double-20-something-cofounders-net-worths/",
+          "source": "Forbes"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Oil falls below $80 on Hormuz flow bets",
+          "body": "Oil dropped below $80 a barrel · traders priced in resumed flows through the Strait of Hormuz · The Economist noted pre-war $60 crude remains unlikely near-term.",
+          "sources": [
+            {
+              "url": "https://www.ft.com/content/45340e55-aa6a-4302-a606-a869f5cb6189",
+              "source": "Financial Times"
+            }
+          ]
+        },
+        {
+          "headline": "Johnson & Johnson announces $55B U.S. investment",
+          "body": "CEO Joaquin Duato cited Trump tax policy · J&J committed $55 billion in U.S. investment · over $1 billion targets a Vision manufacturing facility in Jacksonville, Florida.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/media/johnson-johnson-ceo-credits-trump-tax-policy-55b-us-investment-push-including-1b-florida",
+              "source": "Fox Business"
+            }
+          ]
+        },
+        {
+          "headline": "Rivian cuts hundreds of jobs after R2 launch",
+          "body": "Rivian laid off workers Tuesday in its service and customer division · cuts represent less than 2% of its 15,200-person workforce · the R2 SUV debuted last week starting near $58,000.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/markets/ev-maker-rivian-cuts-hundreds-jobs-after-launching-new-suv",
+              "source": "Fox Business"
+            }
+          ]
+        },
+        {
+          "headline": "Vanguard S&P 500 ETF hits $1 trillion in assets",
+          "body": "The Vanguard S&P 500 ETF became the first ETF to reach $1 trillion in assets · it has returned nearly 800% since its 2010 launch · the S&P 500 has averaged over 10% annually for seven decades.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/markets/could-vanguard-sp-500-etf-your-ticket-becoming-stock-market-millionaire",
+              "source": "Fox Business"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "Trump administration orders Anthropic to pull Mythos and Fable 5 models",
+      "lede_body": "The Trump administration sent Anthropic a letter demanding it bar non-Americans, including its own employees, from accessing Mythos 5 and Fable 5, forcing both models off the market. The directive invoked an export control mechanism. Anthropic had surpassed OpenAI in business spending share in May, reaching 41% of AI subscriptions across Ramp's 70,000-plus business customers, up 2.5 percentage points.",
+      "lede_sources": [
+        {
+          "url": "https://techcrunch.com/2026/06/16/anthropics-latest-feud-with-the-trump-admin-may-actually-help-it-sales-data-suggests/",
+          "source": "TechCrunch AI"
+        }
+      ],
+      "also": [
+        {
+          "headline": "SpaceX acquires AI coding firm Cursor for $60B",
+          "body": "SpaceX announced acquisition of Cursor for $60 billion in stock · deal expected to close in Q3 · SpaceX valuation reached $2.9 trillion intraday June 16.",
+          "sources": [
+            {
+              "url": "https://techcrunch.com/2026/06/16/spacex-valuation-balloons-to-2-6t-briefly-passes-amazon/",
+              "source": "TechCrunch AI"
+            }
+          ]
+        },
+        {
+          "headline": "NVIDIA Blackwell leads all MLPerf Training 6.0 benchmarks",
+          "body": "NVIDIA GB300 NVL72 delivered up to 1.6x faster training than GB200 NVL72 · results spanned 8,192 GPUs · NVIDIA submitted across all seven benchmarks.",
+          "sources": [
+            {
+              "url": "https://blogs.nvidia.com/blog/blackwell-mlperf-training-6-0/",
+              "source": "NVIDIA Blog"
+            }
+          ]
+        },
+        {
+          "headline": "Google DeepMind partners UK government on AI planning tool",
+          "body": "Google DeepMind and the UK government are co-developing a Gemini-based planning prototype · goal is 50% reduction in application processing time · national rollout planned for 2027.",
+          "sources": [
+            {
+              "url": "https://deepmind.google/blog/unlocking-uk-house-building-with-ai-accelerated-planning/",
+              "source": "Google DeepMind"
+            }
+          ]
+        },
+        {
+          "headline": "Wolfram Language Version 15 launches with built-in AI",
+          "body": "Wolfram Language Version 15 launched June 16, 2026 · release adds AI interfaces targeting both human users and AI systems · follows Version 1.0 debut on June 23, 1988.",
+          "sources": [
+            {
+              "url": "https://writings.stephenwolfram.com/2026/06/launching-version-15-of-wolfram-language-mathematica-built-in-useful-ai-lots-of-new-core-functionality/",
+              "source": "Hacker News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "US-Iran deal reported to include $300 billion fund, Lebanon ceasefire terms",
+      "lede_body": "A 14-point US-Iran memorandum of understanding, expected to be signed Friday, provides for a full cessation of hostilities including in Lebanon, according to Saudi broadcaster Al Arabiya, which published what it said was the agreement's full text. The framework includes $300 billion for Iranian investment and reconstruction, 60 days of nuclear talks, US sanctions relief on oil sales, and lifting of the US naval blockade. Israel has not been briefed on the official terms.",
+      "lede_sources": [
+        {
+          "url": "https://www.timesofisrael.com/us-iran-deal-said-set-to-halt-regional-hostilities-including-in-lebanon-lift-blockade/",
+          "source": "The Times of Israel"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Peru runoff count narrows as Sánchez rejects results",
+          "body": "With 99% of ballots counted, Keiko Fujimori held 50.097% against Roberto Sánchez's 49.903% · Sánchez called protest marches, citing irregularities · final count may take until month's end.",
+          "sources": [
+            {
+              "url": "https://www.clarin.com/mundo/balotaje-peru-keiko-fujimori-consolida-recuento-roberto-sanchez-dice-aceptara-resultados_0_hYjMNegXJ8.html",
+              "source": "Clarín (Argentina)"
+            }
+          ]
+        },
+        {
+          "headline": "Somaliland president visits Israeli Knesset, opens embassy",
+          "body": "President Abdirahman Mohamed Abdullahi visited Israel's Knesset on June 16 · Israel became the first country to recognise Somaliland as an independent nation earlier this year.",
+          "sources": [
+            {
+              "url": "https://www.aljazeera.com/video/newsfeed/2026/6/16/aje-onl-nf_somaliland-president-visits-israeli-knesset-on-tour-160626?traffic_source=rss",
+              "source": "Al Jazeera English"
+            }
+          ]
+        },
+        {
+          "headline": "Mbappé becomes France's all-time top scorer at World Cup",
+          "body": "Kylian Mbappé scored twice against Senegal on June 16 · his 57th and 58th international goals surpassed Olivier Giroud's record · France won 3-1 in their Group I opener.",
+          "sources": [
+            {
+              "url": "https://www.lemonde.fr/en/sports/article/2026/06/17/france-vs-senegal-kylian-mbappe-surpasses-olivier-giroud-to-become-france-s-all-time-top-scorer-at-27_6754568_9.html",
+              "source": "Le Monde"
+            }
+          ]
+        },
+        {
+          "headline": "Ghana's Partey barred from Canada over undisclosed charges",
+          "body": "Thomas Partey, 33, was denied entry to Canada for Ghana's World Cup opener after failing to disclose multiple UK sexual violence charges · a federal court in Ottawa rejected Ghana's appeal.",
+          "sources": [
+            {
+              "url": "https://www.bbc.com/sport/football/articles/cly8qj2nlzqo?at_medium=RSS&at_campaign=rss",
+              "source": "BBC News"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"Sometimes we need the collective wisdom of all the assembled companies to collaborate and solve our problems for us and we want them to provide their best advice from the industrial side.\" — Michael Cadenazzi, CBS News",
+  "briefs": [
+    {
+      "topic": "Crypto Regulation",
+      "body": "Binance is set to lose EU operating permission after Greek regulators decided to reject its MiCA license application, leaving the fate of its EU-based customers uncertain ahead of a June 30 deadline.",
+      "sources": [
+        {
+          "url": "https://news.slashdot.org/story/26/06/16/1942225/binance-set-to-lose-permission-to-operate-in-eu?utm_source=rss1.0mainlinkanon&utm_medium=feed",
+          "source": "Slashdot"
+        }
+      ]
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "A researcher exploited a FIFA World Cup backend API flaw to gain full control of TV broadcast streams for every match. FIFA patched the vulnerability within hours without acknowledging the report.",
+      "sources": [
+        {
+          "url": "https://techcrunch.com/2026/06/16/bug-in-fifa-world-cup-internal-system-gave-anyone-ability-to-modify-tv-stream/",
+          "source": "TechCrunch"
+        }
+      ]
+    },
+    {
+      "topic": "Antitrust",
+      "body": "DOJ career lawyers were leaning toward suing to block the $111 billion Paramount–Warner Bros. Discovery deal before senior leadership closed the investigation without allowing staff to formally object, the Wall Street Journal reported.",
+      "sources": [
+        {
+          "url": "https://arstechnica.com/tech-policy/2026/06/us-approval-of-paramount-warner-bros-deal-surprised-doj-lawyers-report-says/",
+          "source": "Ars Technica"
+        }
+      ]
+    },
+    {
+      "topic": "Defense/AI",
+      "body": "Pentagon CTO Emil Michael said the Defense Department uses generative AI on GenAI.mil to draft congressionally mandated reports, reducing a 200-hour staffing task to roughly five hours.",
+      "sources": [
+        {
+          "url": "https://arstechnica.com/ai/2026/06/pentagon-boasts-of-using-ai-to-write-reports-mandated-by-congress/",
+          "source": "Ars Technica"
+        }
+      ]
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "A Google Vertex AI SDK flaw allowed attackers to hijack ML model uploads via predictable Cloud Storage bucket names, enabling malicious code execution inside Google's serving infrastructure. Google patched it in version 1.148.0.",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/06/google-vertex-ai-sdk-flaw-let-attackers.html",
+          "source": "The Hacker News"
+        }
+      ]
+    },
+    {
+      "topic": "Privacy",
+      "body": "Apple will move Hide My Email addresses from @icloud.com to @private.icloud.com, making the anonymized addresses identifiable and easier for apps and websites to block.",
+      "sources": [
+        {
+          "url": "https://techcrunch.com/2026/06/16/apple-plans-to-change-its-hide-my-email-privacy-feature-that-could-make-it-less-effective/",
+          "source": "TechCrunch"
+        }
+      ]
+    }
+  ],
+  "data_point": {
+    "value": "$60 billion",
+    "context": "Estimated value of SpaceX's all-stock deal to acquire AI coding startup Cursor, expected to close by Q3 2026, per Forbes reporting on June 16, 2026."
+  },
+  "on_this_day": {
+    "year_and_title": "1976 — Soweto Uprising Begins in South Africa",
+    "body": "On June 16, 1976, Black students in Soweto, South Africa, marched to protest a government mandate requiring Afrikaans as the medium of instruction in schools. Police opened fire on the crowd. Estimates of those killed in subsequent days of unrest range from 176 to more than 700."
+  }
+}

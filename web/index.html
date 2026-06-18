@@ -4,9 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Morning Fox</title>
+  <meta name="color-scheme" content="light dark">
   <link rel="stylesheet" href="style.css">
+  <script>
+    // Apply the saved/system theme before first paint to avoid a flash.
+    (function () {
+      try {
+        var saved = localStorage.getItem("theme");
+        var dark = saved
+          ? saved === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (dark) document.documentElement.dataset.theme = "dark";
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
+  <button id="theme-toggle" type="button" aria-label="Toggle dark mode"></button>
   <main id="paper" aria-live="polite">
     <p id="status" class="status">Loading the latest edition…</p>
   </main>

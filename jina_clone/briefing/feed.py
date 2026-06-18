@@ -239,8 +239,8 @@ body {{ font-family: Georgia, 'Times New Roman', serif; max-width: 40rem;
         text-decoration: none; color: var(--ink); background: var(--btn-bg);
         border: 1px solid var(--rule-soft); padding: .34rem .8rem; border-radius: 2px; }}
 .broadsheet-link:hover {{ background: var(--btn-bg-hover); border-color: var(--ink); }}
-.lead {{ font-size: 1.08rem; font-style: italic; color: var(--ink-soft);
-        margin: 0 0 1rem; }}
+.lead {{ font-size: 1.08rem; color: var(--ink-soft);
+        margin: 0 0 1rem; text-align: justify; hyphens: auto; }}
 .story {{ border-top: 1px solid var(--rule-soft); padding-top: .75rem;
          margin-top: .75rem; }}
 .story-title {{ font-size: 1.05rem; font-weight: 500; margin: 0 0 .25rem;

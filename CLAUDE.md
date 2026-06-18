@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Before touching code, read these:
 
-- `README.md` — project overview and how to add new sources
+- `docs/architecture-components.md` — reference map of the three
+  components (jina extractor, RSS/fetch job, briefing generator): what
+  each does, where the code lives (`file:line`), how they differ, and how
+  they integrate through the shared `entries` table. Read this first for
+  any "how does X work / where is X" question.
+- `README.md` — project overview and how to add new sources. Parts
+  predate later work: sources now live at `config/sources.yaml` (not the
+  repo root) and the daily summarize cron it describes no longer runs.
 - `docs/superpowers/handoffs/` — dated handoff notes describing the current
   deployment state and outstanding follow-ups. Newest file wins.
 - `docs/superpowers/specs/` and `docs/superpowers/plans/` — design and
@@ -89,31 +96,50 @@ Even for real multi-subsystem work:
 # One test
 ./.venv/bin/pytest tests/test_storage.py::test_insert_entry_and_link_exists -v
 
-# Run a job manually (reads .env)
-./.venv/bin/python -m jina_clone fetch
-./.venv/bin/python -m jina_clone summarize
+# Briefing — runs on the HOST, not in Docker (needs the subscription-authed
+# `claude` CLI; see Gotchas). `run` = generate + render + print + DB row.
+./.venv/bin/python -m jina_clone briefing run --edition=morning   # or evening
+./.venv/bin/python -m jina_clone briefing generate --out /tmp/b.json  # fetch+LLM only
+./.venv/bin/python -m jina_clone briefing render /tmp/b.json          # JSON → PDF, offline
+./.venv/bin/python -m jina_clone briefing print path/to.pdf           # submit to CUPS
+./.venv/bin/python -m jina_clone.briefing.run_web --edition=morning   # run + web JSON publish
 
-# Docker (on fox — this is the deployment target)
+# Fetch manually (hourly in-container cron normally does this; reads .env)
+./.venv/bin/python -m jina_clone fetch
+
+# Docker (on fox — runs the extractor HTTP service + hourly fetch cron)
 docker compose up -d --build           # build + start
 docker compose exec extractor python -m jina_clone fetch
 docker compose logs -f extractor
-tail -f logs/fetch.log logs/summarize.log
+tail -f logs/fetch.log logs/briefing.log
 ```
 
 ## Architecture
 
-Single Python package `jina_clone/` serves two roles:
+Single Python package `jina_clone/` serves three roles:
 
 1. **FastAPI extractor service** (`main.py`) — a thin wrapper around
    `jina_clone.extractor.core.extract_article`. Serves `GET /extract?url=`
    and `GET /health`. Used by external callers (n8n).
-2. **Batch pipeline** (`python -m jina_clone {fetch,summarize}`) — invoked
-   by in-container cron. `fetch` runs hourly; `summarize` runs daily at
-   08:10 America/New_York.
+2. **Fetch job** (`python -m jina_clone fetch`) — invoked hourly by
+   in-container cron. Discovers articles from `config/sources.yaml`
+   (RSS or CSS-selector scrape), extracts, inserts into `entries`.
+3. **Briefing pipeline** (`python -m jina_clone briefing run`) — invoked
+   twice daily by **host** cron (08:10 / 20:10 ET, see Gotchas). Pulls a
+   12h window of articles from `entries`, makes six per-section LLM calls
+   (front matter + 4 panels + briefs), renders a 2-page broadsheet PDF
+   with WeasyPrint, prints it duplex to the `brother` CUPS queue, sends an
+   ntfy notification, and logs a `news_summaries` row. The
+   `run_web` variant additionally publishes JSON for themorningfox.com.
 
-Both are packaged into one Docker image with `cron` + `uvicorn`. The
-container uses `network_mode: host` so the batch jobs can reach fox's
-Postgres (bridge IPs are rejected by pg_hba.conf).
+There is also a legacy **summarize job** (`python -m jina_clone summarize`,
+`jina_clone/summarizer/`). It is **deprecated** — no cron runs it; the
+briefing has its own built-in summarization. Don't build on it.
+
+The extractor + fetch are packaged into one Docker image with `cron` +
+`uvicorn`. The container uses `network_mode: host` so the batch jobs can
+reach fox's Postgres (bridge IPs are rejected by pg_hba.conf). The
+briefing runs directly on the host out of this checkout's venv.
 
 ### Module responsibilities
 
@@ -122,21 +148,36 @@ Postgres (bridge IPs are rejected by pg_hba.conf).
   preferred from first heading, falls back to `<title>`.
 - `jina_clone/sources/rss.py` + `scrape.py` — two discovery paths; both
   return `list[DiscoveredItem(url, published)]`. Scrape uses a CSS
-  selector from `sources.yaml`.
+  selector from `config/sources.yaml`.
 - `jina_clone/storage/db.py` — asyncpg pool + CRUD. All queries are scoped
   to our sources by `source IN (...)` so we coexist with another pipeline
-  already writing to `entries`.
-- `jina_clone/summarizer/` — `providers.py` defines `LLMProvider` Protocol
-  + `parse_json_response` + `build_provider(settings)` factory.
-  `claude.py`, `openai.py`, `gemini.py` are thin provider classes.
-  `prompt.py` has the system prompt and `build_user_prompt` (newest-first
-  selection under a total-char cap).
-- `jina_clone/jobs/` — `fetch.py` orchestrates discovery → dedup →
-  extraction → insert with injected callables (fakes possible in tests).
-  `summarize.py` orchestrates query → prompt → LLM → markdown file + DB
-  row + mark_summarized. LLM failure writes nothing (retry next run).
+  already writing to `entries`. `fetch_section_articles` is the briefing's
+  ranked query: per-source cap (default 5) with per-source `source_caps`
+  overrides applied via COALESCE.
+- `jina_clone/jobs/` — orchestrators with injected callables (fakes
+  possible in tests). `fetch.py`: discovery → dedup → extraction → insert.
+  `briefing.py`: `assemble_briefing` + `run_briefing` — fetch sections →
+  LLM calls → render → print → notify → `insert_summary`, with an
+  emergency-fixture fallback so a paper always prints.
+- `jina_clone/briefing/` — the active product. `config.py` loads
+  `config/briefing_categories.yaml` (sections, limits, per-source caps).
+  `generator.py` makes the per-section LLM calls; backend selected by
+  `BRIEFING_LLM_BACKEND` — default `cli` shells out to `claude -p`
+  (subscription auth), `api` uses `AsyncAnthropic`. `schema.py` is the
+  pydantic `Briefing` model. `renderer.py` (WeasyPrint + `templates/` +
+  `static/`), `printer.py` (lp duplex), `notify.py` (ntfy),
+  `live_data.py` (weather/markets with stub fallbacks, caches in
+  `cache/`). `web.py` + `run_web.py` publish edition JSON + `index.json`
+  into `briefings/` for the static site in `web/`.
+- `web/` — static frontend for themorningfox.com (vanilla JS, served by
+  nginx with `/editions/` aliased to `briefings/`). Purely additive on
+  top of the pipeline.
+- `jina_clone/summarizer/` — **deprecated** provider abstraction
+  (`LLMProvider` Protocol, `claude.py`/`openai.py`/`gemini.py`,
+  `build_provider`). Only the legacy summarize job uses it.
 - `jina_clone/cli.py` — argparse + asyncio.run + dotenv; wires jobs to
-  real dependencies.
+  real dependencies. Subcommands: `fetch`, `summarize`, `briefing
+  {generate,render,print,run}`.
 
 ### Key design decisions (don't regress)
 
@@ -149,16 +190,21 @@ Postgres (bridge IPs are rejected by pg_hba.conf).
 - **Extraction errors are sticky.** Failed URLs get a row with
   `content=null` so they never retry. If this ever changes, update
   `fetch_unsummarized`'s `content IS NOT NULL` filter.
-- **Config in `sources.yaml`, not DB.** File is mounted read-only into
-  the container; edits take effect on the next job run, no rebuild.
-- **One summary per category per run.** `cli.py` groups `sources.yaml`
-  entries by `category` and invokes `run_summarize` once per distinct
-  category. Each run writes `YYYY-MM-DD-HHMM-<category>.md` and a
-  separate `news_summaries` row. Adding a new category to
-  `sources.yaml` is all it takes to get a new daily digest.
-- **LLM providers swappable.** New provider = new file in
-  `jina_clone/summarizer/` + branch in `build_provider`. The
-  `parse_json_response` helper handles code fences and whitespace.
+- **Config in YAML under `config/`, not DB.** `config/sources.yaml`
+  (feeds) and `config/briefing_categories.yaml` (sections, caps) are
+  mounted read-only into the container; edits take effect on the next
+  job run, no rebuild.
+- **Per-section LLM fan-out in the briefing.** Six separate calls (front
+  matter, one per panel, briefs), each fed only its section's articles,
+  with a per-source cap (default 5) plus `source_caps` overrides (e.g.
+  arXiv clamped to 2). This fixed single-source skew — do not collapse
+  back to one big prompt.
+- **Briefing failures still print.** `run_briefing` falls back to
+  `briefing/fixtures/emergency.json` and notifies via ntfy on failure;
+  LLM failure never leaves the printer silent.
+- **`run_web` is additive.** It reuses `run_briefing` unchanged and only
+  injects a render wrapper that also writes web JSON; web-publish
+  failures are swallowed so the paper is never blocked.
 
 ## Test database
 
@@ -179,15 +225,30 @@ Documented inline in `pyproject.toml`.
 
 ## Gotchas
 
-- The **existing readme says port 8080 mapping** for the extractor; the
-  current compose uses `network_mode: host` and `PORT=8090` in `.env`.
-  Don't revert this without also fixing pg_hba.conf on fox.
-- The `.env` file needs at least `DATABASE_URL`, `LLM_PROVIDER`, and
-  the API key for the selected provider. `Settings.from_env()` fails
-  fast if any are missing.
+- **Two crontabs.** The in-container crontab (`crontab` file in the repo)
+  runs only the hourly `fetch`. The briefing lines live in the **host**
+  crontab (`crontab -l` as elucia) because the default LLM backend shells
+  out to the subscription-authed `claude` binary in
+  `~/.npm-global/bin`, which doesn't exist in the container.
+- The compose file uses `network_mode: host` and `PORT=8090` in `.env`.
+  Don't revert to bridge/port-mapping without also fixing pg_hba.conf on
+  fox.
+- The `.env` file needs at least `DATABASE_URL` and a valid
+  `LLM_PROVIDER` — `Settings.from_env()` fails fast on those. Provider
+  API keys are only needed by what you run: the briefing's default
+  `cli` backend needs none (subscription auth via the `claude` binary).
+  Briefing live-data keys (`WEATHER_API_KEY`, `STOCK_API_KEY`,
+  `FRED_API_KEY`) and `NTFY_TOPIC` are optional — each falls back to
+  stubs/no-ops.
 - Cron inside the container inherits a minimal environment; jobs rely on
   `load_dotenv()` reading `/app/.env`. The `.env` is volume-mounted from
   the host, so host edits apply to the next cron firing.
+- A briefing cron run that executed as root can leave a root-owned PDF
+  at the target path in `briefings/`; a manual run then fails to
+  overwrite it — `rm` it first.
+- `briefings/*.json` and `web/editions` (a local-preview symlink) are
+  intentionally untracked. Never `git add -A` / `git add .` in this repo
+  — it has already swept runtime artifacts into a feature commit once.
 - `news_summaries.generated_at` is `timestamp without time zone` — we
   rely on the column default `now()`, not a client-side value, so
   tz-naivety is handled server-side.

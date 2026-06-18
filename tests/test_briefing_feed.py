@@ -6,6 +6,7 @@ from jina_clone.briefing.feed import (
     publish_digest,
     publish_fallback,
     rebuild_feed,
+    update_latest,
 )
 from jina_clone.briefing.schema import DigestItem, SlackDigest
 
@@ -188,6 +189,38 @@ def test_rebuild_orders_newest_first_and_caps(tmp_path):
     # oldest two days fall off the 20-entry cap
     assert "2026-06-02" not in feed
     assert "2026-06-01" not in feed
+
+
+def test_publish_points_latest_at_newest_page(tmp_path):
+    _publish(tmp_path)  # 2026-06-09 morning
+    link = tmp_path / "latest.html"
+    assert link.is_symlink()
+    # relative target so it resolves inside the served dir
+    import os
+    assert os.readlink(link) == "2026-06-09-morning.html"
+    assert link.resolve() == (tmp_path / "2026-06-09-morning.html").resolve()
+
+
+def test_update_latest_follows_newest_and_swaps(tmp_path):
+    for iso, edition in [("2026-06-09", "morning"), ("2026-06-10", "morning"),
+                         ("2026-06-10", "afternoon")]:
+        (tmp_path / f"{iso}-{edition}.json").write_text(
+            json.dumps(_record(iso, edition))
+        )
+        (tmp_path / f"{iso}-{edition}.html").write_text("page")
+    update_latest(tmp_path)
+    import os
+    # afternoon outranks morning within the newest day
+    assert os.readlink(tmp_path / "latest.html") == "2026-06-10-afternoon.html"
+    # re-running is idempotent and leaves no temp file behind
+    update_latest(tmp_path)
+    assert os.readlink(tmp_path / "latest.html") == "2026-06-10-afternoon.html"
+    assert not (tmp_path / ".latest.html.tmp").exists()
+
+
+def test_update_latest_noop_on_empty_dir(tmp_path):
+    assert update_latest(tmp_path) is None
+    assert not (tmp_path / "latest.html").exists()
 
 
 def test_rebuild_ignores_foreign_files(tmp_path):

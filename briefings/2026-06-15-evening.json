@@ -1,0 +1,215 @@
+{
+  "title": "The Evening Fox",
+  "date": "Monday, June 15, 2026 · 8:10 PM",
+  "volume": "Vol. I · No. 166 · Evening",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 84,
+    "temp_low": 62,
+    "conditions": "scattered clouds",
+    "sunrise": "5:42",
+    "sunset": "8:35",
+    "daylight": "14h 52m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "11pm",
+        "temp_f": 71,
+        "precip_pct": 0,
+        "code": 802
+      },
+      {
+        "time_label": "2am",
+        "temp_f": 67,
+        "precip_pct": 0,
+        "code": 801
+      },
+      {
+        "time_label": "5am",
+        "temp_f": 62,
+        "precip_pct": 0,
+        "code": 800
+      },
+      {
+        "time_label": "8am",
+        "temp_f": 65,
+        "precip_pct": 0,
+        "code": 800
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "754.83",
+        "change": "▲1.76%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "744.00",
+        "change": "▲3.14%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "84.59",
+        "change": "▲9.12%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "—",
+        "change": null
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.48%",
+        "change": "▲3bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "4.2%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "U.S. and Iran Sign Memorandum of Understanding, Geneva Ceremony Set for June 19",
+    "deck": "The two countries signed a preliminary agreement on June 15, with a formal signing ceremony scheduled for June 19 and 60 days of further negotiations to follow.",
+    "body": "The United States and Iran signed a memorandum of understanding on June 15, 2026, with a formal signing ceremony planned for June 19 in Geneva. The agreement initiates a 60-day negotiation period covering Iran's nuclear program and its stockpile of enriched uranium. President Trump announced the deal on Truth Social on June 14, writing that it would bring \"Peace and Security to the whole Region.\" However, the White House has not published the memorandum's text. Trump separately told The New York Times that if a nuclear accord is not reached, he would restart military strikes or position the U.S. as \"the guardian of the Middle East\" in exchange for 20% of the region's revenues. Aaron David Miller, a Carnegie Endowment for International Peace senior fellow and former Middle East adviser, said: \"We are not and we have never been talking about peace with Iran.\" Barbara Slavin of the Stimson Center wrote that the memorandum \"resolves none of the complicated disputes between the U.S. and Iran over its nuclear program.\" The Trump administration is also considering a $300 billion fund for Iran contingent on the deal being upheld, according to the Financial Times.",
+    "at_a_glance": [
+      "MOU signed June 15; formal ceremony June 19 in Geneva",
+      "60-day negotiation period on nuclear program follows signing",
+      "White House has not released the memorandum's text"
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "B-52 Stratofortress crashes after takeoff at Edwards Air Force Base",
+      "lede_body": "A B-52 Stratofortress crashed at 11:20 a.m. Monday shortly after takeoff from Edwards Air Force Base, California, roughly 100 miles north of Los Angeles. The airfield was closed and all incoming aircraft diverted. The base suspended non-commercial visitor passes to focus on emergency response. No immediate casualty figures were released; the aircraft typically carries a crew of five.",
+      "also": [
+        {
+          "headline": "Missouri skydiving plane crash kills 12",
+          "body": "A Pacific Aerospace 750XL operating for Skydive Kansas City crashed Sunday at 11:30 a.m. in Butler, Missouri · 9 experienced skydivers, 2 tandem jumpers, and the pilot died · NTSB arrived Monday."
+        },
+        {
+          "headline": "Alaska election official bars Sullivan namesake from ballot",
+          "body": "Elections Director Carol Beecher ruled Monday · Daniel J. Sullivan's filing was not a good-faith candidacy · the candidate has 30 days to appeal."
+        },
+        {
+          "headline": "ICE agent shot at fleeing van in New Jersey",
+          "body": "An ICE agent was struck by a vehicle at 9:30 a.m. Monday in Manahawkin, New Jersey · the agent fired at the van · suspect Friedrich Castillo-Ormeno, a Peru national, was not located."
+        },
+        {
+          "headline": "DOJ probing Newsom and wife, governor says",
+          "body": "Gov. Gavin Newsom said Monday federal agents contacted family friends and former employees · a CNN source said the U.S. Attorney's Eastern District of California is examining Jennifer Siebel Newsom for possible tax crimes."
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "Oil Falls Over 5% as U.S.-Iran Deal Reopens Strait of Hormuz",
+      "lede_body": "West Texas Intermediate crude dropped more than 5% Monday to just above $80 a barrel after President Trump announced a signed memorandum of understanding with Iran. Brent crude fell below $80 for the first time since early March. Trump, speaking at the G7 summit in France, said the Strait of Hormuz is partially open, with a formal signing ceremony scheduled for Friday in Geneva.",
+      "also": [
+        {
+          "headline": "Average U.S. gas price falls below $4",
+          "body": "The national average gasoline price dropped below $4 per gallon Monday · the decline followed the U.S.-Iran deal easing Strait of Hormuz tanker disruptions."
+        },
+        {
+          "headline": "Centene offers companywide voluntary buyouts",
+          "body": "Centene, which has 61,000 employees, announced a Voluntary Separation Program Monday · the insurer lost over 2 million ACA enrollees, falling to 3.58 million from 5.54 million."
+        },
+        {
+          "headline": "West Marine to close 59 stores in bankruptcy",
+          "body": "West Marine filed Chapter 11 last month · it plans to close 59 stores across 23 states · CEO Paulee Day said the company aims to exit bankruptcy by mid-August."
+        },
+        {
+          "headline": "California billionaire tax spurs wealth restructuring",
+          "body": "A proposed one-time 5% California tax on net worth above $1 billion · due in 2027 · is prompting wealthy residents to increase charitable giving and restructure balance sheets."
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "U.S. Export Order Forces Anthropic to Suspend Fable and Mythos Worldwide",
+      "lede_body": "The U.S. government on Friday ordered Anthropic to restrict exports of its Fable 5 and Mythos 5 models, citing national security concerns and a reported jailbreak demonstrated in an unpublished Amazon research paper. Anthropic suspended access globally. As of June 15, 76 cybersecurity professionals, including former Facebook security chief Alex Stamos and cryptographer Jon Callas, have signed an open letter calling the ban dangerous to defenders.",
+      "also": [
+        {
+          "headline": "Salesforce acquires Fin AI for $3.6 billion",
+          "body": "Salesforce announced June 15 it will acquire AI customer-service platform Fin, formerly Intercom, for $3.6 billion · deal expected to close in early 2027."
+        },
+        {
+          "headline": "Google DeepMind's Gemma 4 lands on Amazon Bedrock",
+          "body": "AWS announced Gemma 4 availability on Amazon Bedrock · three variants offered: 31B dense, 26B MoE, and 2.3B-effective-parameter E2B · all support multimodal input and 35-plus languages."
+        },
+        {
+          "headline": "Meta launches AI Mode search on Facebook",
+          "body": "Meta announced June 15 · AI Mode surfaces synthesized answers from public Facebook posts, Groups, and Reels · global subscription plans start at $3.99 per month."
+        },
+        {
+          "headline": "Z.ai releases GLM-5.2 flagship coding model",
+          "body": "Z.ai released GLM-5.2 with 1M-context support · API and chatbot access launches next week · model will be open-sourced under the MIT License."
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "US and Iran sign MOU; Hormuz partially reopens as G7 convenes",
+      "lede_body": "The United States and Iran signed a memorandum of understanding on June 15 to end the Gulf war, with Trump stating the Strait of Hormuz is already partially open and will be fully open by Friday. VP JD Vance is scheduled to attend a formal signing ceremony in Geneva on June 19. The MOU extends a ceasefire for 60 days while negotiators address Iran's nuclear programme. Oil prices fell to their lowest level since March 10.",
+      "also": [
+        {
+          "headline": "UK to supply enriched uranium to Ukraine",
+          "body": "PM Starmer announced £210 million in export financing · British firm Urenco will supply enriched uranium to Ukrainian nuclear operator Energoatom · new Russia sanctions also announced."
+        },
+        {
+          "headline": "UK bans social media for under-16s",
+          "body": "PM Starmer announced the ban June 16 · legislation targets Snapchat, TikTok, YouTube, Instagram, Facebook, and X · law to take effect early 2027."
+        },
+        {
+          "headline": "EU opens formal membership talks with Ukraine",
+          "body": "EU foreign ministers formally launched the first phase of accession negotiations with Ukraine on June 15 · Moldova had joined EU cyber support in 2024."
+        },
+        {
+          "headline": "Hezbollah attacks Israeli forces in southern Lebanon",
+          "body": "Hezbollah said June 15 · rockets and drones blocked Israeli tanks near Kfar Tebnit · an Israeli drone killed one person in the same area."
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"We are not and we have never been talking about peace with Iran.\" — Aaron David Miller, Carnegie Endowment for International Peace, via PolitiFact/WCVB",
+  "briefs": [
+    {
+      "topic": "Cybersecurity",
+      "body": "The FBI warned that Kali365, a $250/month phishing-as-a-service platform first detected in April, bypasses Microsoft 365 multi-factor authentication by capturing OAuth device codes across Teams, Outlook, and OneDrive."
+    },
+    {
+      "topic": "Espionage",
+      "body": "Google's Threat Intelligence Group attributed a 14-month intrusion into US and Canadian medical, academic, and military research networks to China-linked group UNC6508, which exfiltrated emails via hijacked Google Workspace rules."
+    },
+    {
+      "topic": "Space Safety",
+      "body": "The upper stage of China's Zhuque-2E rocket, which launched June 9, broke apart in low-Earth orbit, generating an estimated 100–150 debris pieces near the ISS and SpaceX's Starlink constellation."
+    },
+    {
+      "topic": "Markets",
+      "body": "Nvidia launched a $25 billion, seven-part bond offering Monday—its first since 2021—upsized from $20 billion after receiving over $85 billion in orders, with the 10-year tranche priced at 0.5 points above Treasuries."
+    },
+    {
+      "topic": "Media",
+      "body": "Fox Corporation agreed to acquire Roku for $160 per share, an enterprise value of approximately $22 billion, combining Fox's Tubi streaming service with Roku's 100 million household platform and advertising business."
+    },
+    {
+      "topic": "Child Safety",
+      "body": "The UK government announced a ban on social media for children under 16, covering Snapchat, TikTok, YouTube, Instagram, Facebook, and X, with rules expected to take effect in spring 2027."
+    }
+  ],
+  "data_point": {
+    "value": "$300 billion",
+    "context": "The Trump administration is considering a $300 billion fund for Iran if the U.S.-Iran deal holds, according to the Financial Times, reporting on June 15, 2026."
+  },
+  "on_this_day": {
+    "year_and_title": "1215 — Magna Carta Sealed at Runnymede",
+    "body": "On June 15, 1215, King John of England sealed the Magna Carta at Runnymede, granting nobles defined legal rights and limiting royal authority. The document established the principle that the king was subject to the rule of law and became a foundational text in constitutional history."
+  }
+}

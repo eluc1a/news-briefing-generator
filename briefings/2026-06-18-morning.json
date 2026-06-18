@@ -1,0 +1,377 @@
+{
+  "title": "The Morning Fox",
+  "date": "Thursday, June 18, 2026 · 8:10 AM",
+  "volume": "Vol. I · No. 169 · Morning",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 96,
+    "temp_low": 70,
+    "conditions": "overcast clouds",
+    "sunrise": "5:42",
+    "sunset": "8:36",
+    "daylight": "14h 53m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "11am",
+        "temp_f": 75,
+        "precip_pct": 100,
+        "code": 500
+      },
+      {
+        "time_label": "2pm",
+        "temp_f": 81,
+        "precip_pct": 100,
+        "code": 500
+      },
+      {
+        "time_label": "5pm",
+        "temp_f": 96,
+        "precip_pct": 20,
+        "code": 500
+      },
+      {
+        "time_label": "8pm",
+        "temp_f": 87,
+        "precip_pct": 0,
+        "code": 802
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "740.96",
+        "change": "▼1.25%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "722.51",
+        "change": "▼1.01%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "77.54",
+        "change": "▼2.99%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "63,980",
+        "change": "▼1.35%"
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.43%",
+        "change": "▼4bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "4.2%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "Ukraine Strikes Moscow Oil Refinery, Halts Flights at Four Airports",
+    "deck": "Ukraine launched its largest drone offensive against Moscow in two years, hitting a major refinery twice in one week and forcing temporary flight suspensions.",
+    "body": "Ukrainian drones struck the Moscow Oil Refinery overnight June 17–18, setting it ablaze for the second time in a week after an earlier attack on June 16. The refinery, located roughly 9 miles from the Kremlin, supplies more than a third of the fuel market in the Moscow region, according to its official website. Flights from four Moscow airports were temporarily halted by Russian transport and aviation authorities. The Russian Defense Ministry reported its air defenses intercepted 555 Ukrainian drones across multiple regions, with nearly 200 stopped near the capital — roughly double the number Russia launched at Ukraine overnight, according to the Ukrainian air force. In the Moscow region, a drone struck a residential building in Zhukovsky, prompting evacuation; debris also hit private houses, a car, a fitness center, an industrial facility, and a mall whose roof caught fire, regional governor Andrei Vorobyov said. One woman was injured. President Volodymyr Zelenskyy said the strike was a response to Russian attacks on Ukrainian cities and was aimed at pressuring Russia toward negotiations.",
+    "at_a_glance": [
+      "555 Ukrainian drones intercepted over Russia overnight",
+      "Moscow Oil Refinery struck twice in one week",
+      "Four Moscow airports temporarily suspended flights"
+    ],
+    "sources": [
+      {
+        "url": "https://www.wcvb.com/article/ukraine-hits-moscow-oil-refinery-disrupts-flights/71623902",
+        "source": "WCVB Boston"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "Trump Signs Preliminary Agreement With Iran to End Hostilities",
+      "lede_body": "President Donald Trump signed a nonbinding memorandum of understanding with Iran during a dinner with French President Emmanuel Macron at Versailles on Wednesday night, committing both parties to end the war. The White House and Iranian state media confirmed the deal. Iran has agreed to reopen the Strait of Hormuz, a key oil shipping route, under the terms announced alongside the agreement.",
+      "lede_sources": [
+        {
+          "url": "https://www.politico.eu/article/iran-us-sign-preliminary-peace-agreement/?utm_source=RSS_Feed&utm_medium=RSS&utm_campaign=RSS_Syndication",
+          "source": "Politico Europe"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Tornadoes Strike Illinois, Iowa; 55,000 Lose Power",
+          "body": "Confirmed tornadoes hit Harpers Ferry, Iowa at 5:10 p.m. and Charleston, Illinois at 6:40 p.m. Wednesday · Charleston declared a local state of emergency · at least 55,000 Illinois customers lost power.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/tornadoes-reported-illinois-iowa-severe-weather-roils-midwest/",
+              "source": "CBS News"
+            }
+          ]
+        },
+        {
+          "headline": "Bosch Pays $36M to Resolve Huawei Export Violations",
+          "body": "DOJ announced Wednesday · Bosch agreed to pay $36 million and forfeit $11.4 million in profits · the firm exported over $70 million in restricted products to Huawei from September 2020 to September 2024.",
+          "sources": [
+            {
+              "url": "https://www.upi.com/Top_News/US/2026/06/18/Bosch-pays-export-fine/5371781769505/",
+              "source": "UPI"
+            }
+          ]
+        },
+        {
+          "headline": "Senate Confirms Michelle Steel as South Korea Ambassador",
+          "body": "The Senate approved Steel 55-39 on Wednesday · Trump nominated her in April to fill a post vacant since January 2025 · South Korea granted formal consent Thursday.",
+          "sources": [
+            {
+              "url": "https://www.upi.com/Top_News/World-News/2026/06/18/korea-Michelle-Steel-Senate-confirms-US-ambassador-Korea/6021781773222/",
+              "source": "UPI"
+            }
+          ]
+        },
+        {
+          "headline": "Chicago Man Charged With Hate Crime After Cross Burning",
+          "body": "Merlin Lu, 21, faces felony arson and hate crime charges · police say he burned a cross in Grant Park on June 9 · Lu is scheduled for a detention hearing Thursday.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/man-faces-arson-hate-crime-charges-after-burning-cross-in-grant-park/",
+              "source": "CBS News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "US-Iran deal reopens Strait of Hormuz, lifts oil sanctions immediately",
+      "lede_body": "Iran's President Masoud Pezeshkian signed a 14-point memorandum of understanding on June 18, hours after President Trump signed in Versailles. The deal takes immediate effect, reopening the Strait of Hormuz—which carries 20% of global oil supplies—and allowing Iran to sell oil without sanctions. Frozen Iranian assets estimated at $100–$120 billion will be released upon implementation. A final deal must be negotiated within 60 days.",
+      "lede_sources": [
+        {
+          "url": "https://www.forbes.com/sites/siladityaray/2026/06/18/irans-president-signs-interim-peace-deal-after-trump-key-details-of-agreement-shared/",
+          "source": "Forbes"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Apple CEO warns iPhone price hikes unavoidable",
+          "body": "Tim Cook told the Wall Street Journal · memory and storage chip costs have become \"unsustainable\" · TechInsights estimates a $270 addition to the next iPhone Pro to maintain margins.",
+          "sources": [
+            {
+              "url": "https://www.foxbusiness.com/fox-news-tech/apple-ceo-says-price-hikes-are-unavoidable-rising-chip-costs-squeeze-tech-giant-report",
+              "source": "Fox Business"
+            }
+          ]
+        },
+        {
+          "headline": "Brent crude falls to $80 after Iran ceasefire",
+          "body": "Brent crude settled near $80 a barrel after hitting $126 during the Gulf conflict · Iran's IMF-projected GDP contraction is 6% this year · inflation averaged near 69%.",
+          "sources": [
+            {
+              "url": "https://www.forbes.com/sites/guneyyildiz/2026/06/18/irans-deal-with-washington-is-a-pause-not-a-peace/",
+              "source": "Forbes"
+            }
+          ]
+        },
+        {
+          "headline": "Japanese banks face bond losses in rising-rate era",
+          "body": "Smaller Japanese lenders hold low-return bonds they cannot sell · the Economist reports · rising rates mark a new profit environment for larger banks but a liability trap for regional ones.",
+          "sources": [
+            {
+              "url": "https://www.economist.com/finance-and-economics/2026/06/18/a-new-golden-age-for-japanese-banks-comes-with-a-catch",
+              "source": "The Economist (Finance & Economics)"
+            }
+          ]
+        },
+        {
+          "headline": "Tata conglomerate strategy under boardroom scrutiny",
+          "body": "The Economist reports · Tata Group's speculative bets have not yet generated returns · boardroom conflict has surfaced over the Indian conglomerate's strategic direction.",
+          "sources": [
+            {
+              "url": "https://www.economist.com/business/2026/06/18/tatas-big-bets-are-yet-to-pay-off",
+              "source": "The Economist (Business)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "Z.ai releases GLM-5.2, 753B open-weights model, under MIT license",
+      "lede_body": "Chinese AI lab Z.ai released GLM-5.2 open weights under an MIT license on June 16, 2026, after a June 13 release to coding-plan subscribers. The model has 753 billion parameters, 40 billion active via Mixture of Experts, and a 1 million token context window. Artificial Analysis ranked it first among open-weights models on its Intelligence Index v4.1, scoring 51, ahead of MiniMax-M3 at 44 and DeepSeek V4 Pro at 44.",
+      "lede_sources": [
+        {
+          "url": "https://simonwillison.net/2026/Jun/17/glm-52/#atom-everything",
+          "source": "Simon Willison"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Mistral deploys 18,000 GB200 systems in France",
+          "body": "Mistral's first deployment at Bruyères-le-Châtel is operational with 18,000 NVIDIA GB200 systems · the company targets 200 MW of compute capacity across Europe by 2027.",
+          "sources": [
+            {
+              "url": "https://blogs.nvidia.com/blog/france-advances-europes-ai-future/",
+              "source": "NVIDIA Blog"
+            }
+          ]
+        },
+        {
+          "headline": "Midjourney unveils full-body ultrasound CT scanner",
+          "body": "Midjourney announced a prototype scanner using 358,000 ultrasonic elements and 21 reconstruction servers · about a dozen people scanned so far · current scans take around 20 minutes.",
+          "sources": [
+            {
+              "url": "https://www.latent.space/p/ainews-midjourney-medical-scan-your",
+              "source": "Latent Space"
+            }
+          ]
+        },
+        {
+          "headline": "Lightricks releases LTX-2 audio-video foundation model",
+          "body": "Lightricks released LTX-2, described as the first DiT-based audio-video foundation model · it supports synchronized audio and video generation and offers API access and open access.",
+          "sources": [
+            {
+              "url": "https://github.com/Lightricks/LTX-2",
+              "source": "GitHub Trending"
+            }
+          ]
+        },
+        {
+          "headline": "Researchers publish anonymous two-party GBDT training protocol",
+          "body": "Researchers submitted a revised paper on June 17, 2026 · the protocol hides record IDs during gradient-boosted decision tree training · it halves ciphertext-packing cost versus prior secure GBDT work.",
+          "sources": [
+            {
+              "url": "https://arxiv.org/abs/2605.26903",
+              "source": "arXiv cs.AI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "Ukraine launches largest Moscow drone attack in two years, hitting oil refinery",
+      "lede_body": "Ukraine struck Moscow's Kapotnya oil refinery on June 18 in its largest drone assault on the city in at least two years. Russian air defences shot down 194 drones headed for Moscow and 555 overall, but at least seven reached targets. The refinery supplies roughly 40 percent of Moscow's fuel market. Sixteen people were injured in the Moscow region. Russia retaliated with seven missiles and 239 drones toward Ukraine.",
+      "lede_sources": [
+        {
+          "url": "https://www.independent.co.uk/news/world/europe/moscow-oil-refinery-attack-ukraine-russia-war-b2998213.html",
+          "source": "The Independent (UK)"
+        }
+      ],
+      "also": [
+        {
+          "headline": "US-Iran implementation talks move to Switzerland Friday",
+          "body": "Switzerland confirmed June 18 · the US, Iran, Pakistan, and Qatar plan to meet at Burgenstock on June 19 · Trump signed the MOU at Versailles on June 17.",
+          "sources": [
+            {
+              "url": "https://www.channelnewsasia.com/world/switzerland-talks-implementing-us-iran-deal-6193006",
+              "source": "Channel NewsAsia"
+            }
+          ]
+        },
+        {
+          "headline": "Hegseth announces Europe troop posture review at NATO",
+          "body": "US Defense Secretary Hegseth announced a six-month review of US forces in Europe · threatened to cut NATO dues if allies do not meet spending targets.",
+          "sources": [
+            {
+              "url": "https://www.dw.com/en/nato-us-lashes-out-alliance-head-says-everything-s-fine/a-77603060?maca=en-rss-en-all-1573-rdf",
+              "source": "Deutsche Welle"
+            }
+          ]
+        },
+        {
+          "headline": "Lithuania's new coalition seeks permanent US military presence",
+          "body": "Lithuania's reshuffled coalition signed an agreement June 18 · it commits to 5% of GDP on defence · Lithuania has been without a US armoured battalion since this summer.",
+          "sources": [
+            {
+              "url": "https://www.straitstimes.com/world/europe/lithuanias-new-coalition-seeks-long-term-us-military-presence",
+              "source": "The Straits Times"
+            }
+          ]
+        },
+        {
+          "headline": "Poland arrests suspect in killing of Putin-critical Russian artist",
+          "body": "Polish police arrested a suspect using a Georgian passport · Semyon Skrepetski, 44, was shot dead Monday in eastern Poland · he had protested at Russia's Berlin embassy days earlier.",
+          "sources": [
+            {
+              "url": "https://nos.nl/l/2619152",
+              "source": "NOS (Netherlands)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"This is a fully justified response to Russian attacks on our cities and communities, and another important result of our warriors' work against facilities that sustain Russia's war machine.\" — Volodymyr Zelenskyy, WCVB Boston",
+  "briefs": [
+    {
+      "topic": "Cybersecurity",
+      "body": "CISA added CVE-2026-48907, a CVSS 10.0 unauthenticated remote-code-execution flaw in the Joomla JCE editor plugin, to its Known Exploited Vulnerabilities catalog on June 16, 2026. All JCE versions 1.0.0–2.9.99.4 are affected.",
+      "sources": [
+        {
+          "url": "https://latesthackingnews.com/2026/06/18/joomla-jce-exploit-attack-path-detection/",
+          "source": "Latest Hacking News"
+        }
+      ]
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "Microsoft published an advisory for CVE-2026-50656 (CVSS 7.8), a race-condition privilege-escalation flaw in Defender. A public proof-of-concept works on fully patched Windows 10 and 11 systems; no patch is yet available.",
+      "sources": [
+        {
+          "url": "https://it.slashdot.org/story/26/06/17/2030228/microsoft-working-to-patch-rogueplanet-zero-day?utm_source=rss1.0mainlinkanon&utm_medium=feed",
+          "source": "Slashdot"
+        }
+      ]
+    },
+    {
+      "topic": "Semiconductor",
+      "body": "President Trump announced Apple and Intel have agreed a manufacturing partnership under which Intel will produce chips for Apple devices at U.S. fabrication sites. Intel stock rose 9 percent in premarket trading.",
+      "sources": [
+        {
+          "url": "https://9to5mac.com/2026/06/18/apple-intel-chip-manufacturing-american/",
+          "source": "9to5Mac"
+        }
+      ]
+    },
+    {
+      "topic": "Public Health",
+      "body": "Zero women aged 20–24 died of cervical cancer in England between 2020 and 2024, the first such zero-death period on record, following the UK's HPV vaccination program launched for girls aged 12–13 in 2008.",
+      "sources": [
+        {
+          "url": "https://www.newscientist.com/article/2530733-no-young-women-have-died-of-cervical-cancer-in-england-for-years/?utm_campaign=RSS%7CNSNS&utm_source=NSNS&utm_medium=RSS&utm_content=home",
+          "source": "New Scientist"
+        }
+      ]
+    },
+    {
+      "topic": "AI Regulation",
+      "body": "On June 12, the Trump administration barred foreign nationals from accessing Anthropic's Mythos 5 and Claude Fable 5, citing cyberattack risks. Anthropic met with the White House this week over the export controls.",
+      "sources": [
+        {
+          "url": "https://www.csmonitor.com/USA/Society/2026/0618/ai-anthropic-mythos-government-regulation?icid=rss",
+          "source": "Christian Science Monitor"
+        }
+      ]
+    },
+    {
+      "topic": "Wildlife",
+      "body": "An H5-type bird flu strain killed more than 13,000 elephant seal pups in a breeding colony on a sub-Antarctic volcanic island, Australian scientists reported on June 18, 2026.",
+      "sources": [
+        {
+          "url": "https://phys.org/news/2026-06-bird-flu-pups-remote-australian.html",
+          "source": "Phys.org"
+        }
+      ]
+    }
+  ],
+  "data_point": {
+    "value": "Rs 900 billion",
+    "context": "Additional resources the Pakistani federal government projects it will generate by freezing provincial development fund allocations for three years, as reported during National Assembly budget debate, per Dawn."
+  },
+  "on_this_day": {
+    "year_and_title": "1983 — Sally Ride Becomes First American Woman in Space",
+    "body": "On June 18, 1983, astronaut Sally Ride launched aboard Space Shuttle Challenger on mission STS-7, becoming the first American woman to travel to space. The mission lasted six days. Ride was 32 years old at the time of launch."
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "title": "The Morning Fox",
+  "date": "Monday, June 8, 2026 · 11:31 PM",
+  "volume": "Vol. I · No. 159",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 83,
+    "temp_low": 63,
+    "conditions": "broken clouds",
+    "sunrise": "5:43",
+    "sunset": "8:31",
+    "daylight": "14h 48m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "2am",
+        "temp_f": 66,
+        "precip_pct": 0,
+        "code": 803
+      },
+      {
+        "time_label": "5am",
+        "temp_f": 63,
+        "precip_pct": 0,
+        "code": 804
+      },
+      {
+        "time_label": "8am",
+        "temp_f": 65,
+        "precip_pct": 0,
+        "code": 804
+      },
+      {
+        "time_label": "11am",
+        "temp_f": 72,
+        "precip_pct": 0,
+        "code": 804
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "739.22",
+        "change": "▲0.23%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "716.07",
+        "change": "▲1.56%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "76.27",
+        "change": "▲4.41%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "62,766",
+        "change": "▼0.70%"
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.55%",
+        "change": "▲8bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "3.8%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "Federal judge strikes down Trump's $100,000 H-1B visa fee",
+    "deck": "A Boston federal court invalidated the administration's 67-fold increase to the H-1B skilled-worker visa fee, ruling Congress never authorized it.",
+    "body": "A federal judge in Boston has struck down the Trump administration's $100,000 fee for H-1B visas, ruling that the charge exceeds the administration's legal authority because Congress did not authorize it. The administration had announced the new fee in September, raising the cost from roughly $1,500 to $100,000 for U.S. employers seeking to hire foreign workers with skills unavailable domestically. Twenty U.S. states and the U.S. Chamber of Commerce filed suit to block the increase, arguing it was unlawful and had already suppressed visa applications. The court agreed. A White House spokesperson said the administration is confident the ruling will be reversed on appeal. The H-1B program is the primary pathway through which U.S. technology and other employers hire high-skilled foreign nationals. The administration has maintained that companies should instead hire more U.S. graduates.",
+    "at_a_glance": [
+      "Fee raised from ~$1,500 to $100,000 in September",
+      "20 states and U.S. Chamber of Commerce sued to block it",
+      "Judge ruled Congress never authorized the increase"
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "Trump Nominates Blanche as Attorney General, Sending Pick to Senate",
+      "lede_body": "President Trump formally nominated Todd Blanche, the acting attorney general and his former personal defense lawyer, to permanently lead the Justice Department on June 8. Blanche replaced Pam Bondi, whom Trump fired in April. Senate Judiciary Committee Chairman Chuck Grassley said he supports the nomination. Sen. John Cornyn said he will question Blanche about Trump's $1.8 billion IRS settlement fund.",
+      "also": [
+        {
+          "headline": "Federal judge blocks $100K H-1B visa fee",
+          "body": "Judge Leo Sorokin ruled June 8 · Trump's September proclamation imposing a $100,000 H-1B fee violated the Constitution and APA · about 85,000 such visas are issued annually."
+        },
+        {
+          "headline": "DOJ declines death penalty for Boelter",
+          "body": "The Justice Department announced Monday · it will not seek the death penalty against Vance Boelter · Boelter is charged in the June 2025 killing of Minnesota Rep. Melissa Hortman and her husband."
+        },
+        {
+          "headline": "Pulte DNI pick may stall FISA reauthorization",
+          "body": "Lawmakers on both sides objected to Trump's appointment of Bill Pulte as acting director of national intelligence · the dispute could delay FISA reauthorization."
+        },
+        {
+          "headline": "Raman advances to LA mayoral runoff over Pratt",
+          "body": "City Council member Nithya Raman secured second place June 8 · she will face incumbent Mayor Karen Bass in November · Republican Spencer Pratt was eliminated by late-counted mail ballots."
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "OpenAI Files Confidential S-1, Weighs Timing of Public Offering",
+      "lede_body": "OpenAI announced Monday it has submitted a confidential S-1 filing with the SEC, a formal step toward a potential IPO. The company said it has not decided on timing and that some goals may be easier to achieve while still private. Reuters previously reported OpenAI was targeting a listing as early as September at a valuation of up to $1 trillion, with Goldman Sachs and Morgan Stanley working on a draft prospectus.",
+      "also": [
+        {
+          "headline": "Apollo, Blackstone raise $35bn for Anthropic chips",
+          "body": "Apollo and Blackstone raised $35bn in chip financing for Anthropic · deal disclosed June 8, 2026."
+        },
+        {
+          "headline": "GSK in talks to acquire Nuvalent for $9bn",
+          "body": "GSK entered talks to buy cancer biotech Nuvalent for more than $9bn · terms have not been finalized."
+        },
+        {
+          "headline": "Stellantis recalls 1.08 million Jeep vehicles",
+          "body": "Stellantis recalled 1,076,999 model-year 2021–2025 Jeep Wranglers and Gladiators · faulty power-steering wiring poses fire risk · remedy expected by July."
+        },
+        {
+          "headline": "Monte dei Paschi bidding war erupts",
+          "body": "A bidding war emerged for Monte dei Paschi di Siena, the world's oldest bank · details of competing bids were not disclosed."
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "OpenAI Files Confidentially for IPO One Week After Anthropic",
+      "lede_body": "OpenAI submitted a draft registration statement to the SEC on June 8, 2026, following Anthropic's confidential IPO filing roughly one week earlier. OpenAI was last valued at $852 billion. The company projects spending approximately $122 billion on computing power in 2028 and burning $85 billion that year despite projected revenue doubling. No share count or price was disclosed.",
+      "also": [
+        {
+          "headline": "Apple unveils Siri AI with Gemini partnership",
+          "body": "Apple announced Siri AI at WWDC 2026 on June 8 · the product uses a Google Gemini-derived model on Apple's Private Cloud Compute · beta release is slated for later in 2026."
+        },
+        {
+          "headline": "Apple pays $250M false-advertising settlement",
+          "body": "Apple agreed last month to pay $250 million to settle a false-advertising lawsuit over undelivered AI features shown at WWDC 2024 · Apple did not admit wrongdoing."
+        },
+        {
+          "headline": "Microsoft shuts 70 GitHub repos after malware attack",
+          "body": "Microsoft closed more than 70 GitHub repositories after hackers pushed malware targeting users of Claude and Gemini AI coding agents · the malware was designed to steal credentials."
+        },
+        {
+          "headline": "Tools for Humanity conducting layoffs, report says",
+          "body": "Business Insider reported · Sam Altman's iris-scanning company Tools for Humanity is conducting layoffs · South Korea previously fined the firm $830,000 for privacy violations."
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "ICC Chief Prosecutor Khan Suspended Over Sexual Misconduct Finding",
+      "lede_body": "The ICC's governing body suspended chief prosecutor Karim Khan on June 8 after an 18-month probe found he committed serious misconduct involving non-consensual sexual interactions with a female aide. The executive bureau has recommended removal; 63 of 125 member states must vote yes in a secret ballot to dismiss him. Khan, 56, has denied all wrongdoing.",
+      "also": [
+        {
+          "headline": "Xi and Kim agree to expand bilateral cooperation in Pyongyang",
+          "body": "Xi Jinping met Kim Jong Un in Pyongyang on June 8, his first North Korea visit in seven years. · Both sides agreed to deepen ties in politics, economy, and culture. · Nuclear weapons were not mentioned."
+        },
+        {
+          "headline": "Peru presidential runoff too close to call",
+          "body": "With 94% of centers reporting, leftist Roberto Sanchez held 50.04% against Keiko Fujimori's 49.96%. · Roughly 400,000 contested votes remain to be reviewed before a winner can be declared."
+        },
+        {
+          "headline": "Wellington evacuates hundreds as 11-metre waves strike coast",
+          "body": "Wellington Mayor Andrew Little declared a state of emergency on June 9. · Waves reached 11 metres. · Wind gusts hit 128 km/h at the airport. · Flights were cancelled."
+        },
+        {
+          "headline": "Somali referee barred from World Cup after US border denial",
+          "body": "US Customs and Border Protection denied referee Omar Artan entry, citing vetting concerns. · Somalia is on the US travel ban list. · FIFA confirmed Artan will not participate in the tournament."
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"The newly acquired AI business poses a material threat of value destruction to the company.\" — Nicolas Owens and Suryansh Sharma, Morningstar",
+  "briefs": [
+    {
+      "topic": "Finance",
+      "body": "OpenAI filed a confidential S-1 with the SEC on June 8, pursuing an IPO after raising $122 billion in March at an $852 billion valuation. Timing and share count remain unset."
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "Meta accused NSO Group of violating a permanent injunction barring it from targeting WhatsApp users, filing for contempt after disrupting spear-phishing attempts linked to the Israeli spyware firm."
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "A Linux kernel use-after-free flaw, CVE-2026-23111, allows unprivileged local users to escalate to root. Patched February 5, 2026; working exploits are now public. CVSS score: 7.8."
+    },
+    {
+      "topic": "Space",
+      "body": "NASA reported the ISS air leak in Russia's Zvezda module reached two pounds per day during June 1 Progress 95 cargo operations. Crew moved to a safe haven; structural repair was postponed for analysis."
+    },
+    {
+      "topic": "Regulation",
+      "body": "The FCC waived Amazon's July 30, 2026 deadline to launch 1,616 satellites for its Kuiper broadband network, citing sparse competition with Starlink. The full 3,232-satellite deadline of July 2029 remains."
+    },
+    {
+      "topic": "GPS Security",
+      "body": "University of Texas researchers identified Russian satellites as the source of GPS interference affecting ground stations across Europe on 75 days between January 2019 and April 2026, per a June 2 preprint."
+    }
+  ],
+  "data_point": {
+    "value": "$35 billion",
+    "context": "Apollo and Blackstone raised $35 billion in chip financing for Anthropic, according to the Financial Times, as OpenAI also filed IPO paperwork on June 8, 2026."
+  },
+  "on_this_day": {
+    "year_and_title": "1968 — Robert F. Kennedy buried at Arlington National Cemetery",
+    "body": "On June 8, 1968, Robert F. Kennedy was buried at Arlington National Cemetery in Virginia, three days after he was shot at the Ambassador Hotel in Los Angeles following his victory in the California Democratic presidential primary. He was 42 years old. Sirhan Sirhan was convicted of his murder in 1969."
+  }
+}

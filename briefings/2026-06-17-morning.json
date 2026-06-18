@@ -1,0 +1,377 @@
+{
+  "title": "The Morning Fox",
+  "date": "Wednesday, June 17, 2026 · 8:10 AM",
+  "volume": "Vol. I · No. 168 · Morning",
+  "location": "Arlington, VA",
+  "weather": {
+    "temp_high": 88,
+    "temp_low": 73,
+    "conditions": "broken clouds",
+    "sunrise": "5:42",
+    "sunset": "8:35",
+    "daylight": "14h 53m"
+  },
+  "hourly": {
+    "slots": [
+      {
+        "time_label": "11am",
+        "temp_f": 73,
+        "precip_pct": 0,
+        "code": 802
+      },
+      {
+        "time_label": "2pm",
+        "temp_f": 81,
+        "precip_pct": 0,
+        "code": 802
+      },
+      {
+        "time_label": "5pm",
+        "temp_f": 88,
+        "precip_pct": 0,
+        "code": 803
+      },
+      {
+        "time_label": "8pm",
+        "temp_f": 83,
+        "precip_pct": 0,
+        "code": 803
+      }
+    ]
+  },
+  "markets": {
+    "items": [
+      {
+        "symbol": "SPY",
+        "value": "750.33",
+        "change": "▼0.60%"
+      },
+      {
+        "symbol": "QQQ",
+        "value": "729.86",
+        "change": "▼1.90%"
+      },
+      {
+        "symbol": "TQQQ",
+        "value": "79.93",
+        "change": "▼5.51%"
+      },
+      {
+        "symbol": "BTC",
+        "value": "—",
+        "change": null
+      },
+      {
+        "symbol": "10Y",
+        "value": "4.47%",
+        "change": "▼1bp"
+      },
+      {
+        "symbol": "CPI",
+        "value": "4.2%",
+        "change": "YoY"
+      }
+    ]
+  },
+  "lead": {
+    "headline": "U.S.-Iran Deal Signing Set for Friday Amid Shipping Confusion and Israeli Strikes",
+    "deck": "Mixed signals over the U.S. naval blockade and continued Israeli strikes in Lebanon are disrupting shipping and threatening the planned accord.",
+    "body": "President Trump announced a U.S.-Iran agreement on Sunday and posted on Truth Social that he would \"authorize the immediate removal of the United States Naval blockade,\" but later said the Strait of Hormuz would only reopen after the memorandum of understanding is signed on Friday. A multilateral naval command confirmed Monday the blockade remained in place. By Tuesday, a senior Iranian diplomat said the blockade had been lifted, and CBS News tracked at least four sanctioned Iranian-owned vessels crossing the blockade line since Sunday. Major shipping companies, including BIMCO members, have declined to resume normal operations pending clear terms and safety guarantees. Israeli warplanes struck the Nabatieh al-Fawqa area and the Ansariyeh town in south Lebanon on Wednesday, Lebanon's National News Agency reported. Trump criticized Prime Minister Netanyahu's strikes, calling them \"vicious\" and \"too much.\" Iran has stated that continued Israeli troops and attacks in Lebanon would violate the agreement.",
+    "at_a_glance": [
+      "Deal signing scheduled for Friday; blockade status disputed.",
+      "At least 4 Iranian vessels crossed blockade line since Sunday.",
+      "Israeli airstrikes hit south Lebanon Wednesday."
+    ],
+    "sources": [
+      {
+        "url": "https://www.cbsnews.com/live-updates/iran-war-us-trump-peace-deal-israel/",
+        "source": "CBS News"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "section": "National",
+      "lede_headline": "Trump blocks Clayton DNI nomination, ties FISA renewal to voter ID bill",
+      "lede_body": "President Trump announced Wednesday he is delaying Jay Clayton's Senate confirmation as director of national intelligence, keeping Bill Pulte in the acting role. Trump said he will not approve renewal of the lapsed FISA surveillance program unless Congress passes the Save America Act, a voter ID bill that lacks sufficient support in either chamber. Clayton had been set to appear before the Intelligence Committee on Wednesday, with a vote expected Thursday.",
+      "lede_sources": [
+        {
+          "url": "https://www.cbsnews.com/news/trump-puts-jay-claytons-nomination-for-intel-chief-on-hold/",
+          "source": "CBS News"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Fed holds rates at Warsh's first meeting",
+          "body": "The Federal Reserve is expected to hold its key rate at 3.6% Wednesday · the fourth consecutive meeting without a change · Kevin Warsh chairs his first policy meeting and press conference.",
+          "sources": [
+            {
+              "url": "https://www.wcvb.com/article/kevin-warsh-first-fed-meeting-interest-rates/71611914",
+              "source": "WCVB Boston"
+            }
+          ]
+        },
+        {
+          "headline": "15 Minnesotans charged with obstructing ICE agents",
+          "body": "The Minnesota U.S. Attorney's Office charged 15 people Tuesday · allegations include coordinating blockades and training protesters in de-arrest tactics · protests outside St. Paul federal courthouse drew hundreds.",
+          "sources": [
+            {
+              "url": "https://www.startribune.com/day-of-protests-follows-federal-charges-against-minnesotans-accused-of-obstructing-ice-agents/601858037",
+              "source": "Star Tribune (Minneapolis)"
+            }
+          ]
+        },
+        {
+          "headline": "Private jet crashes on Laredo highway, kills 1",
+          "body": "A six-person private jet crashed on Loop 20 in Laredo, Texas, shortly before 10 p.m. Tuesday · one person killed · five first responders hospitalized with smoke inhalation.",
+          "sources": [
+            {
+              "url": "https://www.upi.com/Top_News/US/2026/06/17/Laredo-Texas-plane-crash/4561781679518/",
+              "source": "UPI"
+            }
+          ]
+        },
+        {
+          "headline": "Wahab advances in California's 14th District special primary",
+          "body": "CBS News projected state Sen. Aisha Wahab advanced Tuesday in the special primary for California's 14th Congressional District · the seat was vacated after Rep. Eric Swalwell resigned in April · a runoff is set for August 18 if no candidate tops 50%.",
+          "sources": [
+            {
+              "url": "https://www.cbsnews.com/news/california-special-election-eric-swalwelll-14th-district/",
+              "source": "CBS News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Economy & Markets",
+      "lede_headline": "VW Uses Sealed Bids to Manage Conflicts in $10 Billion Engines Sale",
+      "lede_body": "Volkswagen has turned to a sealed-bid process for the sale of its engines division, valued at approximately $10 billion, to prevent conflicts among bidders. The move reflects the complexity of divesting a core combustion-engine business as the automaker restructures amid declining internal-combustion demand and ongoing cost pressures across its European operations.",
+      "lede_sources": [
+        {
+          "url": "https://www.ft.com/content/915e37ce-1a6f-462c-9613-60ea9eb37c5c",
+          "source": "Financial Times"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Snap launches consumer AR glasses at $2,195",
+          "body": "Snap released its Specs AR glasses on June 17, 2026, priced at $2,195 · Meta holds roughly 70% of the smart-glasses market with 3.5 million Ray-Ban units shipped.",
+          "sources": [
+            {
+              "url": "https://www.forbes.com/sites/katehardcastle/2026/06/17/snap-smart-glasses-hit-the-market-at-2195-as-ar-wearables-reach-inflection-point/",
+              "source": "Forbes"
+            }
+          ]
+        },
+        {
+          "headline": "IEA warns Middle East peace deal risks oil glut",
+          "body": "The IEA said · a Middle East peace deal could produce an oil supply glut in 2027 · the forecast implies downward pressure on crude prices.",
+          "sources": [
+            {
+              "url": "https://www.ft.com/content/43a47462-3102-4f77-a2fe-d9cf1217ac2f",
+              "source": "Financial Times"
+            }
+          ]
+        },
+        {
+          "headline": "Investors increase bullish dollar bets on US strength",
+          "body": "Investors have piled into long-dollar positions as the 'US exceptionalism' trade revived · the shift reflects renewed confidence in US economic outperformance relative to peers.",
+          "sources": [
+            {
+              "url": "https://www.ft.com/content/c2369546-6857-47fe-84bb-30f4290c9bb5",
+              "source": "Financial Times"
+            }
+          ]
+        },
+        {
+          "headline": "JLR targets wealthy US buyers with hybrid, petrol cars",
+          "body": "Jaguar Land Rover announced it will focus its US strategy on high-net-worth consumers · the company is prioritising hybrid and petrol models over electric vehicles.",
+          "sources": [
+            {
+              "url": "https://www.ft.com/content/7577741a-7140-4340-9965-7e439b059a61",
+              "source": "Financial Times"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "AI & Technology",
+      "lede_headline": "Z.ai releases GLM-5.2, MIT-licensed model with 1M-token context",
+      "lede_body": "Z.ai released GLM-5.2 on June 15–16, 2026 under an MIT open-source license. The 744-billion-parameter model targets coding and long-horizon agentic tasks with a 1M-token context window and two reasoning modes. On FrontierSWE it trails Claude Opus 4.8 by 1% while beating GPT-5.5 by 1%. Pricing is $1.40 per 1M input tokens and $4.40 per 1M output tokens.",
+      "lede_sources": [
+        {
+          "url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+          "source": "Hugging Face"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Pinterest launches conversational AI shopping app",
+          "body": "Pinterest announced Ask Pinterest on June 17, 2026 · the standalone app uses its Taste Graph for personalized, natural-language product discovery · initial access is limited.",
+          "sources": [
+            {
+              "url": "https://techcrunch.com/2026/06/17/pinterest-launches-an-experimental-ai-shopping-app-called-ask-pinterest/",
+              "source": "TechCrunch AI"
+            }
+          ]
+        },
+        {
+          "headline": "CyberEvolver paper improves LLM security-agent success rates",
+          "body": "Arxiv preprint revised June 16, 2026 · CyberEvolver raised seed-agent success rates by 13.6% on average · tested on CTF, exploitation, and pen-testing tasks across four open-source LLMs.",
+          "sources": [
+            {
+              "url": "https://arxiv.org/abs/2605.26195",
+              "source": "arXiv cs.AI"
+            }
+          ]
+        },
+        {
+          "headline": "AWS Strands SDK integrates LeRobot for hardware deployment",
+          "body": "AWS open-sourced Strands Robots under Apache 2.0 · the SDK wraps LeRobot as AgentTools · one agent loop covers simulation recording, Hub push, and physical SO-101 robot deployment.",
+          "sources": [
+            {
+              "url": "https://huggingface.co/blog/amazon/strands-lerobot-hub-to-hardware",
+              "source": "Hugging Face"
+            }
+          ]
+        },
+        {
+          "headline": "GLM-5.2 scores 51 on Intelligence Index, costs $867 to evaluate",
+          "body": "Artificial Analysis scores GLM-5.2 (max) at 51 on its Intelligence Index · average for comparable models is 24 · full evaluation cost $867.88 · throughput is 112 tokens per second.",
+          "sources": [
+            {
+              "url": "https://artificialanalysis.ai/models/glm-5-2",
+              "source": "Hacker News"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "International",
+      "lede_headline": "UK court sentences four Palestine Action members as terrorists",
+      "lede_body": "Woolwich Crown Court on June 12 convicted four Palestine Action members under counterterrorism legislation for a 2024 raid on an Elbit Systems factory in Filton that caused £1.2 million in damages. Charlotte Head and Leona Kamio received six-year sentences; Fatema Zainab Rajwani received five years and eight months; Samuel Corner received eight years and eight months. Police made more than 100 arrests outside the court during sentencing.",
+      "lede_sources": [
+        {
+          "url": "https://mondoweiss.net/2026/06/in-landmark-case-uk-judge-sentences-pro-palestine-activists-as-terrorists/",
+          "source": "Mondoweiss"
+        }
+      ],
+      "also": [
+        {
+          "headline": "Cambodia extradites scam syndicate leader to China",
+          "body": "Beijing confirmed Wednesday · Cambodia extradited Liu Ren, a key member of the Chen Zhi crime syndicate · Liu's Jin Bei Group operated telecom fraud parks in Cambodia from 2016.",
+          "sources": [
+            {
+              "url": "https://www.channelnewsasia.com/asia/cambodia-scam-centre-leader-liu-ren-extradited-china-6190126",
+              "source": "Channel NewsAsia"
+            }
+          ]
+        },
+        {
+          "headline": "Novo Nordisk hit by cyberattack, $25M ransom demanded",
+          "body": "Hackergroup FulcrumSec claims to have stolen over one terabyte of Novo Nordisk data · the group demanded $25 million · Novo Nordisk confirmed the breach and said it is cooperating with authorities.",
+          "sources": [
+            {
+              "url": "https://www.aftenposten.no/okonomi/i/bO7pr5/novo-nordisk-utsatt-for-dataangrep-hackergruppe-tar-paa-seg-skylden",
+              "source": "Aftenposten"
+            }
+          ]
+        },
+        {
+          "headline": "Sri Lanka arrests ex-president's son on corruption charges",
+          "body": "Yoshitha Rajapaksa, 38, was arrested June 17 · he is accused of using state funds for overseas naval training at Dartmouth without minimum qualifications · he was already subject to a foreign travel ban.",
+          "sources": [
+            {
+              "url": "https://www.channelnewsasia.com/asia/sri-lanka-former-president-son-arrested-corruption-6190146",
+              "source": "Channel NewsAsia"
+            }
+          ]
+        },
+        {
+          "headline": "Mumbai imposes water cuts amid 12-year rainfall low",
+          "body": "Mumbai cut water to construction sites and reduced industrial supply by 20% on June 17 · reservoirs stand at 10.35% capacity, leaving 40 days of supply · Maharashtra received 75% below-average rainfall in June's first 16 days.",
+          "sources": [
+            {
+              "url": "https://www.channelnewsasia.com/sustainability/india-mumbai-rainfall-drops-water-supply-rationing-6190121",
+              "source": "Channel NewsAsia"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pull_quote": "\"Due to lack of details and a history of overly optimistic reassurances, we believe the security situation for the shipping industry remains volatile, and we still consider it very risky for ships to commence transits at this point.\" — Jakob Larsen, BIMCO",
+  "briefs": [
+    {
+      "topic": "Shipping",
+      "body": "Approximately 1,500 ships remain stranded in the Persian Gulf despite a U.S.-Iran ceasefire agreement. Before the war, 140 vessels transited the Strait of Hormuz daily. U.S. forces are actively demining shipping lanes.",
+      "sources": [
+        {
+          "url": "https://www.npr.org/2026/06/17/nx-s1-5860909/iran-ships-strait-of-hormuz-trump",
+          "source": "NPR"
+        }
+      ]
+    },
+    {
+      "topic": "Economy",
+      "body": "U.S. inflation reached 4.2% year-over-year in May 2026, the highest since 2023, driven by energy price spikes from the U.S.-Iran war. New Fed Chairman Kevin Warsh holds his first policy meeting today.",
+      "sources": [
+        {
+          "url": "https://www.npr.org/2026/06/17/nx-s1-5860084/fed-chief-warsh-first-fomc-meeting",
+          "source": "NPR"
+        }
+      ]
+    },
+    {
+      "topic": "Cybersecurity",
+      "body": "CISA added CVE-2026-48907, a CVSS 10.0 flaw in Joomla's JCE editor, to its exploited vulnerabilities catalog. Federal agencies must patch by June 19. The flaw allows unauthenticated PHP code execution.",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/06/cisa-warns-of-actively-exploited-joomla.html",
+          "source": "The Hacker News"
+        }
+      ]
+    },
+    {
+      "topic": "Supply Chain",
+      "body": "15 malicious plugins on the JetBrains Marketplace have exfiltrated AI API keys since October 2025. Two plugins exceed 25,000 downloads each. A separate attack compromised 144 Mastra npm packages on June 17.",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/06/malicious-jetbrains-plugins-steal-ai.html",
+          "source": "The Hacker News"
+        }
+      ]
+    },
+    {
+      "topic": "Prisons",
+      "body": "NPR found federal prisons routinely reject medical grievances, delaying care for years. Congress granted ICE over $113 billion since last year; detention complaints citing spoiled food and denied healthcare are rising.",
+      "sources": [
+        {
+          "url": "https://www.npr.org/2026/06/17/nx-s1-5343603/prison-lawsuits-grievance-denial-investigation",
+          "source": "NPR"
+        }
+      ]
+    },
+    {
+      "topic": "Environment",
+      "body": "The Bellingshausen Sea is missing approximately 650,000 square kilometers of winter sea ice — roughly the area of France — compared to the 1991–2020 average, marking the third such deficit in four years.",
+      "sources": [
+        {
+          "url": "https://www.wired.com/story/west-antarctica-is-missing-way-too-much-ice/",
+          "source": "WIRED Science"
+        }
+      ]
+    }
+  ],
+  "data_point": {
+    "value": "4.2%",
+    "context": "U.S. inflation rate as of the latest reading, a three-year high, driven largely by higher gas prices stemming from the Iran war, per Federal Reserve policymakers cited by WCVB."
+  },
+  "on_this_day": {
+    "year_and_title": "1972 — Watergate Break-In Arrests",
+    "body": "On June 17, 1972, five men were arrested inside the Democratic National Committee headquarters at the Watergate complex in Washington, D.C. The break-in, later linked to the Nixon re-election campaign, led to a congressional investigation and Nixon's resignation on August 9, 1974."
+  }
+}

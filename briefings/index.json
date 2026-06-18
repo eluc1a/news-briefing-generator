@@ -1,5 +1,47 @@
 [
   {
+    "date": "2026-06-18",
+    "edition": "morning",
+    "title": "The Morning Fox",
+    "json": "2026-06-18-morning.json",
+    "pdf": "2026-06-18-morning.pdf"
+  },
+  {
+    "date": "2026-06-17",
+    "edition": "evening",
+    "title": "The Evening Fox",
+    "json": "2026-06-17-evening.json",
+    "pdf": "2026-06-17-evening.pdf"
+  },
+  {
+    "date": "2026-06-17",
+    "edition": "morning",
+    "title": "The Morning Fox",
+    "json": "2026-06-17-morning.json",
+    "pdf": "2026-06-17-morning.pdf"
+  },
+  {
+    "date": "2026-06-16",
+    "edition": "evening",
+    "title": "The Evening Fox",
+    "json": "2026-06-16-evening.json",
+    "pdf": "2026-06-16-evening.pdf"
+  },
+  {
+    "date": "2026-06-16",
+    "edition": "morning",
+    "title": "The Morning Fox",
+    "json": "2026-06-16-morning.json",
+    "pdf": "2026-06-16-morning.pdf"
+  },
+  {
+    "date": "2026-06-15",
+    "edition": "evening",
+    "title": "The Evening Fox",
+    "json": "2026-06-15-evening.json",
+    "pdf": "2026-06-15-evening.pdf"
+  },
+  {
     "date": "2026-06-07",
     "edition": "morning",
     "title": "The Morning Fox",

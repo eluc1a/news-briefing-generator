@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Something broke — The Morning Fox</title>
+<script>
+// Apply the saved/system theme before first paint to avoid a flash.
+(function () {
+  try {
+    var saved = localStorage.getItem("theme");
+    var dark = saved
+      ? saved === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (dark) document.documentElement.dataset.theme = "dark";
+  } catch (e) {}
+})();
+</script>
+<style>
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('/ai-digest/fonts/BodoniModa-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'Libre Baskerville';
+  src: url('/ai-digest/fonts/LibreBaskerville-Regular.woff2') format('woff2');
+  font-weight: 400;
+}
+:root {
+  color-scheme: light;
+  --ink: #1a1a1a; --ink-soft: #333; --muted: #777; --rule: #1a1a1a;
+  --underline: #b5b0a4; --bg: #faf8f3;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #d6cfbf; --ink-soft: #cac4b6; --muted: #968f7d; --rule: #bcb5a4;
+  --underline: rgba(231, 226, 214, .4); --bg: #16140f;
+}
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 40rem;
+  margin: 0 auto; min-height: 100vh; padding: 0 1.2rem; color: var(--ink);
+  background: var(--bg); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; }
+.kicker { font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 3px; font-size: .85rem;
+  color: var(--muted); margin: 0 0 .4rem; }
+.code { font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500;
+  font-size: clamp(40px, 12vw, 76px); line-height: 1.05; margin: 0; }
+.rule { border: 0; border-top: 3px double var(--rule);
+  width: 18rem; max-width: 80%; margin: 1.1rem auto; }
+.headline { font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: clamp(20px, 6vw, 30px); margin: 0 0 .6rem; }
+.deck { font-style: italic; color: var(--ink-soft); max-width: 28rem;
+  margin: 0 auto 1.6rem; line-height: 1.5; }
+a.home { color: var(--ink); text-decoration: none;
+  border-bottom: 1px solid var(--underline); padding-bottom: 1px;
+  font-size: 1.05rem; }
+a.home:hover { border-bottom-color: var(--ink); }
+</style>
+</head>
+<body>
+  <p class="kicker">The Morning Fox</p>
+  <p class="code">Hold the press</p>
+  <hr class="rule">
+  <h1 class="headline">The presses jammed.</h1>
+  <p class="deck">Something on our end went wrong while setting today's page.
+    It's not you. Give it a moment and try again.</p>
+  <a class="home" href="/ai-digest/latest.html">Read the latest digest &rarr;</a>
+</body>
+</html>

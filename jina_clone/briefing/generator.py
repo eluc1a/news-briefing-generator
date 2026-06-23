@@ -512,14 +512,24 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
         env["PATH"] = npm_bin + ":" + env.get("PATH", "")
 
     async with _CLI_SEMAPHORE:
-        proc = await asyncio.create_subprocess_exec(
-            *argv,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            env=env,
-            cwd=tempfile.gettempdir(),
-        )
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *argv,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env=env,
+                cwd=tempfile.gettempdir(),
+            )
+        except OSError as e:
+            # The binary couldn't be exec'd — e.g. it was mid-auto-update so the
+            # `claude` symlink momentarily didn't resolve (the 2026-06-23 morning
+            # incident). Surface as a retryable GeneratorFailure so the retry
+            # loop and emergency-edition fallback engage, rather than a bare
+            # OSError that escapes both and crashes the run silently.
+            raise GeneratorFailure(
+                f"claude -p could not spawn {CLAUDE_BIN!r}: {e}"
+            ) from e
         try:
             stdout, stderr = await asyncio.wait_for(
                 proc.communicate(input=prompt.encode()), timeout=CLI_TIMEOUT

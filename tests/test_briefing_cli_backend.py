@@ -105,6 +105,22 @@ async def test_cli_call_llm_nonzero_exit_includes_stdout(monkeypatch):
     assert "Usage limit reached" in str(ei.value)
 
 
+async def test_cli_call_llm_wraps_spawn_failure_as_generator_failure(monkeypatch):
+    # When the `claude` binary can't be exec'd — it was mid-auto-update, the
+    # 2026-06-23 morning incident — create_subprocess_exec raises a bare
+    # FileNotFoundError. That must surface as a *retryable* GeneratorFailure
+    # (like the timeout / nonzero-exit paths) so the retry loop and the
+    # emergency-edition fallback engage, instead of an OSError that escapes both
+    # and crashes the run silently with no ntfy alert.
+    async def boom_exec(*argv, **kwargs):
+        raise FileNotFoundError(2, "No such file or directory", "claude")
+
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", boom_exec)
+    with pytest.raises(generator.GeneratorFailure) as ei:
+        await generator._cli_call_llm("P", system="S", model="m")
+    assert "claude" in str(ei.value).lower()
+
+
 async def test_cli_call_llm_kills_and_raises_on_timeout(monkeypatch):
     class _HangProc:
         returncode = None

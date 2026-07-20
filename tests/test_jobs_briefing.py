@@ -562,6 +562,75 @@ async def test_print_failure_still_raises(tmp_path):
     assert len(pdfs) == 1
 
 
+# ------------- print_enabled=False pauses the physical copy -------------
+
+async def test_print_enabled_false_renders_but_skips_printer(tmp_path):
+    """With print_enabled=False the PDF is still rendered, the run succeeds,
+    and the briefing is logged — but the printer is never called."""
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
+        return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
+
+    async def gen_fm(*, articles, weather, today, volume, **kw):
+        return FrontMatter(
+            lead=GOOD.lead, lead_source_url=articles[0]["link"],
+            pull_quote=GOOD.pull_quote,
+            data_point=GOOD.data_point, on_this_day=GOOD.on_this_day,
+        )
+
+    async def gen_panel(*, section, articles, exclude_urls, **kw):
+        return next(p for p in GOOD.panels if p.section == section.title)
+
+    async def gen_briefs(*, articles, exclude_urls, **kw):
+        return list(GOOD.briefs)
+
+    def render(briefing, out_path, *, generated_at, iso_date):
+        out_path.write_bytes(b"%PDF-fake")
+        return out_path
+
+    printed = []
+    def printer(pdf_path, *, queue):
+        printed.append((pdf_path, queue))
+        return "ok"
+
+    inserted = []
+    async def insert_summary(pool, **kw):
+        inserted.append(kw)
+        return 7
+
+    pdf_path = tmp_path / "2026-04-19-morning.pdf"
+    result = await run_briefing(
+        pool=MagicMock(),
+        config=CFG,
+        window_hours=12,
+        title="The Morning Fox",
+        pdf_path=pdf_path,
+        print_queue="brother",
+        ntfy_topic="fox",
+        weather_provider=_async_weather({"temp_high": 70, "temp_low": 50,
+                                  "conditions": "x", "sunrise": "6:00",
+                                  "sunset": "8:00", "daylight": "13h 24m"}),
+        markets_provider=_async_markets(),
+        today_label="Sat", volume_label="Vol",
+        generated_at_label="08:11 ET", iso_date="2026-04-19",
+        fetch_articles=fetch,
+        generate_front_matter=gen_fm,
+        generate_panel=gen_panel,
+        generate_briefs=gen_briefs,
+        render=render,
+        print_pdf=printer,
+        notify_printed=lambda **kw: None,
+        notify_failure=lambda **kw: None,
+        insert_summary=insert_summary,
+        emergency_path=EMERGENCY,
+        print_enabled=False,
+    )
+
+    assert result.printed  # run completed
+    assert pdf_path.exists()  # still rendered for online publish
+    assert printed == []  # printer NOT invoked
+    assert inserted  # still logged to news_summaries
+
+
 # ------------- assemble_briefing (pure core) -------------
 
 async def test_assemble_briefing_happy_path_returns_briefing_and_count():

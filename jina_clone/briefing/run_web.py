@@ -76,6 +76,8 @@ async def _run_web(settings: Settings, *, edition: str) -> None:
             notify_failure=briefing_notify.notify_failure,
             insert_summary=insert_summary,
             emergency_path=Path(__file__).parent / "fixtures" / "emergency.json",
+            # Physical printing paused (2026-06-21) — flip back to True to resume.
+            print_enabled=False,
         )
     finally:
         await pool.close()

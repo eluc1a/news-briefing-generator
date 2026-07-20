@@ -204,9 +204,14 @@ async def run_briefing(
     notify_failure: Callable[..., None],
     insert_summary: Callable[..., Awaitable[int]],
     emergency_path: Path,
+    print_enabled: bool = True,
 ) -> BriefingResult:
     """Full pipeline: assemble → render → print → log, with
-    NotEnoughArticles and emergency-edition fallback around assemble."""
+    NotEnoughArticles and emergency-edition fallback around assemble.
+
+    When ``print_enabled`` is False, the PDF is still rendered and (via the
+    injected ``render`` wrapper) published online, but it is not submitted to
+    the CUPS queue — the off switch for pausing physical copies."""
 
     emergency_used = False
     try:
@@ -246,12 +251,17 @@ async def run_briefing(
     render(briefing, pdf_path, generated_at=generated_at_label, iso_date=iso_date)
     log.info("rendered %s (%d bytes)", pdf_path, pdf_path.stat().st_size)
 
-    try:
-        msg = print_pdf(pdf_path, queue=print_queue)
-        log.info("print: %s", msg)
-    except Exception as e:
-        notify_failure(topic=ntfy_topic, title=title, reason=str(e))
-        raise
+    if print_enabled:
+        try:
+            msg = print_pdf(pdf_path, queue=print_queue)
+            log.info("print: %s", msg)
+        except Exception as e:
+            notify_failure(topic=ntfy_topic, title=title, reason=str(e))
+            raise
+    else:
+        # Physical printing paused (2026-06-21): briefing is still generated,
+        # rendered, and published online — we just skip the CUPS queue.
+        log.info("print: SKIPPED (print_enabled=False) — %s rendered, not queued", pdf_path)
 
     if not emergency_used:
         notify_printed(topic=ntfy_topic, title=title, pages=2)

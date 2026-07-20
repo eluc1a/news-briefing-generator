@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from jina_clone.briefing.schema import Briefing
+from jina_clone.briefing.schema import Briefing, EditorDecision
 
 
 FIXTURE = Path("jina_clone/briefing/fixtures/sample_briefing.json")
@@ -48,9 +48,18 @@ def test_briefs_too_few_rejected():
 def test_briefs_too_many_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    data["briefs"] = (data["briefs"] * 2)[:7]  # 7 above new ceiling of 6
+    # 9 briefs is above the generation ceiling of 8.
+    data["briefs"] = (data["briefs"] * 2)[:9]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
+
+
+def test_briefs_up_to_gen_count_accepted():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    # 8 briefs (pre-trim over-provisioned state) must validate.
+    data["briefs"] = (data["briefs"] * 2)[:8]
+    Briefing.model_validate(data)
 
 
 def test_invalid_section_label_rejected():
@@ -81,11 +90,19 @@ def test_panel_also_too_few_rejected():
 def test_panel_also_too_many_rejected():
     raw = FIXTURE.read_text()
     data = json.loads(raw)
-    # 5 `also` items must fail (new ceiling is 4).
+    # 7 `also` items is above the generation ceiling of 6.
     first_item = data["panels"][0]["also"][0]
-    data["panels"][0]["also"] = data["panels"][0]["also"] + [first_item]
+    data["panels"][0]["also"] = (data["panels"][0]["also"] + [first_item] * 3)[:7]
     with pytest.raises(ValidationError):
         Briefing.model_validate(data)
+
+
+def test_panel_also_up_to_gen_count_accepted():
+    raw = FIXTURE.read_text()
+    data = json.loads(raw)
+    first_item = data["panels"][0]["also"][0]
+    data["panels"][0]["also"] = (data["panels"][0]["also"] + [first_item] * 2)[:6]
+    Briefing.model_validate(data)
 
 
 def test_briefing_requires_title():
@@ -204,3 +221,21 @@ def test_source_model_roundtrips():
     from jina_clone.briefing.schema import Source
     s = Source(url="https://example.com/a", source="Reuters")
     assert s.model_dump() == {"url": "https://example.com/a", "source": "Reuters"}
+
+
+# ------------- editor decision -------------
+
+def test_editor_decision_parses():
+    decision = EditorDecision.model_validate({
+        "cuts": [{"section": "national", "index": 3, "duplicate_of": "briefs[2]"},
+                 {"section": "briefs", "index": 0, "duplicate_of": None}],
+        "lede_dupes": [{"section": "economy", "duplicate_of": "front lead"}],
+    })
+    assert decision.cuts[0].section == "national"
+    assert decision.cuts[1].duplicate_of is None
+    assert decision.lede_dupes[0].duplicate_of == "front lead"
+
+
+def test_editor_decision_defaults_empty():
+    decision = EditorDecision.model_validate({})
+    assert decision.cuts == [] and decision.lede_dupes == []

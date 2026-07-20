@@ -11,8 +11,9 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, FrontMatter, Panel, PanelItem,
-    PANEL_ALSO_COUNT, SlackDigest, Source,
+    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, BRIEFS_GEN_COUNT, FrontMatter,
+    Panel, PanelItem, PANEL_ALSO_COUNT, PANEL_ALSO_GEN_COUNT, SlackDigest,
+    Source,
 )
 
 
@@ -166,7 +167,7 @@ PANEL_STRUCTURE_RULES = """STRUCTURE — every field required:
 - lede_headline: ≤ 14 words, factual, the strongest single story for this
   section.
 - lede_body: 45-60 words on that story. Facts only. NEVER exceed 60 words.
-- also: EXACTLY 4 PanelItem entries, each a distinct event from this
+- also: EXACTLY 6 PanelItem entries, each a distinct event from this
   section's scope. Every item has:
     - headline: ≤ 8 words, concrete subject + action.
     - body: 15-22 words, facts only (date, numbers, named actors,
@@ -203,8 +204,9 @@ PANEL_STRUCTURE_RULES = """STRUCTURE — every field required:
 - Each `also` item additionally has:
     - source_url: EXACTLY the `Link` of the input article that item is
       primarily based on, verbatim. Same rule — must match an input Link.
-Never fabricate. If fewer than 4 distinct stories exist in the input,
-repeat the strongest adjacent items but do NOT invent facts."""
+Never fabricate. If fewer than 6 distinct stories exist in the input,
+emit what exists (minimum 4) — repeat the strongest adjacent items to
+reach 4 if needed, but do NOT invent facts."""
 
 
 FRONT_MATTER_STRUCTURE_RULES = """STRUCTURE — every field required:
@@ -231,7 +233,8 @@ FRONT_MATTER_STRUCTURE_RULES = """STRUCTURE — every field required:
 
 
 BRIEFS_STRUCTURE_RULES = """STRUCTURE:
-Output {"briefs": [...]} containing EXACTLY 6 Brief entries. Each entry:
+Output {"briefs": [...]} containing EXACTLY 8 Brief entries (minimum 6
+if the input pool is too thin). Each entry:
   - topic: 1-3 word category label ("Cybersecurity", "Markets", "Linux",
     "Investigations").
   - body: 22-30 words, facts only. NEVER exceed 30 words.
@@ -411,7 +414,7 @@ class _PanelDraft(BaseModel):
     lede_body: str
     lede_source_url: str
     also: list[_PanelItemDraft] = Field(
-        min_length=PANEL_ALSO_COUNT, max_length=PANEL_ALSO_COUNT,
+        min_length=PANEL_ALSO_COUNT, max_length=PANEL_ALSO_GEN_COUNT,
     )
 
 
@@ -423,7 +426,7 @@ class _BriefDraft(BaseModel):
 
 class _BriefsResponse(BaseModel):
     briefs: list[_BriefDraft] = Field(
-        min_length=BRIEFS_COUNT_MIN, max_length=BRIEFS_COUNT_MAX,
+        min_length=BRIEFS_COUNT_MIN, max_length=BRIEFS_GEN_COUNT,
     )
 
 

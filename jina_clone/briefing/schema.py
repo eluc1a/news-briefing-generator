@@ -6,8 +6,11 @@ from pydantic import BaseModel, Field
 # these constants rather than duplicating the bounds.
 BRIEFS_COUNT_MAX = 6
 BRIEFS_COUNT_MIN = 6   # tightened in Task 9
+BRIEFS_GEN_COUNT = 8   # over-provision; editor cuts back to BRIEFS_COUNT_MIN
 MARKETS_COUNT = 6
-PANEL_ALSO_COUNT = 4   # bumped in Task 9 density phase
+
+PANEL_ALSO_COUNT = 4       # published count
+PANEL_ALSO_GEN_COUNT = 6   # over-provision; editor cuts back to PANEL_ALSO_COUNT
 
 
 class WeatherStrip(BaseModel):
@@ -69,13 +72,38 @@ class Panel(BaseModel):
     lede_headline: str
     lede_body: str
     lede_sources: list[Source] = Field(default_factory=list)
-    also: list[PanelItem] = Field(min_length=PANEL_ALSO_COUNT, max_length=PANEL_ALSO_COUNT)
+    also: list[PanelItem] = Field(
+        min_length=PANEL_ALSO_COUNT, max_length=PANEL_ALSO_GEN_COUNT,
+    )
 
 
 class Brief(BaseModel):
     topic: str
     body: str
     sources: list[Source] = Field(default_factory=list)
+
+
+class EditorCut(BaseModel):
+    """One item the editor-in-chief removes. `section` is a panel key
+    ("national", "economy", "ai", "international") or "briefs"; `index`
+    is the 0-based position in that panel's `also` list / the briefs
+    list. `duplicate_of` is a short free-text pointer to the surviving
+    telling ("front lead", "briefs[2]"), or None when cut for weakness."""
+    section: str
+    index: int
+    duplicate_of: str | None = None
+
+
+class LedeDupe(BaseModel):
+    """A panel whose lede duplicates the front lead or another panel's
+    lede. Advisory: triggers one targeted panel rerun, never a cut."""
+    section: str
+    duplicate_of: str
+
+
+class EditorDecision(BaseModel):
+    cuts: list[EditorCut] = Field(default_factory=list)
+    lede_dupes: list[LedeDupe] = Field(default_factory=list)
 
 
 DIGEST_ITEMS_MAX = 10
@@ -124,7 +152,7 @@ class Briefing(BaseModel):
     lead: LeadStory
     panels: list[Panel] = Field(min_length=4, max_length=4)
     pull_quote: str
-    briefs: list[Brief] = Field(min_length=BRIEFS_COUNT_MIN, max_length=BRIEFS_COUNT_MAX)
+    briefs: list[Brief] = Field(min_length=BRIEFS_COUNT_MIN, max_length=BRIEFS_GEN_COUNT)
     data_point: DataPoint
     on_this_day: OnThisDay
 

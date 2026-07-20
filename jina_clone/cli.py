@@ -165,6 +165,7 @@ async def _briefing_generate(settings, out_path: Path):
             generate_front_matter=briefing_generator.generate_front_matter,
             generate_panel=briefing_generator.generate_panel,
             generate_briefs=briefing_generator.generate_briefs,
+            generate_editor=briefing_generator.generate_editor_cuts,
         )
     finally:
         await pool.close()
@@ -233,6 +234,7 @@ async def _briefing_run(settings, *, edition: str):
             generate_front_matter=briefing_generator.generate_front_matter,
             generate_panel=briefing_generator.generate_panel,
             generate_briefs=briefing_generator.generate_briefs,
+            generate_editor=briefing_generator.generate_editor_cuts,
             render=make_render_and_save_json(
                 briefing_renderer.render_pdf,
                 briefings_dir=settings.briefings_dir,

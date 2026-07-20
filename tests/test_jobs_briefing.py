@@ -10,11 +10,12 @@ from jina_clone.briefing.config import (
 from jina_clone.briefing.generator import GeneratorFailure
 from jina_clone.briefing.printer import PrintError
 from jina_clone.briefing.schema import (
-    Brief, Briefing, DataPoint, FrontMatter, LeadStory, OnThisDay, Panel,
-    PanelItem, WeatherStrip,
+    Brief, Briefing, DataPoint, EditorDecision, FrontMatter, LeadStory,
+    OnThisDay, Panel, PanelItem, Source, WeatherStrip,
 )
 from jina_clone.jobs.briefing import (
-    BriefingResult, NotEnoughArticles, run_briefing,
+    BriefingResult, NotEnoughArticles, _apply_cuts, _trim_positional,
+    run_briefing,
 )
 
 
@@ -743,3 +744,222 @@ async def test_assemble_briefing_bubbles_generator_failure():
             generate_panel=gen_panel,
             generate_briefs=gen_briefs,
         )
+
+
+# ------------- editor-in-chief dedup -------------
+
+def _panel6(section_title="National"):
+    return Panel(
+        section=section_title,
+        lede_headline=f"{section_title} lede",
+        lede_body="body " * 10,
+        lede_sources=[Source(url=f"https://{section_title}-lede", source="s")],
+        also=[PanelItem(headline=f"{section_title} H{i}", body=f"B{i}",
+                        sources=[]) for i in range(6)],
+    )
+
+
+def _briefs8():
+    return [Brief(topic=f"T{i}", body=f"body {i}", sources=[]) for i in range(8)]
+
+
+async def _assemble_with_fakes(
+    *,
+    gen_panel_result=None,
+    gen_briefs_result=None,
+    gen_panel=None,
+    gen_briefs=None,
+    generate_editor=None,
+):
+    """Standard fetch/front-matter/weather/markets fakes wired to
+    assemble_briefing. Callers supply panel/briefs generation — either a
+    `*_result` factory used by a default kwarg-recording fake, or a fully
+    custom fake — plus an optional editor fake. Front matter's lead
+    headline is fixed to "LEAD HEADLINE" so tests can assert on it."""
+    from jina_clone.jobs.briefing import assemble_briefing
+
+    async def fetch(pool, *, categories, per_source_cap, limit, since_hours=24, source_caps=None):
+        return [_row(f"https://{categories[0]}/{i}", categories[0]) for i in range(5)]
+
+    async def gen_fm(*, articles, weather, today, volume, title, **kw):
+        return FrontMatter(
+            lead=GOOD.lead.model_copy(update={"headline": "LEAD HEADLINE"}),
+            lead_source_url=articles[0]["link"],
+            pull_quote=GOOD.pull_quote,
+            data_point=GOOD.data_point,
+            on_this_day=GOOD.on_this_day,
+        )
+
+    if gen_panel is None:
+        async def gen_panel(*, section, articles, exclude_urls, title, **kw):
+            return gen_panel_result(section.title)
+
+    if gen_briefs is None:
+        async def gen_briefs(*, articles, exclude_urls, title, **kw):
+            return gen_briefs_result()
+
+    return await assemble_briefing(
+        pool=MagicMock(),
+        config=CFG,
+        window_hours=12,
+        title="The Morning Fox",
+        weather_provider=_async_weather(WeatherStrip(
+            temp_high=70, temp_low=50, conditions="x",
+            sunrise="6:00", sunset="8:00", daylight="13h 24m",
+        ).model_dump()),
+        markets_provider=_async_markets(),
+        today_label="Sat",
+        volume_label="Vol",
+        iso_date="2026-04-19",
+        fetch_articles=fetch,
+        generate_front_matter=gen_fm,
+        generate_panel=gen_panel,
+        generate_briefs=gen_briefs,
+        generate_editor=generate_editor,
+    )
+
+
+async def test_editor_cuts_applied(tmp_path):
+    """Editor decision removes the named indices; final counts exact."""
+    editor_calls = []
+
+    async def gen_editor(*, lead_headline, panels, briefs, title, **kw):
+        editor_calls.append((lead_headline, [k for k, _ in panels], len(briefs)))
+        cuts = [{"section": k, "index": i} for k, _ in panels for i in (0, 5)]
+        cuts += [{"section": "briefs", "index": 6}, {"section": "briefs", "index": 7}]
+        return EditorDecision.model_validate({"cuts": cuts, "lede_dupes": []})
+
+    briefing, _ = await _assemble_with_fakes(
+        gen_panel_result=_panel6, gen_briefs_result=_briefs8,
+        generate_editor=gen_editor,
+    )
+    for panel in briefing.panels:
+        assert len(panel.also) == 4
+        # indices 0 and 5 were cut: H0 and H5 gone, H1..H4 remain
+        assert [it.headline.split()[-1] for it in panel.also] == ["H1", "H2", "H3", "H4"]
+    assert len(briefing.briefs) == 6
+    assert [b.topic for b in briefing.briefs] == [f"T{i}" for i in range(6)]
+    assert editor_calls  # editor was invoked with lead headline + keys
+
+
+async def test_editor_failure_falls_back_to_positional_trim(tmp_path):
+    async def gen_editor(**kw):
+        raise GeneratorFailure("editor exploded")
+
+    briefing, _ = await _assemble_with_fakes(
+        gen_panel_result=_panel6, gen_briefs_result=_briefs8,
+        generate_editor=gen_editor,
+    )
+    for panel in briefing.panels:
+        assert len(panel.also) == 4
+        assert panel.also[0].headline.endswith("H0")  # first 4 kept
+    assert len(briefing.briefs) == 6
+
+
+async def test_no_editor_positional_trim(tmp_path):
+    briefing, _ = await _assemble_with_fakes(
+        gen_panel_result=_panel6, gen_briefs_result=_briefs8,
+        generate_editor=None,
+    )
+    for panel in briefing.panels:
+        assert len(panel.also) == 4
+    assert len(briefing.briefs) == 6
+
+
+async def test_lead_headline_threaded_to_panels_and_briefs(tmp_path):
+    seen = {"panel_avoid": [], "briefs_avoid": None}
+
+    async def gen_panel(*, section, articles, exclude_urls, title, **kw):
+        seen["panel_avoid"].append(kw.get("avoid_headlines"))
+        return _panel6(section.title)
+
+    async def gen_briefs(*, articles, exclude_urls, title, **kw):
+        seen["briefs_avoid"] = kw.get("avoid_headlines")
+        return _briefs8()
+
+    await _assemble_with_fakes(gen_panel=gen_panel, gen_briefs=gen_briefs)
+    assert all(a == ["LEAD HEADLINE"] for a in seen["panel_avoid"])
+    assert seen["briefs_avoid"] == ["LEAD HEADLINE"]
+
+
+async def test_lede_dupe_triggers_single_rerun(tmp_path):
+    panel_calls = []
+
+    async def gen_panel(*, section, articles, exclude_urls, title, **kw):
+        panel_calls.append((section.key, set(exclude_urls),
+                            kw.get("avoid_headlines")))
+        return _panel6(section.title)
+
+    async def gen_editor(*, lead_headline, panels, briefs, title, **kw):
+        cuts = [{"section": k, "index": i} for k, _ in panels for i in (0, 5)]
+        cuts += [{"section": "briefs", "index": 6}, {"section": "briefs", "index": 7}]
+        return EditorDecision.model_validate({
+            "cuts": cuts,
+            "lede_dupes": [{"section": "national",
+                            "duplicate_of": "front lead"}],
+        })
+
+    briefing, _ = await _assemble_with_fakes(
+        gen_panel=gen_panel, gen_briefs_result=_briefs8,
+        generate_editor=gen_editor,
+    )
+    national_calls = [c for c in panel_calls if c[0] == "national"]
+    assert len(national_calls) == 2                       # initial + one rerun
+    rerun = national_calls[1]
+    assert "https://National-lede" in rerun[1]            # old lede URL excluded
+    assert "National lede" in rerun[2]                    # old lede headline avoided
+    # rerun panel trimmed positionally to 4
+    nat = [p for p in briefing.panels if p.section == "National"][0]
+    assert len(nat.also) == 4
+
+
+async def test_lede_rerun_failure_keeps_original_panel(tmp_path):
+    calls = {"national": 0}
+
+    async def gen_panel(*, section, articles, exclude_urls, title, **kw):
+        if section.key == "national":
+            calls["national"] += 1
+            if calls["national"] > 1:
+                raise GeneratorFailure("rerun failed")
+        return _panel6(section.title)
+
+    async def gen_editor(*, lead_headline, panels, briefs, title, **kw):
+        cuts = [{"section": k, "index": i} for k, _ in panels for i in (0, 5)]
+        cuts += [{"section": "briefs", "index": 6}, {"section": "briefs", "index": 7}]
+        return EditorDecision.model_validate({
+            "cuts": cuts,
+            "lede_dupes": [{"section": "national",
+                            "duplicate_of": "front lead"}],
+        })
+
+    briefing, _ = await _assemble_with_fakes(
+        gen_panel=gen_panel, gen_briefs_result=_briefs8,
+        generate_editor=gen_editor,
+    )
+    nat = [p for p in briefing.panels if p.section == "National"][0]
+    assert nat.lede_headline == "National lede"   # original kept
+    assert len(nat.also) == 4                     # still trimmed
+
+
+def test_apply_cuts_pure():
+    panels = [_panel6("National")]
+    briefs = _briefs8()
+    decision = EditorDecision.model_validate({
+        "cuts": [{"section": "national", "index": 1},
+                 {"section": "national", "index": 4},
+                 {"section": "briefs", "index": 0},
+                 {"section": "briefs", "index": 7}],
+        "lede_dupes": [],
+    })
+    new_panels, new_briefs = _apply_cuts(decision, ["national"], panels, briefs)
+    assert [it.headline for it in new_panels[0].also] == \
+        ["National H0", "National H2", "National H3", "National H5"]
+    assert [b.topic for b in new_briefs] == [f"T{i}" for i in range(1, 7)]
+
+
+def test_trim_positional_pure():
+    panels, briefs = _trim_positional([_panel6("National")], _briefs8())
+    assert len(panels[0].also) == 4 and len(briefs) == 6
+    # already-final input is a no-op
+    panels2, briefs2 = _trim_positional(panels, briefs)
+    assert panels2[0].also == panels[0].also and briefs2 == briefs

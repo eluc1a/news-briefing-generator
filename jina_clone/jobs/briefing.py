@@ -8,8 +8,8 @@ from jina_clone.briefing.config import BriefingConfig, SectionDef
 from jina_clone.briefing.generator import GeneratorFailure
 from jina_clone.briefing.markdown import briefing_to_markdown
 from jina_clone.briefing.schema import (
-    Brief, Briefing, FrontMatter, HourlyForecast, MarketsBlock,
-    Panel, WeatherStrip,
+    Brief, Briefing, BRIEFS_COUNT_MIN, EditorDecision, FrontMatter,
+    HourlyForecast, MarketsBlock, Panel, PANEL_ALSO_COUNT, WeatherStrip,
 )
 
 
@@ -32,6 +32,7 @@ FetchFn = Callable[..., Awaitable[list[dict]]]
 FrontMatterFn = Callable[..., Awaitable[FrontMatter]]
 PanelFn = Callable[..., Awaitable[Panel]]
 BriefsFn = Callable[..., Awaitable[list[Brief]]]
+EditorFn = Callable[..., Awaitable[Any]]
 WeatherFn = Callable[[], Awaitable[dict]]
 MarketsFn = Callable[[], Awaitable[dict]]
 
@@ -45,6 +46,44 @@ def _dedupe_by_link(articles: list[dict]) -> list[dict]:
             seen.add(link)
             out.append(a)
     return out
+
+
+def _trim_positional(
+    panels: list[Panel], briefs: list[Brief],
+) -> tuple[list[Panel], list[Brief]]:
+    """Fallback trim when there's no editor decision (or it failed):
+    keep the first N items positionally rather than by any judgment."""
+    trimmed = [
+        p.model_copy(update={"also": list(p.also[:PANEL_ALSO_COUNT])})
+        for p in panels
+    ]
+    return trimmed, list(briefs[:BRIEFS_COUNT_MIN])
+
+
+def _apply_cuts(
+    decision: EditorDecision,
+    keys: list[str],
+    panels: list[Panel],
+    briefs: list[Brief],
+) -> tuple[list[Panel], list[Brief]]:
+    """Remove the editor's named indices from each panel's `also` list
+    and from `briefs`. `keys` are the panel section keys in the same
+    order as `panels` (zipped to match decision.cuts' `section`)."""
+    cut_idx: dict[str, set[int]] = {}
+    for c in decision.cuts:
+        cut_idx.setdefault(c.section, set()).add(c.index)
+    new_panels = [
+        p.model_copy(update={"also": [
+            it for i, it in enumerate(p.also)
+            if i not in cut_idx.get(key, set())
+        ]})
+        for key, p in zip(keys, panels)
+    ]
+    new_briefs = [
+        b for i, b in enumerate(briefs)
+        if i not in cut_idx.get("briefs", set())
+    ]
+    return new_panels, new_briefs
 
 
 async def assemble_briefing(
@@ -62,8 +101,9 @@ async def assemble_briefing(
     generate_front_matter: FrontMatterFn,
     generate_panel: PanelFn,
     generate_briefs: BriefsFn,
+    generate_editor: EditorFn | None = None,
 ) -> tuple[Briefing, int]:
-    """Fetch → front-matter → panels+briefs → assemble.
+    """Fetch → front-matter → panels+briefs → editor dedup → assemble.
 
     Pure core shared by `run_briefing` (production, adds emergency
     fallback + render + print + log) and the `briefing generate`
@@ -76,7 +116,7 @@ async def assemble_briefing(
         Total fetched articles across all sections + briefs is below
         `config.min_articles_total`.
     GeneratorFailure
-        Any of the six Gemini calls returned invalid output twice.
+        Any of the seven Gemini calls returned invalid output twice.
     """
 
     # --- Step 1: fan-out fetches (4 sections + briefs) ---
@@ -149,6 +189,7 @@ async def assemble_briefing(
             articles=section_pools[s.key],
             exclude_urls=exclude,
             title=title,
+            avoid_headlines=[front.lead.headline],
         )
         for s in config.sections
     ]
@@ -156,11 +197,51 @@ async def assemble_briefing(
         articles=briefs_pool,
         exclude_urls=exclude,
         title=title,
+        avoid_headlines=[front.lead.headline],
     )
 
     panels_and_briefs = await asyncio.gather(*panel_coros, briefs_coro)
     panels: list[Panel] = list(panels_and_briefs[:-1])
     briefs: list[Brief] = panels_and_briefs[-1]
+
+    # --- Step 3.5: editor-in-chief dedup (spec 2026-07-20) ---
+    keys = [s.key for s in config.sections]
+    if generate_editor is not None:
+        try:
+            decision = await generate_editor(
+                lead_headline=front.lead.headline,
+                panels=list(zip(keys, panels)),
+                briefs=briefs,
+                title=title,
+            )
+            panels, briefs = _apply_cuts(decision, keys, panels, briefs)
+            # One targeted rerun round for panel ledes duplicating the
+            # lead (or each other). Rerun failure keeps the original —
+            # a duplicate lede beats a missing panel.
+            for dupe in decision.lede_dupes:
+                idx = keys.index(dupe.section)
+                old = panels[idx]
+                old_url = old.lede_sources[0].url if old.lede_sources else None
+                log.info("lede dupe in %s (%s) — rerunning panel",
+                         dupe.section, dupe.duplicate_of)
+                try:
+                    fresh = await generate_panel(
+                        section=config.sections[idx],
+                        articles=section_pools[dupe.section],
+                        exclude_urls=exclude | ({old_url} if old_url else set()),
+                        title=title,
+                        avoid_headlines=[front.lead.headline,
+                                         old.lede_headline],
+                    )
+                    panels[idx] = fresh
+                except GeneratorFailure as e:
+                    log.warning("panel rerun failed for %s — keeping "
+                                "original: %s", dupe.section, e)
+        except GeneratorFailure as e:
+            log.warning("editor call failed — positional trim: %s", e)
+    # All paths land on exact published counts; no-op when the editor
+    # already cut to size.
+    panels, briefs = _trim_positional(panels, briefs)
 
     briefing = Briefing(
         title=title,
@@ -198,6 +279,7 @@ async def run_briefing(
     generate_front_matter: FrontMatterFn,
     generate_panel: PanelFn,
     generate_briefs: BriefsFn,
+    generate_editor: EditorFn | None = None,
     render: Callable[..., Path],
     print_pdf: Callable[..., str],
     notify_printed: Callable[..., None],
@@ -229,6 +311,7 @@ async def run_briefing(
             generate_front_matter=generate_front_matter,
             generate_panel=generate_panel,
             generate_briefs=generate_briefs,
+            generate_editor=generate_editor,
         )
     except NotEnoughArticles as e:
         log.warning(str(e))

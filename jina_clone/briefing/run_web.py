@@ -70,6 +70,7 @@ async def _run_web(settings: Settings, *, edition: str) -> None:
             generate_front_matter=briefing_generator.generate_front_matter,
             generate_panel=briefing_generator.generate_panel,
             generate_briefs=briefing_generator.generate_briefs,
+            generate_editor=briefing_generator.generate_editor_cuts,
             render=render,
             print_pdf=briefing_printer.print_pdf,
             notify_printed=briefing_notify.notify_printed,

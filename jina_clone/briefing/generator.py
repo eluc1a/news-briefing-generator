@@ -21,6 +21,26 @@ MAX_TOKENS = 4096
 PER_ARTICLE_BODY_CAP = 3000
 
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
+
+
+def _clean_llm_text(text: str) -> str:
+    """Normalize an LLM response down to the bare JSON object.
+
+    Strips markdown fences, then trims prose around the outermost ``{...}`` —
+    `claude -p` occasionally narrates before/after the JSON despite the
+    JSON-only instruction ("I need to assess the available articles..." — the
+    2026-07-05 morning incident, which shipped the emergency edition). All
+    briefing schemas are top-level objects, so slicing first ``{`` to last
+    ``}`` is safe. If no object is found, return the stripped text unchanged
+    so validation surfaces the real payload in its error.
+    """
+    text = _FENCE.sub("", text).strip()
+    if text and not (text.startswith("{") and text.endswith("}")):
+        start = text.find("{")
+        end = text.rfind("}")
+        if 0 <= start < end:
+            text = text[start:end + 1]
+    return text
 _log = logging.getLogger(__name__)
 
 # Per-run usage accumulator. Not thread-safe — relies on briefing runs being
@@ -467,7 +487,7 @@ async def _real_call_llm(
     text = "".join(
         block.text for block in response.content if block.type == "text"
     )
-    return _FENCE.sub("", text).strip()
+    return _clean_llm_text(text)
 
 
 async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
@@ -576,7 +596,7 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
         entry["input"], entry["output"], entry["cost"],
     )
     text = envelope.get("result", "")
-    return _FENCE.sub("", text).strip()
+    return _clean_llm_text(text)
 
 
 def _ensure_client(client: AsyncAnthropic | None) -> AsyncAnthropic:

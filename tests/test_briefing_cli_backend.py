@@ -68,6 +68,36 @@ async def test_cli_call_llm_strips_api_key_and_parses(monkeypatch):
     assert totals["cost"] == pytest.approx(0.001)
 
 
+async def test_cli_call_llm_strips_prose_preamble_around_json(monkeypatch):
+    # `claude -p` occasionally narrates before the JSON despite the JSON-only
+    # instruction ("I need to assess the available articles..." — the
+    # 2026-07-05 morning incident, which shipped the emergency edition). The
+    # backend must salvage the JSON object from surrounding prose.
+    result = (
+        'I need to assess the available articles first.\n\n'
+        '{"x": 1}\n\nHope this helps!'
+    )
+
+    async def fake_exec(*argv, **kwargs):
+        return _FakeProc(_envelope(result=result))
+
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_exec)
+    generator.reset_usage()
+
+    out = await generator._cli_call_llm("PROMPT", system="SYS", model="sonnet")
+    assert out == '{"x": 1}'
+
+
+def test_clean_llm_text_variants():
+    clean = generator._clean_llm_text
+    assert clean('{"a": 1}') == '{"a": 1}'
+    assert clean('```json\n{"a": 1}\n```') == '{"a": 1}'
+    assert clean('Preamble.\n{"a": {"b": 2}}') == '{"a": {"b": 2}}'
+    assert clean('{"a": 1}\ntrailing note') == '{"a": 1}'
+    # no JSON at all — pass through so validation raises the real error
+    assert clean("no json here") == "no json here"
+
+
 async def test_cli_call_llm_raises_on_is_error(monkeypatch):
     async def fake_exec(*argv, **kwargs):
         return _FakeProc(_envelope(is_error=True, result="rate limited"), returncode=0)

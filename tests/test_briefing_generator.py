@@ -11,12 +11,14 @@ from jina_clone.briefing.generator import (
     _panel_system_prompt,
     _slack_digest_system_prompt,
     generate_briefs,
+    generate_editor_cuts,
     generate_front_matter,
     generate_panel,
     generate_slack_digest,
 )
 from jina_clone.briefing.schema import (
-    Brief, DataPoint, FrontMatter, LeadStory, OnThisDay, Panel, SlackDigest,
+    Brief, DataPoint, EditorDecision, FrontMatter, LeadStory, OnThisDay, Panel,
+    PanelItem, SlackDigest,
 )
 
 
@@ -474,4 +476,182 @@ async def test_slack_digest_enforces_item_count_floor():
         await generate_slack_digest(
             articles=_articles(), edition_label="Morning",
             call_llm=fake, client=None,
+        )
+
+
+# ------------- avoid_headlines threading -------------
+
+async def test_panel_prompt_carries_avoid_headlines():
+    captured = {}
+
+    async def fake(client, prompt):
+        captured["prompt"] = prompt
+        return _panel_payload("National")
+
+    await generate_panel(
+        section=NATIONAL_SECTION, articles=_articles(), exclude_urls=set(),
+        title="T", call_llm=fake,
+        avoid_headlines=["Fed cuts rates by 50bp"],
+    )
+    assert "Fed cuts rates by 50bp" in captured["prompt"]
+    assert "do NOT cover" in captured["prompt"]
+
+
+async def test_briefs_prompt_carries_avoid_headlines():
+    captured = {}
+
+    async def fake(client, prompt):
+        captured["prompt"] = prompt
+        return _briefs_payload()
+
+    await generate_briefs(
+        articles=_articles(), exclude_urls=set(), title="T", call_llm=fake,
+        avoid_headlines=["Fed cuts rates by 50bp"],
+    )
+    assert "Fed cuts rates by 50bp" in captured["prompt"]
+
+
+# ------------- editor-in-chief -------------
+
+def _mk_panel(n_also=6):
+    return Panel(
+        section="National",
+        lede_headline="Lede headline",
+        lede_body="Lede body " * 8,
+        lede_sources=[],
+        also=[PanelItem(headline=f"H{i}", body=f"B{i}", sources=[])
+              for i in range(n_also)],
+    )
+
+
+def _mk_briefs(n=8):
+    return [Brief(topic=f"T{i}", body=f"Body {i}", sources=[]) for i in range(n)]
+
+
+async def test_editor_happy_path():
+    panels = [("national", _mk_panel(6)), ("economy", _mk_panel(6))]
+    briefs = _mk_briefs(8)
+
+    async def fake(client, prompt):
+        return json.dumps({
+            "cuts": (
+                [{"section": "national", "index": i} for i in (0, 3)]
+                + [{"section": "economy", "index": i} for i in (1, 2)]
+                + [{"section": "briefs", "index": i, "duplicate_of": "front lead"}
+                   for i in (5, 7)]
+            ),
+            "lede_dupes": [],
+        })
+
+    decision = await generate_editor_cuts(
+        lead_headline="Lead", panels=panels, briefs=briefs,
+        title="T", call_llm=fake,
+    )
+    assert isinstance(decision, EditorDecision)
+    assert len(decision.cuts) == 6
+    assert decision.lede_dupes == []
+
+
+async def test_editor_prompt_lists_manifest_and_required_cuts():
+    captured = {}
+    panels = [("national", _mk_panel(6))]
+
+    async def fake(client, prompt):
+        captured["prompt"] = prompt
+        return json.dumps({"cuts": [
+            {"section": "national", "index": 0},
+            {"section": "national", "index": 1},
+            {"section": "briefs", "index": 0},
+            {"section": "briefs", "index": 1},
+        ], "lede_dupes": []})
+
+    await generate_editor_cuts(
+        lead_headline="Lead H", panels=panels, briefs=_mk_briefs(8),
+        title="T", call_llm=fake,
+    )
+    p = captured["prompt"]
+    assert "Lead H" in p and "Lede headline" in p
+    assert "national.also[5]" in p and "briefs[7]" in p
+    assert "cut EXACTLY 2" in p
+
+
+async def test_editor_retries_on_wrong_cut_count():
+    calls = {"n": 0}
+    good = {"cuts": [{"section": "national", "index": 0},
+                     {"section": "national", "index": 1}],
+            "lede_dupes": []}
+
+    async def fake(client, prompt):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return json.dumps({"cuts": [{"section": "national", "index": 0}],
+                               "lede_dupes": []})  # 1 cut, need 2
+        return json.dumps(good)
+
+    decision = await generate_editor_cuts(
+        lead_headline="L", panels=[("national", _mk_panel(6))], briefs=_mk_briefs(6),
+        title="T", call_llm=fake,
+    )
+    assert calls["n"] == 2 and len(decision.cuts) == 2
+
+
+async def test_editor_rejects_out_of_range_and_duplicate_indices():
+    async def bad_index(client, prompt):
+        return json.dumps({"cuts": [{"section": "national", "index": 6},
+                                    {"section": "national", "index": 0}],
+                           "lede_dupes": []})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_editor_cuts(
+            lead_headline="L", panels=[("national", _mk_panel(6))],
+            briefs=_mk_briefs(6), title="T", call_llm=bad_index,
+        )
+
+    async def dup_index(client, prompt):
+        return json.dumps({"cuts": [{"section": "national", "index": 2},
+                                    {"section": "national", "index": 2}],
+                           "lede_dupes": []})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_editor_cuts(
+            lead_headline="L", panels=[("national", _mk_panel(6))],
+            briefs=_mk_briefs(6), title="T", call_llm=dup_index,
+        )
+
+
+async def test_editor_rejects_unknown_section():
+    async def fake(client, prompt):
+        return json.dumps({"cuts": [{"section": "sports", "index": 0},
+                                    {"section": "national", "index": 1}],
+                           "lede_dupes": []})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_editor_cuts(
+            lead_headline="L", panels=[("national", _mk_panel(6))],
+            briefs=_mk_briefs(6), title="T", call_llm=fake,
+        )
+
+
+async def test_editor_zero_overage_accepts_empty_cuts():
+    async def fake(client, prompt):
+        return json.dumps({"cuts": [], "lede_dupes": [
+            {"section": "national", "duplicate_of": "front lead"}]})
+
+    decision = await generate_editor_cuts(
+        lead_headline="L", panels=[("national", _mk_panel(4))],
+        briefs=_mk_briefs(6), title="T", call_llm=fake,
+    )
+    assert decision.cuts == []
+    assert decision.lede_dupes[0].section == "national"
+
+
+async def test_editor_rejects_lede_dupe_unknown_panel():
+    async def fake(client, prompt):
+        return json.dumps({"cuts": [], "lede_dupes": [
+            {"section": "briefs", "duplicate_of": "front lead"}]})
+
+    with pytest.raises(GeneratorFailure):
+        await generate_editor_cuts(
+            lead_headline="L", panels=[("national", _mk_panel(4))],
+            briefs=_mk_briefs(6), title="T", call_llm=fake,
         )

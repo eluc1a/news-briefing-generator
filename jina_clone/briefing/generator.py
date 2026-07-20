@@ -11,9 +11,9 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, BRIEFS_GEN_COUNT, FrontMatter,
-    Panel, PanelItem, PANEL_ALSO_COUNT, PANEL_ALSO_GEN_COUNT, SlackDigest,
-    Source,
+    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, BRIEFS_GEN_COUNT, EditorDecision,
+    FrontMatter, Panel, PanelItem, PANEL_ALSO_COUNT, PANEL_ALSO_GEN_COUNT,
+    SlackDigest, Source,
 )
 
 
@@ -300,6 +300,38 @@ fence.
 """
 
 
+def _editor_system_prompt(title: str) -> str:
+    return f"""You are the editor-in-chief of "{title}" daily briefing.
+The section editors have filed the full paper, over-provisioned. Your
+ONLY task: cut items back to the published counts, removing duplicate
+coverage first.
+
+Two items are DUPLICATES when they cover the same underlying event or
+announcement — even from different outlets, with different wording, or
+from a different angle. A follow-up with genuinely new developments is
+NOT a duplicate.
+
+RULES:
+- Cut EXACTLY the number of items per section stated in the REQUIRED
+  CUTS block — no more, no fewer. Sections absent from that block get
+  zero cuts.
+- Cut priority: (1) items duplicating the front lead or a panel lede,
+  (2) items duplicating another surviving item — keep the stronger
+  telling, cut the other, (3) if no duplicates remain, the least
+  consequential items.
+- Cuts may target ONLY `also` items and briefs. The front lead and the
+  panel ledes are fixed and cannot be cut.
+- If a panel LEDE duplicates the front lead or another panel's lede,
+  report that panel in `lede_dupes` — do not try to cut it. Otherwise
+  emit "lede_dupes": [].
+- `duplicate_of`: a short pointer to the surviving telling ("front
+  lead", "national lede", "briefs[2]", "economy.also[0]"), or null
+  when cutting for weakness.
+
+Output: valid JSON matching the EditorDecision schema below. No
+preamble. No markdown fence."""
+
+
 SLACK_DIGEST_SCOPE = """SCOPE: a twice-daily AI/ML digest posted to a work
 Slack channel of software engineers. Prefer: model releases and benchmark
 results, agent techniques and harnesses, notable open-source repos and
@@ -364,6 +396,17 @@ def _filter_excluded(articles: list[dict], exclude_urls: set[str]) -> list[dict]
     return [a for a in articles if a.get("link") not in exclude_urls]
 
 
+def _avoid_lines(avoid_headlines: list[str] | None) -> list[str]:
+    if not avoid_headlines:
+        return []
+    return [
+        "",
+        "Already covered elsewhere in the paper — do NOT cover these "
+        "stories, including any other outlet's version of them:",
+        *[f"- «{h}»" for h in avoid_headlines],
+    ]
+
+
 def _build_front_matter_user_msg(
     *, articles: list[dict], weather: dict, today: str, volume: str,
 ) -> str:
@@ -387,9 +430,11 @@ def _build_front_matter_user_msg(
 
 def _build_panel_user_msg(
     *, section: SectionDef, articles: list[dict],
+    avoid_headlines: list[str] | None = None,
 ) -> str:
     parts = [
         f"Panel: {section.title} ({len(articles)} articles)",
+        *_avoid_lines(avoid_headlines),
     ]
     for art in articles:
         parts.append("")
@@ -430,8 +475,13 @@ class _BriefsResponse(BaseModel):
     )
 
 
-def _build_briefs_user_msg(*, articles: list[dict]) -> str:
-    parts = [f"Briefs pool ({len(articles)} articles)"]
+def _build_briefs_user_msg(
+    *, articles: list[dict], avoid_headlines: list[str] | None = None,
+) -> str:
+    parts = [
+        f"Briefs pool ({len(articles)} articles)",
+        *_avoid_lines(avoid_headlines),
+    ]
     for art in articles:
         parts.append("")
         parts.append(_format_article(art, body_cap=1500))
@@ -440,6 +490,45 @@ def _build_briefs_user_msg(*, articles: list[dict]) -> str:
     parts.append(json.dumps(_BriefsResponse.model_json_schema(), indent=2))
     parts.append("")
     parts.append("Emit the JSON now.")
+    return "\n".join(parts)
+
+
+def _build_editor_user_msg(
+    *,
+    lead_headline: str,
+    panels: list[tuple[str, Panel]],
+    briefs: list[Brief],
+    overages: dict[str, int],
+    sizes: dict[str, int],
+) -> str:
+    parts = [f"FRONT LEAD (fixed): {lead_headline}", ""]
+    for key, panel in panels:
+        parts.append(f"PANEL {key} — lede (fixed): {panel.lede_headline}")
+        for i, item in enumerate(panel.also):
+            parts.append(f"  {key}.also[{i}]: {item.headline} — {item.body}")
+        parts.append("")
+    parts.append("BRIEFS:")
+    for i, b in enumerate(briefs):
+        parts.append(f"  briefs[{i}]: {b.topic}: {b.body}")
+    parts.append("")
+    parts.append("REQUIRED CUTS:")
+    any_cuts = False
+    for section, need in overages.items():
+        if need > 0:
+            any_cuts = True
+            parts.append(
+                f"- {section}: cut EXACTLY {need} "
+                f"(valid indices 0-{sizes[section] - 1})"
+            )
+    if not any_cuts:
+        parts.append(
+            "- none required; emit \"cuts\": [] and only report lede_dupes"
+        )
+    parts.append("")
+    parts.append("--- Schema ---")
+    parts.append(json.dumps(EditorDecision.model_json_schema(), indent=2))
+    parts.append("")
+    parts.append("Emit the EditorDecision JSON now.")
     return "\n".join(parts)
 
 
@@ -709,13 +798,16 @@ async def generate_panel(
     title: str,
     call_llm: CallLLM | None = None,
     client: AsyncAnthropic | None = None,
+    avoid_headlines: list[str] | None = None,
 ) -> Panel:
     system_prompt = _panel_system_prompt(section, title)
     if call_llm is None:
         call_llm = _build_default_call_llm(system_prompt, client)
 
     filtered = _filter_excluded(articles, exclude_urls)
-    user_msg = _build_panel_user_msg(section=section, articles=filtered)
+    user_msg = _build_panel_user_msg(
+        section=section, articles=filtered, avoid_headlines=avoid_headlines,
+    )
     valid_urls = {a.get("link") for a in filtered}
     source_by_url = {a.get("link"): a.get("source") for a in filtered}
 
@@ -754,13 +846,16 @@ async def generate_briefs(
     title: str,
     call_llm: CallLLM | None = None,
     client: AsyncAnthropic | None = None,
+    avoid_headlines: list[str] | None = None,
 ) -> list[Brief]:
     system_prompt = _briefs_system_prompt(title)
     if call_llm is None:
         call_llm = _build_default_call_llm(system_prompt, client)
 
     filtered = _filter_excluded(articles, exclude_urls)
-    user_msg = _build_briefs_user_msg(articles=filtered)
+    user_msg = _build_briefs_user_msg(
+        articles=filtered, avoid_headlines=avoid_headlines,
+    )
     valid_urls = {a.get("link") for a in filtered}
     source_by_url = {a.get("link"): a.get("source") for a in filtered}
 
@@ -783,6 +878,66 @@ async def generate_briefs(
         call_llm=call_llm, client=client,
         user_msg=user_msg,
         parse=parse,
+    )
+
+
+async def generate_editor_cuts(
+    *,
+    lead_headline: str,
+    panels: list[tuple[str, Panel]],
+    briefs: list[Brief],
+    title: str,
+    call_llm: CallLLM | None = None,
+    client: AsyncAnthropic | None = None,
+) -> EditorDecision:
+    """Editor-in-chief pass: given the whole over-provisioned paper
+    (headlines only), decide which `also` items / briefs to cut so each
+    section lands on its published count, duplicates first. Panel ledes
+    duplicating the front lead (or each other) are reported in
+    `lede_dupes` for a targeted rerun by the caller."""
+    system_prompt = _editor_system_prompt(title)
+    if call_llm is None:
+        call_llm = _build_default_call_llm(system_prompt, client)
+
+    panel_keys = {key for key, _ in panels}
+    sizes = {key: len(p.also) for key, p in panels}
+    sizes["briefs"] = len(briefs)
+    overages = {key: len(p.also) - PANEL_ALSO_COUNT for key, p in panels}
+    overages["briefs"] = len(briefs) - BRIEFS_COUNT_MIN
+
+    user_msg = _build_editor_user_msg(
+        lead_headline=lead_headline, panels=panels, briefs=briefs,
+        overages=overages, sizes=sizes,
+    )
+
+    def parse(raw: str) -> EditorDecision:
+        decision = EditorDecision.model_validate_json(raw)
+        by_section: dict[str, set[int]] = {}
+        for cut in decision.cuts:
+            if cut.section not in sizes:
+                raise ValueError(f"cut names unknown section {cut.section!r}")
+            idxs = by_section.setdefault(cut.section, set())
+            if cut.index in idxs:
+                raise ValueError(
+                    f"duplicate cut index {cut.section}[{cut.index}]")
+            if not (0 <= cut.index < sizes[cut.section]):
+                raise ValueError(
+                    f"cut index {cut.section}[{cut.index}] out of range "
+                    f"(size {sizes[cut.section]})")
+            idxs.add(cut.index)
+        for section, need in overages.items():
+            got = len(by_section.get(section, set()))
+            if got != need:
+                raise ValueError(
+                    f"{section}: {got} cuts, need exactly {need}")
+        for dupe in decision.lede_dupes:
+            if dupe.section not in panel_keys:
+                raise ValueError(
+                    f"lede_dupes names unknown panel {dupe.section!r}")
+        return decision
+
+    return await _call_with_retry(
+        call_llm=call_llm, client=client, user_msg=user_msg, parse=parse,
     )
 
 

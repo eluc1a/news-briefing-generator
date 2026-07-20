@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from jina_clone.briefing.config import SectionDef
 from jina_clone.briefing.schema import (
-    Brief, BRIEFS_COUNT_MAX, BRIEFS_COUNT_MIN, BRIEFS_GEN_COUNT, EditorDecision,
+    Brief, BRIEFS_COUNT_MIN, BRIEFS_GEN_COUNT, EditorDecision,
     FrontMatter, Panel, PanelItem, PANEL_ALSO_COUNT, PANEL_ALSO_GEN_COUNT,
     SlackDigest, Source,
 )
@@ -42,6 +42,8 @@ def _clean_llm_text(text: str) -> str:
         if 0 <= start < end:
             text = text[start:end + 1]
     return text
+
+
 _log = logging.getLogger(__name__)
 
 # Per-run usage accumulator. Not thread-safe — relies on briefing runs being

@@ -2,10 +2,13 @@ import os
 
 import asyncpg
 import pytest_asyncio
+from dotenv import load_dotenv
+
+load_dotenv()
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql://postgres:REDACTED@192.168.0.89:5432/jina_clone_test",
+    "postgresql://postgres@localhost:5432/jina_clone_test",
 )
 
 

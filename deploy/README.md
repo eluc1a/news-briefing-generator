@@ -26,3 +26,27 @@ Notes:
   (`news_mcp_server:app`).
 - TLS certs/dhparams referenced by the vhosts come from certbot and are
   not in git.
+
+## Dev environment (stood up 2026-07-22)
+
+- `~/dev/jina-clone-dev` — second checkout on `dev`, own venv, `.env` from
+  `env/dev.env.example` (`mcp_news_dev`, PORT 8091, no ntfy). Briefing
+  runs are **manual only** — no dev cron, no doubled LLM spend. The dev
+  extractor container is not started; if needed:
+  `docker compose -p jina-clone-dev up -d --build` in the dev checkout.
+- `news-mcp-dev.service` — same news-mcp checkout, `EnvironmentFile=.env.dev`
+  (`mcp_news_dev`), 127.0.0.1:4821.
+- `nginx/morningfox-dev` — LAN-only dev site at `http://192.168.0.89:8081`
+  serving the dev checkout's `web/` + `briefings/`.
+- `mcp_news_dev` database created from `schema.sql`.
+
+## Promotion flow (dev → prod)
+
+1. Merge: `git checkout main && git merge --ff-only dev && git push`
+   (or `git fetch . dev:main && git push origin main` without switching).
+2. jina-clone prod: `scripts/deploy.sh` in this checkout (pull, deps,
+   compose rebuild). Host-cron briefing picks up new code next firing.
+3. news-mcp: `./deploy.sh` in `~/dev/news-mcp` (pull, `uv sync`,
+   `systemctl restart news-mcp`).
+4. Config changes (units/vhosts/crontab): apply per the table above,
+   then update the copy in `deploy/`.

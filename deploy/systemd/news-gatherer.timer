@@ -1,0 +1,10 @@
+[Unit]
+Description=Run news-gatherer every 2 h (user timer)
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=2h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

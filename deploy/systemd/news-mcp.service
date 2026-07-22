@@ -1,0 +1,15 @@
+# /etc/systemd/system/news-mcp.service
+[Unit]
+Description=News MCP Server
+After=network.target
+
+[Service]
+User=elucia
+WorkingDirectory=/home/elucia/dev/news-mcp
+EnvironmentFile=/home/elucia/dev/news-mcp/.env
+ExecStart=/home/elucia/dev/news-mcp/.venv/bin/python -m uvicorn news_mcp_server:app --host 127.0.0.1 --port 4820 --workers 1
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

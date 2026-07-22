@@ -1,0 +1,12 @@
+# jina-clone briefing — runs on the host as elucia so it can reach the
+PATH=/home/elucia/.npm-global/bin:/home/elucia/dev/jina-clone/.venv/bin:/usr/bin:/bin
+DISABLE_AUTOUPDATER=1
+10 8  * * * cd /home/elucia/dev/jina-clone && ./.venv/bin/python -m jina_clone briefing run --edition=morning >> logs/briefing.log 2>&1
+10 20 * * * cd /home/elucia/dev/jina-clone && ./.venv/bin/python -m jina_clone briefing run --edition=evening >> logs/briefing.log 2>&1
+# jina-clone slack-digest — RSS feed for feeds.elucia.com (Slack /feed polls it)
+15 8  * * * cd /home/elucia/dev/jina-clone && ./.venv/bin/python -m jina_clone slack-digest --edition=morning >> logs/slack-digest.log 2>&1
+30 16 * * * cd /home/elucia/dev/jina-clone && ./.venv/bin/python -m jina_clone slack-digest --edition=afternoon >> logs/slack-digest.log 2>&1
+15 8  * * * cd /home/elucia/dev/jina-clone && ./.venv/bin/python -m jina_clone briefing publish-web >> logs/briefing.log 2>&1
+15 20 * * * cd /home/elucia/dev/jina-clone && ./.venv/bin/python -m jina_clone briefing publish-web >> logs/briefing.log 2>&1
+# jina-clone external healthcheck — public URLs only, every 30 min
+*/30 * * * * /home/elucia/dev/jina-clone/scripts/healthcheck.sh >> /home/elucia/dev/jina-clone/logs/healthcheck.log 2>&1

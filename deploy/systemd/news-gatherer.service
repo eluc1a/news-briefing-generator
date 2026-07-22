@@ -1,0 +1,15 @@
+[Unit]
+Description=RSS → Postgres harvester for MCP (user service)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/elucia/dev/news-mcp
+# load variables; the leading “-” means “ignore if missing”
+EnvironmentFile=-/home/elucia/dev/news-mcp/.env
+# use an absolute path so systemd can’t get confused
+ExecStart=/home/elucia/dev/news-mcp/.venv/bin/python /home/elucia/dev/news-mcp/news_gatherer.py
+
+[Install]
+WantedBy=multi-user.target
+

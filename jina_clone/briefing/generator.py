@@ -621,7 +621,7 @@ async def _cli_call_llm(prompt: str, *, system: str, model: str) -> str:
     env = {**os.environ}
     env.pop("ANTHROPIC_API_KEY", None)
     env["MAX_THINKING_TOKENS"] = "0"
-    npm_bin = os.path.expanduser("~/.npm-global/bin")
+    npm_bin = os.environ.get("CLAUDE_BIN_DIR") or os.path.expanduser("~/.npm-global/bin")
     if npm_bin not in env.get("PATH", "").split(":"):
         env["PATH"] = npm_bin + ":" + env.get("PATH", "")
 
